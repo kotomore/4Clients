@@ -4,7 +4,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
-import ru.set404.clients.controllers.ClientController;
+import ru.set404.clients.controllers.TherapistController;
 import ru.set404.clients.models.Appointment;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -15,8 +15,10 @@ public class AppointmentModelAssembler implements RepresentationModelAssembler<A
     @Override
     public EntityModel<Appointment> toModel(Appointment entity) {
         return EntityModel.of(entity,
-                linkTo(methodOn(ClientController.class).newAppointment(entity)).withSelfRel(),
-                linkTo(methodOn(ClientController.class).newAppointment(entity)).withRel("clients"));
+                linkTo(methodOn(TherapistController.class)
+                        .getById(entity.getTherapistId(), entity.getAppointmentId()))
+                        .withSelfRel(),
+                linkTo(methodOn(TherapistController.class).all(entity.getTherapistId())).withRel("appointments"));
     }
 
     @Override

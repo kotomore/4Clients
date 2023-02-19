@@ -155,6 +155,35 @@ public class TherapistsRepositorySQL {
         else return Optional.empty();
     }
 
+    public Optional<Appointment> getAppointmentForTherapistById(Long therapistId, Long appointmentId) {
+        Appointment appointment = null;
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String sql = "SELECT * FROM appointments " +
+                    "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
+                    "JOIN SERVICES S on S.SERVICE_ID = APPOINTMENTS.SERVICE_ID " +
+                    "WHERE therapist_id = ? AND APPOINTMENT_ID = ?";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, therapistId);
+            statement.setLong(2, appointmentId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                Long clientId = resultSet.getLong("client_id");
+                Long serviceId = resultSet.getLong("service_id");
+                Timestamp startTime = resultSet.getTimestamp("start_time");
+                Timestamp endTime = resultSet.getTimestamp("end_time");
+                String clientName = resultSet.getString("name");
+                String clientPhone = resultSet.getString("phone");
+                Client client = new Client(clientId, clientName, clientPhone);
+                appointment = new Appointment(appointmentId, startTime, endTime, serviceId, therapistId, client);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if (appointment != null)
+            return Optional.of(appointment);
+        else return Optional.empty();
+    }
+
     public void deleteAppointment(int appointmentId) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "DELETE FROM appointments WHERE appointment_id = ?";

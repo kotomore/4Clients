@@ -27,6 +27,13 @@ public class TherapistService {
     public List<Appointment> findAll(Long therapistId) {
 
         return repository
-                .getAppointmentsForTherapist(therapistId).orElseThrow(() -> new AppointmentNotFoundException(therapistId));
+                .getAppointmentsForTherapist(therapistId)
+                .orElseThrow(() -> new AppointmentNotFoundException(therapistId));
+    }
+
+    public Appointment getById(Long therapistId, Long appointmentId) {
+        return repository
+                .getAppointmentForTherapistById(therapistId, appointmentId)
+                .orElseThrow(() -> new AppointmentNotFoundException(therapistId));
     }
 }

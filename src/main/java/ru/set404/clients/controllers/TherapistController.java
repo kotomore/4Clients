@@ -30,4 +30,10 @@ public class TherapistController {
         List<Appointment> appointments = therapistService.findAll(id);
         return appointmentModelAssembler.toCollectionModel(appointments);
     }
+
+    @GetMapping("therapist/{id}/appointments/{appointmentId}")
+    public EntityModel<Appointment> getById(@PathVariable Long id, @PathVariable Long appointmentId) {
+        Appointment appointment = therapistService.getById(id, appointmentId);
+        return appointmentModelAssembler.toModel(appointment);
+    }
 }

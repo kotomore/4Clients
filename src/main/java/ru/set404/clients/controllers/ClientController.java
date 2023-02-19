@@ -36,7 +36,7 @@ public class ClientController {
 //                .body(entityModel);
 //    }
 
-    @PostMapping("/client/appointment/create")
+    @PostMapping("/client/appointment")
     public ResponseEntity<?> newAppointment(@RequestBody Appointment newAppointment) {
 
         Appointment appointment = therapistService.addAppoinment(newAppointment);
