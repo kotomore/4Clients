@@ -1,13 +1,20 @@
 package ru.set404.clients.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.set404.clients.models.Appointment;
 import ru.set404.clients.services.TherapistService;
 import ru.set404.clients.util.AppointmentModelAssembler;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 @RestController
 public class ClientController {
@@ -51,6 +58,12 @@ public class ClientController {
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel);
+    }
+
+    @GetMapping("client/therapist/{id}")
+    public ResponseEntity<?> availableTime(@PathVariable Long id) {
+        List<LocalTime> availableTimes = therapistService.getAvailableTimes(id, LocalDate.now());
+        return new ResponseEntity<>(availableTimes, HttpStatus.OK);
     }
 
 //    @GetMapping("/clients/{id}")

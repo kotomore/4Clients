@@ -6,6 +6,8 @@ import ru.set404.clients.exceptions.AppointmentNotFoundException;
 import ru.set404.clients.models.Appointment;
 import ru.set404.clients.repositories.TherapistsRepositorySQL;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Component
@@ -25,7 +27,6 @@ public class TherapistService {
     }
 
     public List<Appointment> findAll(Long therapistId) {
-
         return repository
                 .getAppointmentsForTherapist(therapistId)
                 .orElseThrow(() -> new AppointmentNotFoundException(therapistId));
@@ -36,4 +37,9 @@ public class TherapistService {
                 .getAppointmentForTherapistById(therapistId, appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException(therapistId));
     }
+
+    public List<LocalTime> getAvailableTimes(Long therapistId, LocalDate date) {
+        return repository.getAvailableTimes(therapistId, date);
+    }
+
 }

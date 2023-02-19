@@ -16,11 +16,13 @@ CREATE TABLE therapists
 
 CREATE TABLE services
 (
-    service_id  INT PRIMARY KEY AUTO_INCREMENT,
-    name        VARCHAR(100)   NOT NULL,
-    description TEXT,
-    duration INT NOT NULL,
-    price       DECIMAL(10, 2) NOT NULL
+    service_id   INT PRIMARY KEY AUTO_INCREMENT,
+    THERAPIST_ID INTEGER        not null
+        references THERAPISTS,
+    name         VARCHAR(100)   NOT NULL,
+    description  TEXT,
+    duration     INT            NOT NULL,
+    price        DECIMAL(10, 2) NOT NULL
 );
 
 CREATE TABLE appointments

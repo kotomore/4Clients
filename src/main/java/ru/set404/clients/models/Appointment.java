@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 public class Appointment {
     private Long appointmentId;
     private Timestamp startTime;
-    private Timestamp endTime;
     private Long serviceId;
     private Long therapistId;
     private Client client;
@@ -13,18 +12,16 @@ public class Appointment {
     public Appointment() {
     }
 
-    public Appointment(Long appointmentId, Timestamp startTime, Timestamp endTime, Long serviceId, Long therapistId, Client client) {
+    public Appointment(Long appointmentId, Timestamp startTime, Long serviceId, Long therapistId, Client client) {
         this.appointmentId = appointmentId;
         this.startTime = startTime;
-        this.endTime = endTime;
         this.serviceId = serviceId;
         this.therapistId = therapistId;
         this.client = client;
     }
 
-    public Appointment(Timestamp startTime, Timestamp endTime, Long serviceId, Long therapistId, Client client) {
+    public Appointment(Timestamp startTime, Long serviceId, Long therapistId, Client client) {
         this.startTime = startTime;
-        this.endTime = endTime;
         this.serviceId = serviceId;
         this.therapistId = therapistId;
         this.client = client;
@@ -44,14 +41,6 @@ public class Appointment {
 
     public void setStartTime(Timestamp startTime) {
         this.startTime = startTime;
-    }
-
-    public Timestamp getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Timestamp endTime) {
-        this.endTime = endTime;
     }
 
     public Long getServiceId() {
