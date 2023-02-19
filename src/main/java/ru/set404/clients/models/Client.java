@@ -1,34 +1,25 @@
 package ru.set404.clients.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 
 import java.util.Objects;
 
-@Entity
 public class Client {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
     private Long id;
-
-    private String firstName;
-    private String lastName;
-    private String email;
+    private String name;
     private String phone;
-    private String password;
-    private String role;
-
-
     public Client() {
     }
 
-    public Client(String firstName, String lastName, String email, String phone, String password, String role) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
+    public Client(String name, String phone) {
+        this.name = name;
         this.phone = phone;
-        this.password = password;
-        this.role = role;
+    }
+
+    public Client(Long id, String name, String phone) {
+        this.id = id;
+        this.name = name;
+        this.phone = phone;
     }
 
     public Long getId() {
@@ -39,28 +30,12 @@ public class Client {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getName() {
+        return name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPhone() {
@@ -71,45 +46,25 @@ public class Client {
         this.phone = phone;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Client client = (Client) o;
-        return Objects.equals(id, client.id) && Objects.equals(firstName, client.firstName) && Objects.equals(lastName, client.lastName) && Objects.equals(email, client.email) && Objects.equals(phone, client.phone) && Objects.equals(password, client.password) && Objects.equals(role, client.role);
+        return phone.equals(client.phone);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, email, phone, password, role);
+        return Objects.hash(phone);
     }
 
     @Override
     public String toString() {
         return "Client{" +
                 "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
                 ", phone='" + phone + '\'' +
-                ", password='" + password + '\'' +
-                ", role='" + role + '\'' +
                 '}';
     }
 }
