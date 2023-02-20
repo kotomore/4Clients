@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.set404.clients.exceptions.AppointmentNotFoundException;
 import ru.set404.clients.models.Appointment;
+import ru.set404.clients.models.Therapist;
 import ru.set404.clients.repositories.TherapistsRepositorySQL;
 
 import java.time.LocalDate;
@@ -40,6 +41,18 @@ public class TherapistService {
 
     public List<LocalTime> getAvailableTimes(Long therapistId, LocalDate date) {
         return repository.getAvailableTimes(therapistId, date);
+    }
+
+    public List<LocalDate> getAvailableDates(Long therapistId, LocalDate date) {
+        return repository.getAppointmentsByMonth(therapistId, date);
+    }
+
+    public void deleteAppointment(Long appointmentId) {
+        repository.deleteAppointment(appointmentId);
+    }
+
+    public Therapist saveTherapist(Therapist therapist) {
+        return repository.createTherapist(therapist);
     }
 
 }

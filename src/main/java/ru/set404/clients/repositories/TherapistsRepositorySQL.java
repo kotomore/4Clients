@@ -3,6 +3,7 @@ package ru.set404.clients.repositories;
 import org.springframework.stereotype.Repository;
 import ru.set404.clients.models.Appointment;
 import ru.set404.clients.models.Client;
+import ru.set404.clients.models.Therapist;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -18,23 +19,31 @@ public class TherapistsRepositorySQL {
     private static final String DB_USER = "user";
     private static final String DB_PASSWORD = "password";
 
-    public void createTherapist(String name, String phone, String password, String role) {
+    public Therapist createTherapist(Therapist therapist) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "INSERT INTO therapists (name, phone, password, role) " +
                     "VALUES (?, ?, ?, ?)";
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, name);
-            statement.setString(2, phone);
-            statement.setString(3, password);
-            statement.setString(4, role);
+            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            statement.setString(1, therapist.getName());
+            statement.setString(2, therapist.getPhone());
+            statement.setString(3, therapist.getPassword());
+            statement.setString(4, therapist.getRole());
             statement.executeUpdate();
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    therapist.setId(generatedKeys.getLong(1));
+                } else {
+                    throw new SQLException("Creating client failed, no ID obtained.");
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return therapist;
     }
 
-    public Client getClientByPhoneNumber(String phoneNumber) {
-        Client client = null;
+    public Optional<Client> getClientByPhoneNumber(String phoneNumber) {
+        Optional<Client> client = Optional.empty();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT * FROM clients WHERE phone = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -44,7 +53,7 @@ public class TherapistsRepositorySQL {
                 Long clientId = resultSet.getLong("client_id");
                 String name = resultSet.getString("name");
                 String phone = resultSet.getString("phone");
-                client = new Client(clientId, name, phone);
+                client = Optional.of(new Client(clientId, name, phone));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -92,13 +101,8 @@ public class TherapistsRepositorySQL {
 
     public void createAppointment(Appointment appointment) {
 
-        Client client = getClientByPhoneNumber(appointment.getClient().getPhone());
-
-        if (client == null) {
-            appointment.setClient(addClient(appointment.getClient()));
-        } else {
-            appointment.setClient(client);
-        }
+        Optional<Client> client = getClientByPhoneNumber(appointment.getClient().getPhone());
+        appointment.setClient(client.orElse(addClient(appointment.getClient())));
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "INSERT INTO appointments (client_id, therapist_id, service_id, start_time) " +
@@ -129,7 +133,7 @@ public class TherapistsRepositorySQL {
             String sql = "SELECT * FROM appointments " +
                     "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
                     "JOIN SERVICES S on S.SERVICE_ID = APPOINTMENTS.SERVICE_ID " +
-                    "WHERE therapist_id = ?";
+                    "WHERE APPOINTMENTS.therapist_id = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, therapistId);
             ResultSet resultSet = statement.executeQuery();
@@ -229,11 +233,30 @@ public class TherapistsRepositorySQL {
         return availableTimes;
     }
 
-    public void deleteAppointment(int appointmentId) {
+    public List<LocalDate> getAppointmentsByMonth(Long therapistId, LocalDate date) {
+        List<LocalDate> appointments = new ArrayList<>();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String sql = "SELECT DISTINCT start_time FROM AVAILABILITY " +
+                    "WHERE therapist_id = ? AND START_TIME >= CURRENT_DATE() AND MONTH(start_time) = ?";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, therapistId);
+            statement.setInt(2, Date.valueOf(date).toLocalDate().getMonth().getValue());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Timestamp startTime = resultSet.getTimestamp("start_time");
+                appointments.add(startTime.toLocalDateTime().toLocalDate());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return appointments;
+    }
+
+    public void deleteAppointment(Long appointmentId) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "DELETE FROM appointments WHERE appointment_id = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, appointmentId);
+            statement.setLong(1, appointmentId);
             int rowsDeleted = statement.executeUpdate();
             System.out.println(rowsDeleted + " rows deleted.");
         } catch (SQLException e) {
