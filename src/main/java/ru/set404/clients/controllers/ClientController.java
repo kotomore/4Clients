@@ -18,6 +18,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 @RestController
+@RequestMapping("/clients")
 public class ClientController {
 
     private final AppointmentModelAssembler appointmentModelAssembler;
@@ -29,22 +30,7 @@ public class ClientController {
         this.therapistService = therapistService;
     }
 
-//    @GetMapping("/clients")
-//    public CollectionModel<EntityModel<Client>> all() {
-//        List<Client> clients = clientRepository.findAll();
-//        return clientModelAssembler.toCollectionModel(clients);
-//    }
-
-//    @PostMapping("/clients")
-//    public ResponseEntity<?> newClient(@RequestBody Client newClient) {
-//        EntityModel<Client> entityModel = clientModelAssembler.toModel(clientRepository.save(newClient));
-//
-//        return ResponseEntity
-//                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-//                .body(entityModel);
-//    }
-
-    @PostMapping("/client/appointment")
+    @PostMapping("/appointment")
     public ResponseEntity<?> newAppointment(@RequestBody Appointment newAppointment) {
 
         Appointment appointment = therapistService.addAppoinment(newAppointment);
@@ -61,7 +47,7 @@ public class ClientController {
                 .body(entityModel);
     }
 
-    @GetMapping("client/availableTimes")
+    @GetMapping("/availableTimes")
     public ResponseEntity<?> availableTimes(@RequestParam Long therapistId, @RequestParam LocalDate date) {
         List<LocalTime> availableTimes = therapistService.getAvailableTimes(therapistId, date);
         if (availableTimes.isEmpty())
@@ -74,7 +60,7 @@ public class ClientController {
         return new ResponseEntity<>(availableTimes, HttpStatus.OK);
     }
 
-    @GetMapping("client/availableDates")
+    @GetMapping("/availableDates")
     public ResponseEntity<?> availableDates(@RequestParam Long therapistId, @RequestParam LocalDate date) {
         List<LocalDate> availableDates = therapistService.getAvailableDates(therapistId, date);
         if (availableDates.isEmpty())
@@ -86,38 +72,4 @@ public class ClientController {
                             .withDetail("There is no available date for appointment to month - " + date.getMonth()));
         return new ResponseEntity<>(availableDates, HttpStatus.OK);
     }
-
-//    @GetMapping("/clients/{id}")
-//    public EntityModel<Client> one(@PathVariable Long id) {
-//
-//        Client client = clientRepository.findById(id) //
-//                .orElseThrow(() -> new ClientNotFoundException(id));
-//
-//        return clientModelAssembler.toModel(client);
-//    }
-//
-//    @PutMapping("/clients/{id}")
-//    ResponseEntity<?> replaceEmployee(@RequestBody Client newClient, @PathVariable Long id) {
-//        Client updatedClient = clientRepository.findById(id)
-//                .map(client -> {
-//                    client.setName(newClient.getName());
-//                    client.setPhone(newClient.getPhone());
-//                    return clientRepository.save(client);
-//                })
-//                .orElseGet(() -> {
-//                    newClient.setId(id);
-//                    return clientRepository.save(newClient);
-//                });
-//        EntityModel<Client> entityModel = clientModelAssembler.toModel(updatedClient);
-//
-//        return ResponseEntity
-//                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-//                .body(entityModel);
-//    }
-//
-//    @DeleteMapping("/client/{id}")
-//    ResponseEntity<?> deleteEmployee(@PathVariable Long id) {
-//        clientRepository.deleteById(id);
-//        return ResponseEntity.noContent().build();
-//    }
 }

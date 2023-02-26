@@ -18,7 +18,9 @@ public class AppointmentModelAssembler implements RepresentationModelAssembler<A
                 linkTo(methodOn(TherapistController.class)
                         .getAppointmentById(entity.getTherapistId(), entity.getAppointmentId()))
                         .withSelfRel(),
-                linkTo(methodOn(TherapistController.class).all(entity.getTherapistId())).withRel("appointments"));
+                linkTo(methodOn(TherapistController.class)
+                        .allappointments(entity.getTherapistId()))
+                        .withRel("appointments"));
     }
 
     @Override

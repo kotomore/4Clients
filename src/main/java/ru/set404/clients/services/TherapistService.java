@@ -1,10 +1,15 @@
 package ru.set404.clients.services;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.set404.clients.dto.ServiceDTO;
+import ru.set404.clients.dto.TherapistDTO;
 import ru.set404.clients.exceptions.AppointmentNotFoundException;
+import ru.set404.clients.exceptions.ServiceNotFoundException;
 import ru.set404.clients.exceptions.TherapistNotFoundException;
 import ru.set404.clients.models.Appointment;
+import ru.set404.clients.models.Service;
 import ru.set404.clients.models.Therapist;
 import ru.set404.clients.repositories.TherapistsRepositorySQL;
 
@@ -15,10 +20,12 @@ import java.util.List;
 @Component
 public class TherapistService {
     private final TherapistsRepositorySQL repository;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public TherapistService(TherapistsRepositorySQL repository) {
+    public TherapistService(TherapistsRepositorySQL repository, ModelMapper modelMapper) {
         this.repository = repository;
+        this.modelMapper = modelMapper;
     }
 
     public Appointment addAppoinment(Appointment appointment) {
@@ -52,8 +59,10 @@ public class TherapistService {
         repository.deleteAppointment(appointmentId);
     }
 
-    public Therapist saveTherapist(Therapist therapist) {
-        return repository.createTherapist(therapist);
+    public Long saveTherapist(TherapistDTO therapist) {
+        Therapist newTherapist = modelMapper.map(therapist, Therapist.class);
+        newTherapist.setRole("Therapist");
+        return repository.createTherapist(newTherapist);
     }
 
     public List<Therapist> getAllTherapist() {
@@ -71,7 +80,24 @@ public class TherapistService {
     }
 
     public void addAvailableTime(Long therapistId, LocalDate date, LocalTime timeStart, LocalTime timeEnd) {
-        repository.addAvailableTime(therapistId, date, timeStart, timeEnd);
+        repository.addorUpdateAvailableTime(therapistId, date, timeStart, timeEnd);
+    }
+
+    public void deleteAvailableTime(Long therapistId, LocalDate date) {
+        repository.deleteAvailableTime(therapistId, date);
+    }
+
+    public void deleteTherapist(Long therapistId) {
+        repository.deleteTherapist(therapistId);
+    }
+
+    public Service getService(Long therapistId) {
+        return repository.getServiceByTherapist(therapistId).orElseThrow(() -> new ServiceNotFoundException(therapistId));
+    }
+
+    public void addOrUpdateService(Long therapistId, ServiceDTO service) {
+        Service updatedService = modelMapper.map(service, Service.class);
+        repository.addOrUpdateService(therapistId, updatedService);
     }
 
 }

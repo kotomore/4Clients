@@ -1,28 +1,19 @@
-package ru.set404.clients.models;
+package ru.set404.clients.dto;
 
-public class Service {
-    private Long serviceId;
+public class ServiceDTO {
     private String name;
     private String description;
     private int duration;
     private int price;
 
-    public Service(String name, String description, int duration, int price) {
+    public ServiceDTO(String name, String description, int duration, int price) {
         this.name = name;
         this.description = description;
         this.duration = duration;
         this.price = price;
     }
 
-    public Service() {
-    }
-
-    public Long getServiceId() {
-        return serviceId;
-    }
-
-    public void setServiceId(Long serviceId) {
-        this.serviceId = serviceId;
+    public ServiceDTO() {
     }
 
     public String getName() {
