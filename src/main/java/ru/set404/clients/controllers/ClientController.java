@@ -3,6 +3,9 @@ package ru.set404.clients.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mediatype.problem.Problem;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,12 +64,26 @@ public class ClientController {
     @GetMapping("client/availableTimes")
     public ResponseEntity<?> availableTimes(@RequestParam Long therapistId, @RequestParam LocalDate date) {
         List<LocalTime> availableTimes = therapistService.getAvailableTimes(therapistId, date);
+        if (availableTimes.isEmpty())
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+                    .body(Problem.create()
+                            .withTitle("Not found")
+                            .withDetail("There is no available time for appointment to date - " + date));
         return new ResponseEntity<>(availableTimes, HttpStatus.OK);
     }
 
     @GetMapping("client/availableDates")
     public ResponseEntity<?> availableDates(@RequestParam Long therapistId, @RequestParam LocalDate date) {
         List<LocalDate> availableDates = therapistService.getAvailableDates(therapistId, date);
+        if (availableDates.isEmpty())
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+                    .body(Problem.create()
+                            .withTitle("Not found")
+                            .withDetail("There is no available date for appointment to month - " + date.getMonth()));
         return new ResponseEntity<>(availableDates, HttpStatus.OK);
     }
 

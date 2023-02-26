@@ -3,6 +3,7 @@ package ru.set404.clients.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.set404.clients.exceptions.AppointmentNotFoundException;
+import ru.set404.clients.exceptions.TherapistNotFoundException;
 import ru.set404.clients.models.Appointment;
 import ru.set404.clients.models.Therapist;
 import ru.set404.clients.repositories.TherapistsRepositorySQL;
@@ -33,7 +34,7 @@ public class TherapistService {
                 .orElseThrow(() -> new AppointmentNotFoundException(therapistId));
     }
 
-    public Appointment getById(Long therapistId, Long appointmentId) {
+    public Appointment getAppointmentById(Long therapistId, Long appointmentId) {
         return repository
                 .getAppointmentForTherapistById(therapistId, appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException(therapistId));
@@ -44,7 +45,7 @@ public class TherapistService {
     }
 
     public List<LocalDate> getAvailableDates(Long therapistId, LocalDate date) {
-        return repository.getAppointmentsByMonth(therapistId, date);
+        return repository.getAvailableDates(therapistId, date);
     }
 
     public void deleteAppointment(Long appointmentId) {
@@ -53,6 +54,24 @@ public class TherapistService {
 
     public Therapist saveTherapist(Therapist therapist) {
         return repository.createTherapist(therapist);
+    }
+
+    public List<Therapist> getAllTherapist() {
+        return repository.getAllTherapist();
+    }
+
+    public Therapist getTherapist(Long therapistId) {
+        return repository
+                .getTherapist(therapistId)
+                .orElseThrow(() -> new TherapistNotFoundException(therapistId));
+    }
+
+    public void updateTherapist(Therapist therapist) {
+        repository.updateTherapist(therapist);
+    }
+
+    public void addAvailableTime(Long therapistId, LocalDate date, LocalTime timeStart, LocalTime timeEnd) {
+        repository.addAvailableTime(therapistId, date, timeStart, timeEnd);
     }
 
 }

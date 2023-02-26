@@ -5,24 +5,24 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 import ru.set404.clients.controllers.TherapistController;
-import ru.set404.clients.models.Appointment;
+import ru.set404.clients.models.Therapist;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class AppointmentModelAssembler implements RepresentationModelAssembler<Appointment, EntityModel<Appointment>> {
+public class TherapistModelAssembler implements RepresentationModelAssembler<Therapist, EntityModel<Therapist>> {
     @Override
-    public EntityModel<Appointment> toModel(Appointment entity) {
+    public EntityModel<Therapist> toModel(Therapist entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(TherapistController.class)
-                        .getAppointmentById(entity.getTherapistId(), entity.getAppointmentId()))
+                        .getTherapistById(entity.getId()))
                         .withSelfRel(),
-                linkTo(methodOn(TherapistController.class).all(entity.getTherapistId())).withRel("appointments"));
+                linkTo(methodOn(TherapistController.class).allTherapists()).withRel("therapists"));
     }
 
     @Override
-    public CollectionModel<EntityModel<Appointment>> toCollectionModel(Iterable<? extends Appointment> entities) {
+    public CollectionModel<EntityModel<Therapist>> toCollectionModel(Iterable<? extends Therapist> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 }

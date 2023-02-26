@@ -1,6 +1,5 @@
 package ru.set404.clients.models;
 
-import jakarta.persistence.Entity;
 
 import java.util.Objects;
 

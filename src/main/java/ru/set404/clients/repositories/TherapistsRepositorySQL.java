@@ -3,6 +3,7 @@ package ru.set404.clients.repositories;
 import org.springframework.stereotype.Repository;
 import ru.set404.clients.models.Appointment;
 import ru.set404.clients.models.Client;
+import ru.set404.clients.models.Service;
 import ru.set404.clients.models.Therapist;
 
 import java.sql.*;
@@ -209,7 +210,7 @@ public class TherapistsRepositorySQL {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT START_TIME, END_TIME, DURATION FROM AVAILABILITY " +
                     "JOIN SERVICES ON AVAILABILITY.THERAPIST_ID = SERVICES.THERAPIST_ID " +
-                    "WHERE AVAILABILITY.therapist_id = ? AND FORMATDATETIME(start_time, 'yyyy-MM-dd') = ?";
+                    "WHERE AVAILABILITY.therapist_id = ? AND AVAILABLE_DATE = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, therapistId);
             statement.setDate(2, Date.valueOf(date));
@@ -218,12 +219,12 @@ public class TherapistsRepositorySQL {
             List<LocalTime> appointedTime = getAppointmentsByDay(therapistId, date);
 
             if (resultSet.next()) {
-                LocalDateTime startTime = resultSet.getTimestamp("start_time").toLocalDateTime();
-                LocalDateTime endTime = resultSet.getTimestamp("end_time").toLocalDateTime();
+                LocalTime startTime = resultSet.getTime("start_time").toLocalTime();
+                LocalTime endTime = resultSet.getTime("end_time").toLocalTime();
                 int duration = resultSet.getInt("duration");
-                for (LocalDateTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(duration)) {
-                    if (!appointedTime.contains(time.toLocalTime())) {
-                        availableTimes.add(time.toLocalTime());
+                for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(duration)) {
+                    if (!appointedTime.contains(time)) {
+                        availableTimes.add(time);
                     }
                 }
             }
@@ -233,23 +234,23 @@ public class TherapistsRepositorySQL {
         return availableTimes;
     }
 
-    public List<LocalDate> getAppointmentsByMonth(Long therapistId, LocalDate date) {
-        List<LocalDate> appointments = new ArrayList<>();
+    public List<LocalDate> getAvailableDates(Long therapistId, LocalDate date) {
+        List<LocalDate> availableDates = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT DISTINCT start_time FROM AVAILABILITY " +
-                    "WHERE therapist_id = ? AND START_TIME >= CURRENT_DATE() AND MONTH(start_time) = ?";
+            String sql = "SELECT AVAILABLE_DATE FROM AVAILABILITY " +
+                    "WHERE therapist_id = ? AND AVAILABLE_DATE >= CURRENT_DATE() AND MONTH(AVAILABLE_DATE) = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, therapistId);
             statement.setInt(2, Date.valueOf(date).toLocalDate().getMonth().getValue());
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Timestamp startTime = resultSet.getTimestamp("start_time");
-                appointments.add(startTime.toLocalDateTime().toLocalDate());
+                LocalDate availableDate = resultSet.getDate("available_date").toLocalDate();
+                availableDates.add(availableDate);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return appointments;
+        return availableDates;
     }
 
     public void deleteAppointment(Long appointmentId) {
@@ -259,6 +260,103 @@ public class TherapistsRepositorySQL {
             statement.setLong(1, appointmentId);
             int rowsDeleted = statement.executeUpdate();
             System.out.println(rowsDeleted + " rows deleted.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Therapist> getAllTherapist() {
+        List<Therapist> therapists = new ArrayList<>();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String sql = "SELECT * FROM THERAPISTS";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Therapist therapist = new Therapist();
+                therapist.setId(resultSet.getLong("therapist_id"));
+                therapist.setName(resultSet.getString("name"));
+                therapist.setPassword(resultSet.getString("password"));
+                therapist.setPhone(resultSet.getString("phone"));
+                therapist.setRole(resultSet.getString("role"));
+                therapists.add(therapist);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return therapists;
+    }
+
+    public Optional<Therapist> getTherapist(Long therapistId) {
+        Optional<Therapist> therapist = Optional.empty();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String sql = "SELECT * FROM THERAPISTS WHERE THERAPIST_ID = ?";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, therapistId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                therapist = Optional.of(new Therapist());
+                therapist.get().setId(resultSet.getLong("therapist_id"));
+                therapist.get().setName(resultSet.getString("name"));
+                therapist.get().setPassword(resultSet.getString("password"));
+                therapist.get().setPhone(resultSet.getString("phone"));
+                therapist.get().setRole(resultSet.getString("role"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return therapist;
+    }
+
+    public void updateTherapist(Therapist therapist) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String sql = "UPDATE THERAPISTS SET NAME = ?, PASSWORD = ?, PHONE = ?, ROLE = ? WHERE THERAPIST_ID = ?";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, therapist.getName());
+            statement.setString(2, therapist.getPassword());
+            statement.setString(3, therapist.getPhone());
+            statement.setString(4, therapist.getRole());
+            statement.setLong(5, therapist.getId());
+            statement.executeQuery();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Optional<Service> getServiceByTherapist(Long therapistId) {
+        Optional<Service> service = Optional.empty();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String sql = "SELECT * FROM SERVICES WHERE THERAPIST_ID = ?";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, therapistId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                service = Optional.of(new Service());
+                service.get().setName(resultSet.getString("name"));
+                service.get().setDescription(resultSet.getString("description"));
+                service.get().setDuration(resultSet.getInt("duration"));
+                service.get().setPrice(resultSet.getInt("price"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return service;
+    }
+
+
+    private void checkAvailableTime(Long therapistId, LocalDateTime timeStart) {
+
+    }
+    public void addAvailableTime(Long therapistId, LocalDate date, LocalTime timeStart, LocalTime timeEnd) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            String sql = "INSERT INTO AVAILABILITY (THERAPIST_ID, AVAILABLE_DATE, START_TIME, END_TIME) " +
+                    "VALUES (?, ?, ?, ?)";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, therapistId);
+            statement.setDate(2, Date.valueOf(date));
+            statement.setTime(3, Time.valueOf(timeStart));
+            statement.setTime(4, Time.valueOf(timeEnd));
+            statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

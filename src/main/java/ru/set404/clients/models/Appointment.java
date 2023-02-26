@@ -1,9 +1,13 @@
 package ru.set404.clients.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.sql.Timestamp;
 
 public class Appointment {
     private Long appointmentId;
+
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     private Timestamp startTime;
     private Long serviceId;
     private Long therapistId;
