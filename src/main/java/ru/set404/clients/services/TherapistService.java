@@ -3,6 +3,7 @@ package ru.set404.clients.services;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.dto.ServiceDTO;
 import ru.set404.clients.dto.TherapistDTO;
 import ru.set404.clients.exceptions.AppointmentNotFoundException;
@@ -28,7 +29,8 @@ public class TherapistService {
         this.modelMapper = modelMapper;
     }
 
-    public Appointment addAppoinment(Appointment appointment) {
+    public Appointment addAppointment(AppointmentDTO appointmentDTO) {
+        Appointment appointment = appointmentDTO.toAppointment();
         if (repository.isTimeAvailable(appointment))
             repository.createAppointment(appointment);
         else return null;
@@ -80,7 +82,7 @@ public class TherapistService {
     }
 
     public void addAvailableTime(Long therapistId, LocalDate date, LocalTime timeStart, LocalTime timeEnd) {
-        repository.addorUpdateAvailableTime(therapistId, date, timeStart, timeEnd);
+        repository.addOrUpdateAvailableTime(therapistId, date, timeStart, timeEnd);
     }
 
     public void deleteAvailableTime(Long therapistId, LocalDate date) {

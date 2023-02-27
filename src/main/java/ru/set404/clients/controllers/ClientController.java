@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.models.Appointment;
 import ru.set404.clients.services.TherapistService;
 import ru.set404.clients.util.AppointmentModelAssembler;
@@ -31,9 +32,9 @@ public class ClientController {
     }
 
     @PostMapping("/appointment")
-    public ResponseEntity<?> newAppointment(@RequestBody Appointment newAppointment) {
+    public ResponseEntity<?> newAppointment(@RequestBody AppointmentDTO newAppointment) {
 
-        Appointment appointment = therapistService.addAppoinment(newAppointment);
+        Appointment appointment = therapistService.addAppointment(newAppointment);
 
         if (appointment == null)
             return ResponseEntity
@@ -60,6 +61,7 @@ public class ClientController {
         return new ResponseEntity<>(availableTimes, HttpStatus.OK);
     }
 
+    @CrossOrigin
     @GetMapping("/availableDates")
     public ResponseEntity<?> availableDates(@RequestParam Long therapistId, @RequestParam LocalDate date) {
         List<LocalDate> availableDates = therapistService.getAvailableDates(therapistId, date);

@@ -3,12 +3,13 @@ package ru.set404.clients.models;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class Appointment {
     private Long appointmentId;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm")
-    private Timestamp startTime;
+    private LocalDateTime startTime;
     private Long serviceId;
     private Long therapistId;
     private Client client;
@@ -16,7 +17,7 @@ public class Appointment {
     public Appointment() {
     }
 
-    public Appointment(Long appointmentId, Timestamp startTime, Long serviceId, Long therapistId, Client client) {
+    public Appointment(Long appointmentId, LocalDateTime startTime, Long serviceId, Long therapistId, Client client) {
         this.appointmentId = appointmentId;
         this.startTime = startTime;
         this.serviceId = serviceId;
@@ -24,7 +25,7 @@ public class Appointment {
         this.client = client;
     }
 
-    public Appointment(Timestamp startTime, Long serviceId, Long therapistId, Client client) {
+    public Appointment(LocalDateTime startTime, Long serviceId, Long therapistId, Client client) {
         this.startTime = startTime;
         this.serviceId = serviceId;
         this.therapistId = therapistId;
@@ -39,11 +40,11 @@ public class Appointment {
         this.appointmentId = appointmentId;
     }
 
-    public Timestamp getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 

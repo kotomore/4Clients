@@ -8,6 +8,7 @@ import ru.set404.clients.models.Therapist;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +91,7 @@ public class TherapistsRepositorySQL {
             String sql = "SELECT * FROM appointments WHERE therapist_id = ? AND start_time = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, appointment.getTherapistId());
-            statement.setTimestamp(2, appointment.getStartTime());
+            statement.setTimestamp(2, Timestamp.valueOf(appointment.getStartTime()));
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 isAvailable = false;
@@ -113,7 +114,7 @@ public class TherapistsRepositorySQL {
             statement.setLong(1, appointment.getClient().getId());
             statement.setLong(2, appointment.getTherapistId());
             statement.setLong(3, appointment.getServiceId());
-            statement.setTimestamp(4, appointment.getStartTime());
+            statement.setTimestamp(4, Timestamp.valueOf(appointment.getStartTime()));
             statement.executeUpdate();
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -147,7 +148,7 @@ public class TherapistsRepositorySQL {
                 String clientName = resultSet.getString("name");
                 String clientPhone = resultSet.getString("phone");
                 Client client = new Client(clientId, clientName, clientPhone);
-                Appointment appointment = new Appointment(appointmentId, startTime, serviceId, therapistId, client);
+                Appointment appointment = new Appointment(appointmentId, startTime.toLocalDateTime(), serviceId, therapistId, client);
                 appointments.add(appointment);
             }
         } catch (SQLException e) {
@@ -176,7 +177,7 @@ public class TherapistsRepositorySQL {
                 String clientName = resultSet.getString("name");
                 String clientPhone = resultSet.getString("phone");
                 Client client = new Client(clientId, clientName, clientPhone);
-                appointment = new Appointment(appointmentId, startTime, serviceId, therapistId, client);
+                appointment = new Appointment(appointmentId, startTime.toLocalDateTime(), serviceId, therapistId, client);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -191,14 +192,14 @@ public class TherapistsRepositorySQL {
         List<LocalTime> appointments = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT START_TIME FROM appointments " +
-                    "WHERE therapist_id = ? AND FORMATDATETIME(start_time, 'yyyy-MM-dd') = ?";
+                    "WHERE therapist_id = ? AND FORMATDATETIME(start_time, 'yyyy-MM-dd', 'de') = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, therapistId);
             statement.setDate(2, Date.valueOf(date));
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Timestamp startTime = resultSet.getTimestamp("start_time");
-                appointments.add(startTime.toLocalDateTime().toLocalTime());
+                LocalDateTime startTime = resultSet.getTimestamp("start_time").toLocalDateTime();
+                appointments.add(startTime.toLocalTime());
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -221,10 +222,11 @@ public class TherapistsRepositorySQL {
 
             if (resultSet.next()) {
                 LocalTime startTime = resultSet.getTime("start_time").toLocalTime();
+
                 LocalTime endTime = resultSet.getTime("end_time").toLocalTime();
                 int duration = resultSet.getInt("duration");
                 for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(duration)) {
-                    if (!appointedTime.contains(time)) {
+                    if (!appointedTime.contains(time) && (!LocalDate.now().isEqual(date) || time.isAfter(LocalTime.now()))) {
                         availableTimes.add(time);
                     }
                 }
@@ -337,7 +339,7 @@ public class TherapistsRepositorySQL {
         return true;
     }
 
-    public void addorUpdateAvailableTime(Long therapistId, LocalDate date, LocalTime timeStart, LocalTime timeEnd) {
+    public void addOrUpdateAvailableTime(Long therapistId, LocalDate date, LocalTime timeStart, LocalTime timeEnd) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
 
             String sql;
