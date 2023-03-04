@@ -16,10 +16,10 @@ public class AppointmentModelAssembler implements RepresentationModelAssembler<A
     public EntityModel<Appointment> toModel(Appointment entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(TherapistController.class)
-                        .getAppointmentById(entity.getTherapistId(), entity.getAppointmentId()))
+                        .getAppointmentById(entity.getAppointmentId()))
                         .withSelfRel(),
                 linkTo(methodOn(TherapistController.class)
-                        .allappointments(entity.getTherapistId()))
+                        .allAppointments())
                         .withRel("appointments"));
     }
 

@@ -14,7 +14,7 @@ public class TherapistNotFoundAdvice {
     @ResponseBody
     @ExceptionHandler(TherapistNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    String appointmentNotFoundHandler(TherapistNotFoundException ex) {
+    String therapistNotFoundHandler(TherapistNotFoundException ex) {
         return ex.getMessage();
     }
 }

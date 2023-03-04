@@ -12,11 +12,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class TherapistModelAssembler implements RepresentationModelAssembler<Therapist, EntityModel<Therapist>> {
+
     @Override
     public EntityModel<Therapist> toModel(Therapist entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(TherapistController.class)
-                        .getTherapistById(entity.getId()))
+                        .getTherapistById())
                         .withSelfRel(),
                 linkTo(methodOn(TherapistController.class).allTherapists()).withRel("therapists"));
     }

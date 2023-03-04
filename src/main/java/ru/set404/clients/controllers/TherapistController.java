@@ -4,19 +4,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mediatype.problem.Problem;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import ru.set404.clients.dto.AppointmentsForSiteDTO;
 import ru.set404.clients.dto.ServiceDTO;
 import ru.set404.clients.dto.TherapistDTO;
-import ru.set404.clients.models.Appointment;
-import ru.set404.clients.models.Availability;
-import ru.set404.clients.models.Service;
-import ru.set404.clients.models.Therapist;
+import ru.set404.clients.models.*;
 import ru.set404.clients.services.TherapistService;
 import ru.set404.clients.util.AppointmentModelAssembler;
+import ru.set404.clients.util.ClientModelAssembler;
 import ru.set404.clients.util.TherapistModelAssembler;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -24,22 +30,26 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/therapists")
+@CrossOrigin(allowedHeaders = {"Authorization", "Origin"}, value = "*")
 public class TherapistController {
 
     private final AppointmentModelAssembler appointmentModelAssembler;
     private final TherapistModelAssembler therapistModelAssembler;
+    private final ClientModelAssembler clientModelAssembler;
     private final TherapistService therapistService;
 
     @Autowired
-    public TherapistController(AppointmentModelAssembler appointmentModelAssembler, TherapistModelAssembler therapistModelAssembler, TherapistService therapistService) {
+    public TherapistController(AppointmentModelAssembler appointmentModelAssembler, TherapistModelAssembler therapistModelAssembler, ClientModelAssembler clientModelAssembler, TherapistService therapistService) {
         this.appointmentModelAssembler = appointmentModelAssembler;
         this.therapistModelAssembler = therapistModelAssembler;
+        this.clientModelAssembler = clientModelAssembler;
         this.therapistService = therapistService;
     }
 
-    @GetMapping("/{id}")
-    public EntityModel<Therapist> getTherapistById(@PathVariable Long id) {
-        Therapist therapist = therapistService.getTherapist(id);
+    @GetMapping()
+    public EntityModel<Therapist> getTherapistById() {
+        Long therapistId = getAuthUserId();
+        Therapist therapist = therapistService.getTherapist(therapistId);
         return therapistModelAssembler.toModel(therapist);
     }
 
@@ -51,19 +61,20 @@ public class TherapistController {
 
     @PostMapping
     ResponseEntity<EntityModel<TherapistDTO>> newTherapist(@RequestBody TherapistDTO therapist) {
-        Long newTherapistId = therapistService.saveTherapist(therapist);
+        therapistService.saveTherapist(therapist);
         return ResponseEntity
-                .created(linkTo(methodOn(TherapistController.class).getTherapistById(newTherapistId)).toUri())
+                .created(linkTo(methodOn(TherapistController.class).getTherapistById()).toUri())
                 .body(EntityModel.of(therapist));
     }
 
     @PutMapping
     ResponseEntity<?> updateTherapist(@RequestBody Therapist newTherapist) {
-        Therapist updatedTherapist = therapistService.getTherapist(newTherapist.getId());
+        Long therapistId = getAuthUserId();
+        Therapist updatedTherapist = therapistService.getTherapist(therapistId);
         updatedTherapist.setName(newTherapist.getName());
         updatedTherapist.setPassword(newTherapist.getPassword());
         updatedTherapist.setPhone(newTherapist.getPhone());
-        updatedTherapist.setRole(newTherapist.getRole());
+        updatedTherapist.setRole(Role.USER);
         therapistService.updateTherapist(updatedTherapist);
         EntityModel<Therapist> entityModel = therapistModelAssembler.toModel(updatedTherapist);
 
@@ -72,56 +83,111 @@ public class TherapistController {
                 .body(entityModel);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTherapist(@PathVariable Long id) {
-        therapistService.deleteTherapist(id);
+    @DeleteMapping()
+    public ResponseEntity<?> deleteTherapist() {
+        Long therapistId = getAuthUserId();
+        therapistService.deleteTherapist(therapistId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/appointments/{appointmentId}")
-    public EntityModel<Appointment> getAppointmentById(@PathVariable Long id, @PathVariable Long appointmentId) {
-        Appointment appointment = therapistService.getAppointmentById(id, appointmentId);
+    @GetMapping("/appointments/{appointmentId}")
+    public EntityModel<Appointment> getAppointmentById(@PathVariable Long appointmentId) {
+        Long therapistId = getAuthUserId();
+        Appointment appointment = therapistService.getAppointmentById(therapistId, appointmentId);
         return appointmentModelAssembler.toModel(appointment);
     }
 
-    @GetMapping("/{id}/appointments")
-    public CollectionModel<EntityModel<Appointment>> allappointments(@PathVariable Long id) {
-        List<Appointment> appointments = therapistService.findAll(id);
+    @GetMapping("/appointments")
+    public CollectionModel<EntityModel<Appointment>> allAppointments() {
+        Long therapistId = getAuthUserId();
+        List<Appointment> appointments = therapistService.findAllAppointments(therapistId);
         return appointmentModelAssembler.toCollectionModel(appointments);
     }
 
     @DeleteMapping("/appointments/{appointmentId}")
     public ResponseEntity<?> deleteAppointment(@PathVariable Long appointmentId) {
-        therapistService.deleteAppointment(appointmentId);
+        Long therapistId = getAuthUserId();
+        therapistService.deleteAppointment(therapistId, appointmentId);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/availabilities")
-    ResponseEntity<EntityModel<Therapist>> newAvailableTime(@PathVariable Long id, @RequestBody Availability availability) {
-        therapistService.addAvailableTime(id, availability.getDate(), availability.getStartTime(), availability.getEndTime());
+    @GetMapping("/availabilities")
+    public ResponseEntity<?> availableTimes(@RequestParam LocalDate date) {
+        List<LocalTime> availableTimes = therapistService.getAvailableTimes(1L, date);
+        if (availableTimes.isEmpty())
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+                    .body(Problem.create()
+                            .withTitle("Not found")
+                            .withDetail("There is no available time for appointment to date - " + date));
+        return new ResponseEntity<>(availableTimes, HttpStatus.OK);
+    }
+
+    @GetMapping("/appointments/byDate")
+    public ResponseEntity<?> availableTime(@RequestParam LocalDate date) {
+        Long therapistId = getAuthUserId();
+        List<AppointmentsForSiteDTO> appointmentsForSiteDTOS = therapistService.findAllAppointmentsDTO(therapistId);
+        if (appointmentsForSiteDTOS.isEmpty())
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+                    .body(Problem.create()
+                            .withTitle("Not found")
+                            .withDetail("There is no available time for appointment to date - " + date));
+        return new ResponseEntity<>(appointmentsForSiteDTOS, HttpStatus.OK);
+    }
+    @PostMapping("/availabilities")
+    ResponseEntity<EntityModel<Therapist>> newAvailableTime(@RequestBody Availability availability) {
+        Long therapistId = getAuthUserId();
+        therapistService.addAvailableTime(therapistId, availability.getDate(), availability.getStartTime(), availability.getEndTime());
         return ResponseEntity
-                .created(linkTo(methodOn(ClientController.class).availableTimes(id, availability.getDate())).toUri())
+                .ok()
                 .build();
     }
 
-    @DeleteMapping("/{id}/availabilities")
-    public ResponseEntity<?> deleteAppointment(@PathVariable Long id, @RequestBody LocalDate date) {
-        therapistService.deleteAvailableTime(id, date);
+    @PostMapping("/availabilities/few")
+    ResponseEntity<EntityModel<Therapist>> newAvailableTime(@RequestBody Availabilities availabilities) {
+        Long therapistId = getAuthUserId();
+        therapistService.addAvailableTime(therapistId, availabilities.getStartTime(), availabilities.getEndTime());
+        return ResponseEntity
+                .ok()
+                .build();
+    }
+
+    @DeleteMapping("/availabilities")
+    public ResponseEntity<?> deleteAppointment(@RequestBody LocalDate date) {
+        Long therapistId = getAuthUserId();
+        therapistService.deleteAvailableTime(therapistId, date);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/services")
-    public EntityModel<Service> getService(@PathVariable Long id) {
-        Service service = therapistService.getService(id);
+    @GetMapping("/services")
+    public EntityModel<Service> getService() {
+        Long therapistId = getAuthUserId();
+        Service service = therapistService.getService(therapistId);
         return EntityModel.of(service, linkTo(methodOn(TherapistController.class)
-                .getTherapistById(id)).withRel("therapist"));
+                .getTherapistById()).withRel("therapist"));
     }
 
-    @PostMapping("/{id}/services")
-    ResponseEntity<EntityModel<Service>> newService(@PathVariable Long id, @RequestBody ServiceDTO service) {
-        therapistService.addOrUpdateService(id, service);
+    @PostMapping("/services")
+    ResponseEntity<EntityModel<Service>> newService(@RequestBody ServiceDTO service) {
+        Long therapistId = getAuthUserId();
+        therapistService.addOrUpdateService(therapistId, service);
         return ResponseEntity
-                .created(linkTo(methodOn(TherapistController.class).getService(id)).toUri())
+                .ok()
                 .build();
+    }
+
+    @GetMapping("/clients")
+    public CollectionModel<EntityModel<Client>> getClients() {
+        Long therapistId = getAuthUserId();
+        List<Client> clients = therapistService.getClients(therapistId);
+        return clientModelAssembler.toCollectionModel(clients);
+    }
+
+    private Long getAuthUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (Long) authentication.getPrincipal();
     }
 }

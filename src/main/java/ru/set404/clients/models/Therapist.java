@@ -1,5 +1,7 @@
 package ru.set404.clients.models;
 
+import org.springframework.security.core.GrantedAuthority;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -8,14 +10,14 @@ public class Therapist {
     private String name;
     private String phone;
     private String password;
-    private String role;
+    private Role role;
     private List<Appointment> appointments;
 
 
     public Therapist() {
     }
 
-    public Therapist(String name, String phone, String password, String role) {
+    public Therapist(String name, String phone, String password, Role role) {
         this.name = name;
         this.phone = phone;
         this.password = password;
@@ -54,11 +56,11 @@ public class Therapist {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
@@ -86,3 +88,4 @@ public class Therapist {
                 '}';
     }
 }
+
