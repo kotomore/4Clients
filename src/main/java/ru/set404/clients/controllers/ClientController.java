@@ -48,6 +48,7 @@ public class ClientController {
                 .body(entityModel);
     }
 
+    @CrossOrigin
     @GetMapping("/availableTimes")
     public ResponseEntity<?> availableTimes(@RequestParam Long therapistId, @RequestParam LocalDate date) {
         List<LocalTime> availableTimes = therapistService.getAvailableTimes(therapistId, date);

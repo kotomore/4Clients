@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +29,10 @@ public class SwaggerConfig {
         var schema3 = new Schema<LocalDateTime>();
         schema3.example(LocalDateTime.of(2023,1,1,0,0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         SpringDocUtils.getConfig().replaceWithSchema(LocalDateTime.class, schema3);
+
+        var schema4 = new Schema<LocalDate>();
+        schema4.example(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        SpringDocUtils.getConfig().replaceWithSchema(LocalDate.class, schema4);
     }
 
     @Bean

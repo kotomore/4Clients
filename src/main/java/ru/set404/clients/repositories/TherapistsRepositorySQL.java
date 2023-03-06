@@ -1,5 +1,6 @@
 package ru.set404.clients.repositories;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import ru.set404.clients.dto.AppointmentsForSiteDTO;
 import ru.set404.clients.models.*;
@@ -14,9 +15,13 @@ import java.util.Optional;
 
 @Repository
 public class TherapistsRepositorySQL {
-    private static final String DB_URL = "jdbc:h2:file:/Users/kot/Java/clients/src/main/resources/static/sampledata";
-    private static final String DB_USER = "user";
-    private static final String DB_PASSWORD = "password";
+
+    @Value("${db.url}")
+    private String DB_URL;
+    @Value("${db.user}")
+    private String DB_USER;
+    @Value("${db.password}")
+    private String DB_PASSWORD;
 
     public Long createTherapist(Therapist therapist) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
@@ -51,10 +56,7 @@ public class TherapistsRepositorySQL {
             statement.setString(1, phoneNumber);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                Long clientId = resultSet.getLong("client_id");
-                String name = resultSet.getString("name");
-                String phone = resultSet.getString("phone");
-                client = Optional.of(new Client(clientId, name, phone));
+                client = Optional.of(makeClientFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -143,12 +145,9 @@ public class TherapistsRepositorySQL {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Long appointmentId = resultSet.getLong("appointment_id");
-                Long clientId = resultSet.getLong("client_id");
                 Long serviceId = resultSet.getLong("service_id");
                 Timestamp startTime = resultSet.getTimestamp("start_time");
-                String clientName = resultSet.getString("name");
-                String clientPhone = resultSet.getString("phone");
-                Client client = new Client(clientId, clientName, clientPhone);
+                Client client = makeClientFromResultSet(resultSet);
                 Appointment appointment = new Appointment(appointmentId, startTime.toLocalDateTime(), serviceId, therapistId, client);
                 appointments.add(appointment);
             }
@@ -173,7 +172,7 @@ public class TherapistsRepositorySQL {
             while (resultSet.next()) {
                 Long appointmentId = resultSet.getLong("appointment_id");
                 Timestamp startTime = resultSet.getTimestamp("start_time");
-                Integer duration = resultSet.getInt("duration");
+                int duration = resultSet.getInt("duration");
                 String clientName = resultSet.getString("name");
                 String clientPhone = resultSet.getString("phone");
                 AppointmentsForSiteDTO appointment = new AppointmentsForSiteDTO();
@@ -192,6 +191,13 @@ public class TherapistsRepositorySQL {
         else return Optional.empty();
     }
 
+    private Client makeClientFromResultSet(ResultSet resultSet) throws SQLException {
+        Long clientId = resultSet.getLong("client_id");
+
+        String clientName = resultSet.getString("name");
+        String clientPhone = resultSet.getString("phone");
+        return new Client(clientId, clientName, clientPhone);
+    }
     public Optional<List<Client>> getClientsForTherapist(Long therapistId) {
         List<Client> clients = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
@@ -202,12 +208,7 @@ public class TherapistsRepositorySQL {
             statement.setLong(1, therapistId);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Client client = new Client();
-                client.setId(resultSet.getLong("client_id"));
-                client.setName(resultSet.getString("name"));
-                client.setPhone(resultSet.getString("phone"));
-
-                clients.add(client);
+                clients.add(makeClientFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -229,12 +230,9 @@ public class TherapistsRepositorySQL {
             statement.setLong(2, appointmentId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                Long clientId = resultSet.getLong("client_id");
                 Long serviceId = resultSet.getLong("service_id");
                 Timestamp startTime = resultSet.getTimestamp("start_time");
-                String clientName = resultSet.getString("name");
-                String clientPhone = resultSet.getString("phone");
-                Client client = new Client(clientId, clientName, clientPhone);
+                Client client = makeClientFromResultSet(resultSet);
                 appointment = new Appointment(appointmentId, startTime.toLocalDateTime(), serviceId, therapistId, client);
             }
         } catch (SQLException e) {
@@ -362,18 +360,22 @@ public class TherapistsRepositorySQL {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                Therapist therapist = new Therapist();
-                therapist.setId(resultSet.getLong("therapist_id"));
-                therapist.setName(resultSet.getString("name"));
-                therapist.setPassword(resultSet.getString("password"));
-                therapist.setPhone(resultSet.getString("phone"));
-                therapist.setRole(Role.valueOf(resultSet.getString("role")));
-                therapists.add(therapist);
+                therapists.add(makeTherapistFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return therapists;
+    }
+
+    private Therapist makeTherapistFromResultSet(ResultSet resultSet) throws SQLException {
+        Therapist therapist = new Therapist();
+        therapist.setId(resultSet.getLong("therapist_id"));
+        therapist.setName(resultSet.getString("name"));
+        therapist.setPassword(resultSet.getString("password"));
+        therapist.setPhone(resultSet.getString("phone"));
+        therapist.setRole(Role.valueOf(resultSet.getString("role")));
+        return therapist;
     }
 
     public Optional<Therapist> getTherapistById(Long therapistId) {
@@ -384,12 +386,7 @@ public class TherapistsRepositorySQL {
             statement.setLong(1, therapistId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                therapist = Optional.of(new Therapist());
-                therapist.get().setId(resultSet.getLong("therapist_id"));
-                therapist.get().setName(resultSet.getString("name"));
-                therapist.get().setPassword(resultSet.getString("password"));
-                therapist.get().setPhone(resultSet.getString("phone"));
-                therapist.get().setRole(Role.valueOf(resultSet.getString("role")));
+                therapist = Optional.of(makeTherapistFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -405,12 +402,7 @@ public class TherapistsRepositorySQL {
             statement.setString(1, phone);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                therapist = Optional.of(new Therapist());
-                therapist.get().setId(resultSet.getLong("therapist_id"));
-                therapist.get().setName(resultSet.getString("name"));
-                therapist.get().setPassword(resultSet.getString("password"));
-                therapist.get().setPhone(resultSet.getString("phone"));
-                therapist.get().setRole(Role.valueOf(resultSet.getString("role")));
+                therapist = Optional.of(makeTherapistFromResultSet(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
