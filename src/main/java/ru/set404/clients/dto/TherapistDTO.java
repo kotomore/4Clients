@@ -1,10 +1,12 @@
 package ru.set404.clients.dto;
 
+import lombok.AllArgsConstructor;
 import ru.set404.clients.models.Appointment;
 
 import java.util.List;
 import java.util.Objects;
 
+@AllArgsConstructor
 public class TherapistDTO {
     private String name;
     private String phone;
