@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS appointments;
+DROP TABLE IF EXISTS services;
+DROP TABLE IF EXISTS availability;
+DROP TABLE IF EXISTS therapists;
+DROP TABLE IF EXISTS clients;
