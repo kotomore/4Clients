@@ -91,7 +91,7 @@ public class TherapistController {
     @GetMapping("/appointments/{appointmentId}")
     public EntityModel<Appointment> getAppointmentById(@PathVariable Long appointmentId) {
         Long therapistId = getAuthUserId();
-        Appointment appointment = therapistService.getAppointmentById(therapistId, appointmentId);
+        Appointment appointment = therapistService.findAppointmentById(therapistId, appointmentId);
         return appointmentModelAssembler.toModel(appointment);
     }
 
@@ -125,7 +125,7 @@ public class TherapistController {
 
     @GetMapping("/availabilities")
     public ResponseEntity<?> availableTimes(@RequestParam LocalDate date) {
-        List<LocalTime> availableTimes = therapistService.getAvailableTimes(1L, date);
+        List<LocalTime> availableTimes = therapistService.findAvailableTimes(1L, date);
         if (availableTimes.isEmpty())
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -164,7 +164,7 @@ public class TherapistController {
     @GetMapping("/services")
     public EntityModel<Service> getService() {
         Long therapistId = getAuthUserId();
-        Service service = therapistService.getService(therapistId);
+        Service service = therapistService.findService(therapistId);
         return EntityModel.of(service, linkTo(methodOn(TherapistController.class)
                 .getTherapistById()).withRel("therapist"));
     }
@@ -173,7 +173,7 @@ public class TherapistController {
     public EntityModel<Service> newService(@RequestBody ServiceDTO serviceDTO) {
         Long therapistId = getAuthUserId();
         therapistService.addOrUpdateService(therapistId, serviceDTO);
-        Service service = therapistService.getService(therapistId);
+        Service service = therapistService.findService(therapistId);
         return EntityModel.of(service, linkTo(methodOn(TherapistController.class)
                 .getTherapistById()).withRel("therapist"));
     }
@@ -181,7 +181,7 @@ public class TherapistController {
     @GetMapping("/clients")
     public CollectionModel<EntityModel<Client>> getClients() {
         Long therapistId = getAuthUserId();
-        List<Client> clients = therapistService.getClients(therapistId);
+        List<Client> clients = therapistService.findClients(therapistId);
         return clientModelAssembler.toCollectionModel(clients);
     }
 

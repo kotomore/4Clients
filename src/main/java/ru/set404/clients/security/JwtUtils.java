@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.set404.clients.models.Role;
-import ru.set404.clients.security.JwtAuthentication;
 
 import java.util.List;
 import java.util.Set;

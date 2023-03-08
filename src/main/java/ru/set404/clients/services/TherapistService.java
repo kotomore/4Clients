@@ -45,13 +45,13 @@ public class TherapistService {
                 .orElseThrow(() -> new AppointmentNotFoundException(therapistId));
     }
 
-    public Appointment getAppointmentById(Long therapistId, Long appointmentId) {
+    public Appointment findAppointmentById(Long therapistId, Long appointmentId) {
         return repository
                 .findAppointmentForTherapistById(therapistId, appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException(therapistId));
     }
 
-    public List<LocalTime> getAvailableTimes(Long therapistId, LocalDate date) {
+    public List<LocalTime> findAvailableTimes(Long therapistId, LocalDate date) {
         List<LocalTime> availableTimes = repository.findAvailableTimes(therapistId, date);
         if (availableTimes.size() > 0)
             return availableTimes;
@@ -59,7 +59,7 @@ public class TherapistService {
             throw new TimeNotAvailableException();
     }
 
-    public List<LocalDate> getAvailableDates(Long therapistId, LocalDate date) {
+    public List<LocalDate> findAvailableDates(Long therapistId, LocalDate date) {
         List<LocalDate> availableDates = repository.findAvailableDates(therapistId, date);
         if (availableDates.size() > 0)
             return availableDates;
@@ -77,10 +77,6 @@ public class TherapistService {
         Therapist newTherapist = modelMapper.map(therapist, Therapist.class);
         newTherapist.setRole(Role.USER);
         return repository.createTherapist(newTherapist);
-    }
-
-    public List<Therapist> getAllTherapist() {
-        return repository.findAllTherapist();
     }
 
     public Therapist findTherapistById(Long therapistId) {
@@ -115,11 +111,11 @@ public class TherapistService {
         repository.deleteTherapist(therapistId);
     }
 
-    public Service getService(Long therapistId) {
+    public Service findService(Long therapistId) {
         return repository.findServiceByTherapist(therapistId).orElseThrow(() -> new ServiceNotFoundException(therapistId));
     }
 
-    public List<Client> getClients(Long therapistId) {
+    public List<Client> findClients(Long therapistId) {
         return repository.findClientsForTherapist(therapistId).orElseThrow(() -> new ClientNotFoundException(therapistId));
     }
 

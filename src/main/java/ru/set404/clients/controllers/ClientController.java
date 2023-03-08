@@ -51,7 +51,7 @@ public class ClientController {
     @CrossOrigin
     @GetMapping("/availableTimes")
     public ResponseEntity<?> availableTimes(@RequestParam Long therapistId, @RequestParam LocalDate date) {
-        List<LocalTime> availableTimes = therapistService.getAvailableTimes(therapistId, date);
+        List<LocalTime> availableTimes = therapistService.findAvailableTimes(therapistId, date);
         if (availableTimes.isEmpty())
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -65,7 +65,7 @@ public class ClientController {
     @CrossOrigin
     @GetMapping("/availableDates")
     public ResponseEntity<?> availableDates(@RequestParam Long therapistId, @RequestParam LocalDate date) {
-        List<LocalDate> availableDates = therapistService.getAvailableDates(therapistId, date);
+        List<LocalDate> availableDates = therapistService.findAvailableDates(therapistId, date);
         if (availableDates.isEmpty())
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)

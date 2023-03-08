@@ -353,21 +353,6 @@ public class TherapistsRepositorySQL {
         }
     }
 
-    public List<Therapist> findAllTherapist() {
-        List<Therapist> therapists = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT * FROM THERAPISTS";
-            PreparedStatement statement = connection.prepareStatement(sql);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                therapists.add(makeTherapistFromResultSet(resultSet));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return therapists;
-    }
-
     private Therapist makeTherapistFromResultSet(ResultSet resultSet) throws SQLException {
         Therapist therapist = new Therapist();
         therapist.setId(resultSet.getLong("therapist_id"));

@@ -2,13 +2,8 @@ package ru.set404.clients.controllers;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.security.auth.message.AuthException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -26,17 +21,10 @@ import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.dto.ClientDTO;
 import ru.set404.clients.dto.ServiceDTO;
 import ru.set404.clients.dto.TherapistDTO;
-import ru.set404.clients.exceptions.TimeNotAvailableException;
-import ru.set404.clients.models.Availabilities;
-import ru.set404.clients.models.Availability;
-import ru.set404.clients.models.Role;
-import ru.set404.clients.models.Therapist;
-import ru.set404.clients.security.JwtRequest;
 import ru.set404.clients.services.TherapistService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThrows;
@@ -122,7 +110,7 @@ public class ClientControllerTest {
         appointmentDTO.setClient(clientDTO);
         appointmentDTO.setServiceId(1L);
         appointmentDTO.setTherapistId(therapistId);
-        appointmentDTO.setStartTime(service.getAvailableTimes(therapistId,
+        appointmentDTO.setStartTime(service.findAvailableTimes(therapistId,
                 LocalDate.now().plusDays(1))
                 .get(0)
                 .atDate(LocalDate.now().plusDays(1)));

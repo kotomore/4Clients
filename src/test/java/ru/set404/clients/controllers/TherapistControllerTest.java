@@ -1,7 +1,6 @@
 package ru.set404.clients.controllers;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.security.auth.message.AuthException;
 import org.json.JSONObject;
@@ -183,7 +182,7 @@ public class TherapistControllerTest {
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(availability)))
                 .andExpect(status().is(200));
-        assertTrue((service.getAvailableDates(1L, LocalDate.now().plusDays(5)).size() > 0));
+        assertTrue((service.findAvailableDates(1L, LocalDate.now().plusDays(5)).size() > 0));
     }
 
     @Test
@@ -199,7 +198,7 @@ public class TherapistControllerTest {
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(availability)))
                 .andExpect(status().is(200));
-        assertTrue((service.getAvailableDates(1L, LocalDate.now().plusDays(5)).size() > 0));
+        assertTrue((service.findAvailableDates(1L, LocalDate.now().plusDays(5)).size() > 0));
     }
 
     @Test
@@ -207,14 +206,14 @@ public class TherapistControllerTest {
         String token = getAccessToken();
         createAppointment();
 
-        assertTrue(service.getAvailableDates(1L, LocalDate.now().plusDays(1)).size() > 0);
+        assertTrue(service.findAvailableDates(1L, LocalDate.now().plusDays(1)).size() > 0);
 
         mvc.perform(delete("/therapists/availabilities").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .param("date", LocalDate.now().plusDays(1).toString()))
                 .andExpect(status().is(204));
 
-        assertThrows(TimeNotAvailableException.class, () -> service.getAvailableDates(1L, LocalDate.now().plusDays(1)));
+        assertThrows(TimeNotAvailableException.class, () -> service.findAvailableDates(1L, LocalDate.now().plusDays(1)));
     }
 
     @Test
@@ -273,7 +272,7 @@ public class TherapistControllerTest {
         AppointmentDTO appointmentDTO = new AppointmentDTO();
         appointmentDTO.setTherapistId(therapistId);
         appointmentDTO.setClient(client);
-        appointmentDTO.setServiceId(service.getService(therapistId).getServiceId());
+        appointmentDTO.setServiceId(service.findService(therapistId).getServiceId());
         appointmentDTO.setStartTime(LocalDate.now().plusDays(1).atTime(10, 0));
 
         service.addAvailableTime(therapistId, LocalDate.now().plusDays(1), LocalTime.of(0, 0), LocalTime.of(23, 0));

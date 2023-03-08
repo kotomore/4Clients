@@ -2,12 +2,16 @@ package ru.set404.clients.models;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 
+@Getter
+@Setter
 public class Availabilities {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     private LocalDateTime startTime;
@@ -15,22 +19,6 @@ public class Availabilities {
     private LocalDateTime endTime;
 
     public Availabilities() {
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
     }
 
     @Override
