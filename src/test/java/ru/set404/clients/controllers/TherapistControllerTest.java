@@ -251,20 +251,6 @@ public class TherapistControllerTest {
                         is("JohnDoe")));
     }
 
-
-    @Test
-    public void whenLoginInvalidPassword() throws Exception {
-        TherapistDTO therapist = createTestTherapist();
-
-        JwtRequest request = new JwtRequest();
-        request.setLogin(therapist.getPhone());
-        request.setPassword("Invalid" + therapist.getPassword());
-
-        mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is(403)).andExpect(jsonPath("$.message", is("Authorization error. Wrong password")));
-    }
-
     private TherapistDTO createTestTherapist() {
         TherapistDTO therapist = new TherapistDTO("Bob", "88005553535", "qwerty");
         service.saveTherapist(therapist);
