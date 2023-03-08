@@ -1,48 +1,55 @@
-CREATE TABLE clients
+create table CLIENTS
 (
-    client_id INT PRIMARY KEY AUTO_INCREMENT,
-    name      VARCHAR(50) NOT NULL,
-    phone     VARCHAR(20) NOT NULL
+    CLIENT_ID INTEGER auto_increment
+        primary key,
+    NAME      CHARACTER VARYING(50) not null,
+    PHONE     CHARACTER VARYING(20) not null
 );
 
-CREATE TABLE therapists
+create table THERAPISTS
 (
-    therapist_id INT PRIMARY KEY AUTO_INCREMENT,
-    name         VARCHAR(50)  NOT NULL,
-    phone        VARCHAR(20)  NOT NULL,
-    password     VARCHAR(255) NOT NULL,
-    role         VARCHAR(255) NOT NULL
+    THERAPIST_ID INTEGER auto_increment
+        primary key,
+    NAME         CHARACTER VARYING(50)  not null,
+    PHONE        CHARACTER VARYING(20)  not null,
+    PASSWORD     CHARACTER VARYING(255) not null,
+    ROLE         CHARACTER VARYING(255) not null
 );
 
-CREATE TABLE services
+create table AVAILABILITY
 (
-    service_id   INT PRIMARY KEY AUTO_INCREMENT,
-    THERAPIST_ID INTEGER        not null
+    AVAILABILITY_ID INTEGER auto_increment
+        primary key,
+    THERAPIST_ID    INTEGER not null
         references THERAPISTS,
-    name         VARCHAR(100)   NOT NULL,
-    description  TEXT,
-    duration     INT            NOT NULL,
-    price        DECIMAL(10, 2) NOT NULL
+    START_TIME      TIME    not null,
+    END_TIME        TIME    not null,
+    AVAILABLE_DATE  DATE    not null,
+    ISFULL          BOOLEAN default FALSE
 );
 
-CREATE TABLE appointments
+create table SERVICES
 (
-    appointment_id INT PRIMARY KEY AUTO_INCREMENT,
-    client_id      INT      NOT NULL,
-    therapist_id   INT      NOT NULL,
-    service_id     INT      NOT NULL,
-    start_time     DATETIME NOT NULL,
-    end_time       DATETIME NOT NULL,
-    FOREIGN KEY (client_id) REFERENCES clients (client_id),
-    FOREIGN KEY (therapist_id) REFERENCES therapists (therapist_id),
-    FOREIGN KEY (service_id) REFERENCES services (service_id)
+    SERVICE_ID   INTEGER auto_increment
+        primary key,
+    NAME         CHARACTER VARYING(100) not null,
+    DESCRIPTION  CHARACTER LARGE OBJECT,
+    DURATION     INTEGER                not null,
+    PRICE        NUMERIC(10, 2)         not null,
+    THERAPIST_ID INTEGER                not null
+        references THERAPISTS
 );
 
-CREATE TABLE availability
+create table APPOINTMENTS
 (
-    availability_id INT PRIMARY KEY AUTO_INCREMENT,
-    therapist_id    INT      NOT NULL,
-    start_time      DATETIME NOT NULL,
-    end_time        DATETIME NOT NULL,
-    FOREIGN KEY (therapist_id) REFERENCES therapists (therapist_id)
+    APPOINTMENT_ID INTEGER auto_increment
+        primary key,
+    CLIENT_ID      INTEGER   not null
+        references CLIENTS,
+    THERAPIST_ID   INTEGER   not null
+        references THERAPISTS,
+    SERVICE_ID     INTEGER   not null
+        references SERVICES,
+    START_TIME     TIMESTAMP not null
 );
+

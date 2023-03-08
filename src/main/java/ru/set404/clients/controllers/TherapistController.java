@@ -53,13 +53,7 @@ public class TherapistController {
         return therapistModelAssembler.toModel(therapist);
     }
 
-    @GetMapping("/all")
-    public CollectionModel<EntityModel<Therapist>> allTherapists() {
-        List<Therapist> therapists = therapistService.getAllTherapist();
-        return therapistModelAssembler.toCollectionModel(therapists);
-    }
-
-    @PostMapping
+    @PostMapping("/create")
     @CrossOrigin
     ResponseEntity<EntityModel<TherapistDTO>> newTherapist(@RequestBody TherapistDTO therapist) {
         therapistService.saveTherapist(therapist);
@@ -112,19 +106,6 @@ public class TherapistController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/availabilities")
-    public ResponseEntity<?> availableTimes(@RequestParam LocalDate date) {
-        List<LocalTime> availableTimes = therapistService.getAvailableTimes(1L, date);
-        if (availableTimes.isEmpty())
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
-                    .body(Problem.create()
-                            .withTitle("Not found")
-                            .withDetail("There is no available time for appointment to date - " + date));
-        return new ResponseEntity<>(availableTimes, HttpStatus.OK);
-    }
-
     @GetMapping("/appointments/byDate")
     public ResponseEntity<?> availableTime(@RequestParam LocalDate date) {
         Long therapistId = getAuthUserId();
@@ -138,6 +119,20 @@ public class TherapistController {
                             .withDetail("There is no available time for appointment to date - " + date));
         return new ResponseEntity<>(appointmentsForSiteDTOS, HttpStatus.OK);
     }
+
+    @GetMapping("/availabilities")
+    public ResponseEntity<?> availableTimes(@RequestParam LocalDate date) {
+        List<LocalTime> availableTimes = therapistService.getAvailableTimes(1L, date);
+        if (availableTimes.isEmpty())
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+                    .body(Problem.create()
+                            .withTitle("Not found")
+                            .withDetail("There is no available time for appointment to date - " + date));
+        return new ResponseEntity<>(availableTimes, HttpStatus.OK);
+    }
+
     @PostMapping("/availabilities")
     ResponseEntity<EntityModel<Therapist>> newAvailableTime(@RequestBody Availability availability) {
         Long therapistId = getAuthUserId();
@@ -157,7 +152,7 @@ public class TherapistController {
     }
 
     @DeleteMapping("/availabilities")
-    public ResponseEntity<?> deleteAppointment(@RequestBody LocalDate date) {
+    public ResponseEntity<?> deleteAppointment(@RequestParam LocalDate date) {
         Long therapistId = getAuthUserId();
         therapistService.deleteAvailableTime(therapistId, date);
         return ResponseEntity.noContent().build();
@@ -172,12 +167,12 @@ public class TherapistController {
     }
 
     @PostMapping("/services")
-    ResponseEntity<EntityModel<Service>> newService(@RequestBody ServiceDTO service) {
+    public EntityModel<Service> newService(@RequestBody ServiceDTO serviceDTO) {
         Long therapistId = getAuthUserId();
-        therapistService.addOrUpdateService(therapistId, service);
-        return ResponseEntity
-                .ok()
-                .build();
+        therapistService.addOrUpdateService(therapistId, serviceDTO);
+        Service service = therapistService.getService(therapistId);
+        return EntityModel.of(service, linkTo(methodOn(TherapistController.class)
+                .getTherapistById()).withRel("therapist"));
     }
 
     @GetMapping("/clients")
