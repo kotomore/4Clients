@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import ru.set404.clients.exceptions.TimeNotAvailableException;
+import ru.set404.clients.exceptions.UserAlreadyExistException;
 
 @ControllerAdvice
 public class ExceptionAdvice {
@@ -41,6 +42,12 @@ public class ExceptionAdvice {
     @ExceptionHandler(value = {TimeNotAvailableException.class})
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public ResponseEntity<Object> requestNotSupportedException(TimeNotAvailableException ex) {
+        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @ExceptionHandler(value = {UserAlreadyExistException.class})
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ResponseEntity<Object> requestNotSupportedException(UserAlreadyExistException ex) {
         return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NOT_ACCEPTABLE);
     }
 }

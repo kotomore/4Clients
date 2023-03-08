@@ -13,7 +13,7 @@ public enum Role implements GrantedAuthority {
         this.vale = vale;
     }
 
-    public String getVale() {
+    public String getValue() {
         return vale;
     }
 

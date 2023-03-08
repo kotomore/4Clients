@@ -7,6 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +27,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.set404.clients.ClientsApplication;
 import ru.set404.clients.dto.TherapistDTO;
 import ru.set404.clients.security.JwtRequest;
-import ru.set404.clients.services.TherapistService;
 
 
 @RunWith(SpringRunner.class)
@@ -38,8 +40,6 @@ public class AuthControllerTest {
 
     @Autowired
     private MockMvc mvc;
-    @Autowired
-    private TherapistService service;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -82,9 +82,11 @@ public class AuthControllerTest {
                 .andExpect(status().is(403)).andExpect(jsonPath("$.message", is("Authorization error. Wrong password")));
     }
 
-    private TherapistDTO createTestTherapist() {
-        TherapistDTO therapist = new TherapistDTO("Bob", "88005553535", "qwerty");
-        service.saveTherapist(therapist);
-        return therapist;
+    private TherapistDTO createTestTherapist() throws Exception {
+        TherapistDTO therapistDTO = new TherapistDTO("Bob", "88005553535", "qwerty");
+        mvc.perform(post("/therapists/create").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(therapistDTO)))
+                .andExpect(status().is(201));
+        return therapistDTO;
     }
 }

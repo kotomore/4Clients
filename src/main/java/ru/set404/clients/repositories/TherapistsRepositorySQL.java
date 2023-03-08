@@ -33,7 +33,7 @@ public class TherapistsRepositorySQL {
             statement.setString(1, therapist.getName());
             statement.setString(2, therapist.getPhone());
             statement.setString(3, therapist.getPassword());
-            statement.setString(4, therapist.getRole().getVale());
+            statement.setString(4, therapist.getRole().getValue());
             statement.executeUpdate();
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
@@ -48,7 +48,7 @@ public class TherapistsRepositorySQL {
         return null;
     }
 
-    public Optional<Client> getClientByPhoneNumber(String phoneNumber) {
+    public Optional<Client> findClientByPhoneNumber(String phoneNumber) {
         Optional<Client> client = Optional.empty();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT * FROM clients WHERE phone = ?";
@@ -64,7 +64,7 @@ public class TherapistsRepositorySQL {
         return client;
     }
 
-    public Client addClient(Client client) {
+    public Client createClient(Client client) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "INSERT INTO clients (name, phone) VALUES (?, ?)";
             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -104,8 +104,8 @@ public class TherapistsRepositorySQL {
 
     public void createAppointment(Appointment appointment) {
 
-        Optional<Client> client = getClientByPhoneNumber(appointment.getClient().getPhone());
-        appointment.setClient(client.orElse(addClient(appointment.getClient())));
+        Optional<Client> client = findClientByPhoneNumber(appointment.getClient().getPhone());
+        appointment.setClient(client.orElse(createClient(appointment.getClient())));
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "INSERT INTO appointments (client_id, therapist_id, service_id, start_time) " +
@@ -125,7 +125,7 @@ public class TherapistsRepositorySQL {
                 }
             }
 
-            if (getAvailableTimes(appointment.getTherapistId(), appointment.getStartTime().toLocalDate()).size() < 1)
+            if (findAvailableTimes(appointment.getTherapistId(), appointment.getStartTime().toLocalDate()).size() < 1)
                 markAvailabilityAs(appointment.getTherapistId(), appointment.getStartTime().toLocalDate(), true);
 
         } catch (SQLException e) {
@@ -133,7 +133,7 @@ public class TherapistsRepositorySQL {
         }
     }
 
-    public Optional<List<Appointment>> getAppointmentsForTherapist(Long therapistId) {
+    public Optional<List<Appointment>> findAppointmentsForTherapist(Long therapistId) {
         List<Appointment> appointments = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT * FROM appointments " +
@@ -159,7 +159,7 @@ public class TherapistsRepositorySQL {
         else return Optional.empty();
     }
 
-    public Optional<List<AppointmentsForSiteDTO>> getAppointmentsForTherapistSite(Long therapistId) {
+    public Optional<List<AppointmentsForSiteDTO>> findAppointmentsForTherapistSite(Long therapistId) {
         List<AppointmentsForSiteDTO> appointments = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT * FROM appointments " +
@@ -198,7 +198,7 @@ public class TherapistsRepositorySQL {
         String clientPhone = resultSet.getString("phone");
         return new Client(clientId, clientName, clientPhone);
     }
-    public Optional<List<Client>> getClientsForTherapist(Long therapistId) {
+    public Optional<List<Client>> findClientsForTherapist(Long therapistId) {
         List<Client> clients = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT C.CLIENT_ID, C.NAME, C.PHONE FROM appointments " +
@@ -218,7 +218,7 @@ public class TherapistsRepositorySQL {
         else return Optional.empty();
     }
 
-    public Optional<Appointment> getAppointmentForTherapistById(Long therapistId, Long appointmentId) {
+    public Optional<Appointment> findAppointmentForTherapistById(Long therapistId, Long appointmentId) {
         Appointment appointment = null;
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT * FROM appointments " +
@@ -244,7 +244,7 @@ public class TherapistsRepositorySQL {
     }
 
 
-    private List<LocalTime> getAppointmentsByDay(Long therapistId, LocalDate date) {
+    private List<LocalTime> findAppointmentsByDay(Long therapistId, LocalDate date) {
         List<LocalTime> appointments = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT START_TIME FROM appointments " +
@@ -276,7 +276,7 @@ public class TherapistsRepositorySQL {
         }
     }
 
-    public List<LocalTime> getAvailableTimes(Long therapistId, LocalDate date) {
+    public List<LocalTime> findAvailableTimes(Long therapistId, LocalDate date) {
         List<LocalTime> availableTimes = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT START_TIME, END_TIME, DURATION FROM AVAILABILITY " +
@@ -287,7 +287,7 @@ public class TherapistsRepositorySQL {
             statement.setDate(2, Date.valueOf(date));
             ResultSet resultSet = statement.executeQuery();
 
-            List<LocalTime> appointedTime = getAppointmentsByDay(therapistId, date);
+            List<LocalTime> appointedTime = findAppointmentsByDay(therapistId, date);
 
             if (resultSet.next()) {
                 LocalTime startTime = resultSet.getTime("start_time").toLocalTime();
@@ -306,7 +306,7 @@ public class TherapistsRepositorySQL {
         return availableTimes;
     }
 
-    public List<LocalDate> getAvailableDates(Long therapistId, LocalDate date) {
+    public List<LocalDate> findAvailableDates(Long therapistId, LocalDate date) {
         List<LocalDate> availableDates = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT AVAILABLE_DATE FROM AVAILABILITY " +
@@ -318,7 +318,7 @@ public class TherapistsRepositorySQL {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 LocalDate availableDate = resultSet.getDate("available_date").toLocalDate();
-                if (availableDate.isEqual(LocalDate.now()) && getAvailableTimes(therapistId, availableDate).size() < 1)
+                if (availableDate.isEqual(LocalDate.now()) && findAvailableTimes(therapistId, availableDate).size() < 1)
                     markAvailabilityAs(therapistId, availableDate, true);
                 else
                     availableDates.add(availableDate);
@@ -345,7 +345,7 @@ public class TherapistsRepositorySQL {
                 statement.setLong(2, therapistId);
                 statement.executeUpdate();
 
-                if (getAvailableTimes(therapistId, date).size() > 0)
+                if (findAvailableTimes(therapistId, date).size() > 0)
                     markAvailabilityAs(therapistId, date, false);
             }
         } catch (SQLException e) {
@@ -353,7 +353,7 @@ public class TherapistsRepositorySQL {
         }
     }
 
-    public List<Therapist> getAllTherapist() {
+    public List<Therapist> findAllTherapist() {
         List<Therapist> therapists = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT * FROM THERAPISTS";
@@ -378,7 +378,7 @@ public class TherapistsRepositorySQL {
         return therapist;
     }
 
-    public Optional<Therapist> getTherapistById(Long therapistId) {
+    public Optional<Therapist> findTherapistById(Long therapistId) {
         Optional<Therapist> therapist = Optional.empty();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT * FROM THERAPISTS WHERE THERAPIST_ID = ?";
@@ -394,7 +394,7 @@ public class TherapistsRepositorySQL {
         return therapist;
     }
 
-    public Optional<Therapist> getTherapistByPhone(String phone) {
+    public Optional<Therapist> findTherapistByPhone(String phone) {
         Optional<Therapist> therapist = Optional.empty();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT * FROM THERAPISTS WHERE PHONE = ?";
@@ -417,7 +417,7 @@ public class TherapistsRepositorySQL {
             statement.setString(1, therapist.getName());
             statement.setString(2, therapist.getPassword());
             statement.setString(3, therapist.getPhone());
-            statement.setString(4, therapist.getRole().getVale());
+            statement.setString(4, therapist.getRole().getValue());
             statement.setLong(5, therapist.getId());
             statement.executeUpdate();
 
@@ -457,7 +457,7 @@ public class TherapistsRepositorySQL {
             statement.setDate(4, Date.valueOf(date));
             statement.executeUpdate();
 
-            markAvailabilityAs(therapistId, date, getAvailableTimes(therapistId, date).size() < 1);
+            markAvailabilityAs(therapistId, date, findAvailableTimes(therapistId, date).size() < 1);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -482,7 +482,7 @@ public class TherapistsRepositorySQL {
                 statement.setDate(4, Date.valueOf(date));
                 statement.executeUpdate();
 
-                markAvailabilityAs(therapistId, date, getAvailableTimes(therapistId, date).size() < 1);
+                markAvailabilityAs(therapistId, date, findAvailableTimes(therapistId, date).size() < 1);
 
 
             }
@@ -514,7 +514,7 @@ public class TherapistsRepositorySQL {
         }
     }
 
-    public Optional<Service> getServiceByTherapist(Long therapistId) {
+    public Optional<Service> findServiceByTherapist(Long therapistId) {
         Optional<Service> service = Optional.empty();
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql = "SELECT * FROM SERVICES WHERE THERAPIST_ID = ?";
@@ -538,7 +538,7 @@ public class TherapistsRepositorySQL {
     public void addOrUpdateService(Long therapistId, Service service) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql;
-            if (getServiceByTherapist(therapistId).isEmpty()) {
+            if (findServiceByTherapist(therapistId).isEmpty()) {
                 sql = "INSERT INTO SERVICES (NAME, DESCRIPTION, DURATION, PRICE, THERAPIST_ID) " +
                         "VALUES (?, ?, ?, ?, ?)";
             } else {

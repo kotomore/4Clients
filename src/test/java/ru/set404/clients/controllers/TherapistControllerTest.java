@@ -1,6 +1,7 @@
 package ru.set404.clients.controllers;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.security.auth.message.AuthException;
 import org.json.JSONObject;
@@ -92,8 +93,7 @@ public class TherapistControllerTest {
         TherapistDTO therapist = new TherapistDTO("Bob", "88005553535", "qwerty");
         mvc.perform(post("/therapists/create").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(therapist)))
-                .andExpect(status().is(201))
-                .andExpect(jsonPath("$.name", is(therapist.getName())));
+                .andExpect(status().is(201));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class TherapistControllerTest {
         mvc.perform(delete("/therapists").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + getAccessToken()))
                 .andExpect(status().is(204));
-        assertThrows(AuthException.class, () -> service.getTherapist("88005553535"));
+        assertThrows(AuthException.class, () -> service.findTherapistByPhone("88005553535"));
     }
 
     @Test
@@ -251,10 +251,12 @@ public class TherapistControllerTest {
                         is("JohnDoe")));
     }
 
-    private TherapistDTO createTestTherapist() {
-        TherapistDTO therapist = new TherapistDTO("Bob", "88005553535", "qwerty");
-        service.saveTherapist(therapist);
-        return therapist;
+    private TherapistDTO createTestTherapist() throws Exception {
+        TherapistDTO therapistDTO = new TherapistDTO("Bob", "88005553535", "qwerty");
+        mvc.perform(post("/therapists/create").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(therapistDTO)))
+                .andExpect(status().is(201));
+        return therapistDTO;
     }
 
     private AppointmentDTO createAppointment() throws AuthException {
@@ -262,7 +264,7 @@ public class TherapistControllerTest {
         client.setName("JohnDoe");
         client.setPhone("88001234567");
 
-        Therapist therapist = service.getTherapist("88005553535");
+        Therapist therapist = service.findTherapistByPhone("88005553535");
         Long therapistId = therapist.getId();
 
         ServiceDTO serviceDTO = new ServiceDTO("Name", "Description", 60, 5000);

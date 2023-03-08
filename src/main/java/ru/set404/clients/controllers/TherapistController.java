@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ru.set404.clients.dto.AppointmentsForSiteDTO;
 import ru.set404.clients.dto.ServiceDTO;
@@ -37,35 +38,37 @@ public class TherapistController {
     private final TherapistModelAssembler therapistModelAssembler;
     private final ClientModelAssembler clientModelAssembler;
     private final TherapistService therapistService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public TherapistController(AppointmentModelAssembler appointmentModelAssembler, TherapistModelAssembler therapistModelAssembler, ClientModelAssembler clientModelAssembler, TherapistService therapistService) {
+    public TherapistController(AppointmentModelAssembler appointmentModelAssembler, TherapistModelAssembler therapistModelAssembler, ClientModelAssembler clientModelAssembler, TherapistService therapistService, PasswordEncoder passwordEncoder) {
         this.appointmentModelAssembler = appointmentModelAssembler;
         this.therapistModelAssembler = therapistModelAssembler;
         this.clientModelAssembler = clientModelAssembler;
         this.therapistService = therapistService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping()
     public EntityModel<Therapist> getTherapistById() {
         Long therapistId = getAuthUserId();
-        Therapist therapist = therapistService.getTherapist(therapistId);
+        Therapist therapist = therapistService.findTherapistById(therapistId);
         return therapistModelAssembler.toModel(therapist);
     }
 
     @PostMapping("/create")
     @CrossOrigin
     ResponseEntity<EntityModel<TherapistDTO>> newTherapist(@RequestBody TherapistDTO therapist) {
+        therapist.setPassword(passwordEncoder.encode(therapist.getPassword()));
         therapistService.saveTherapist(therapist);
         return ResponseEntity
-                .created(linkTo(methodOn(TherapistController.class).getTherapistById()).toUri())
-                .body(EntityModel.of(therapist));
+                .created(linkTo(methodOn(TherapistController.class).getTherapistById()).toUri()).build();
     }
 
     @PutMapping
     ResponseEntity<?> updateTherapist(@RequestBody Therapist newTherapist) {
         Long therapistId = getAuthUserId();
-        Therapist updatedTherapist = therapistService.getTherapist(therapistId);
+        Therapist updatedTherapist = therapistService.findTherapistById(therapistId);
         updatedTherapist.setName(newTherapist.getName());
         updatedTherapist.setPassword(newTherapist.getPassword());
         updatedTherapist.setPhone(newTherapist.getPhone());
