@@ -21,7 +21,7 @@ create table AVAILABILITY
     AVAILABILITY_ID INTEGER auto_increment
         primary key,
     THERAPIST_ID    INTEGER not null
-        references THERAPISTS,
+        references THERAPISTS ON DELETE CASCADE,
     START_TIME      TIME    not null,
     END_TIME        TIME    not null,
     AVAILABLE_DATE  DATE    not null,
@@ -37,7 +37,7 @@ create table SERVICES
     DURATION     INTEGER                not null,
     PRICE        NUMERIC(10, 2)         not null,
     THERAPIST_ID INTEGER                not null
-        references THERAPISTS
+        references THERAPISTS ON DELETE CASCADE
 );
 
 create table APPOINTMENTS
@@ -45,11 +45,11 @@ create table APPOINTMENTS
     APPOINTMENT_ID INTEGER auto_increment
         primary key,
     CLIENT_ID      INTEGER   not null
-        references CLIENTS,
+        references CLIENTS ON DELETE CASCADE,
     THERAPIST_ID   INTEGER   not null
-        references THERAPISTS,
+        references THERAPISTS ON DELETE CASCADE,
     SERVICE_ID     INTEGER   not null
-        references SERVICES,
+        references SERVICES ON DELETE CASCADE,
     START_TIME     TIMESTAMP not null
 );
 
