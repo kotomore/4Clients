@@ -66,7 +66,7 @@ public class TherapistController {
     }
 
     @PutMapping
-    ResponseEntity<?> updateTherapist(@RequestBody Therapist newTherapist) {
+    ResponseEntity<?> updateTherapist(@RequestBody TherapistDTO newTherapist) {
         Long therapistId = getAuthUserId();
         Therapist updatedTherapist = therapistService.findTherapistById(therapistId);
         updatedTherapist.setName(newTherapist.getName());
