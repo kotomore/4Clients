@@ -1,54 +1,30 @@
 package ru.set404.clients.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.set404.clients.models.Appointment;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
+@NoArgsConstructor
+@Getter
+@Setter
 public class AppointmentDTO {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @NotNull(message = "Not be empty")
     private LocalDateTime startTime;
+    @NotNull(message = "Not be empty")
     private Long serviceId;
+    @NotNull(message = "Not be empty")
     private Long therapistId;
     private ClientDTO client;
 
-    public AppointmentDTO() {
-    }
-
     public Appointment toAppointment() {
         return new Appointment(startTime, serviceId, therapistId, client.toClient());
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public Long getServiceId() {
-        return serviceId;
-    }
-
-    public void setServiceId(Long serviceId) {
-        this.serviceId = serviceId;
-    }
-
-    public Long getTherapistId() {
-        return therapistId;
-    }
-
-    public void setTherapistId(Long therapistId) {
-        this.therapistId = therapistId;
-    }
-
-    public ClientDTO getClient() {
-        return client;
-    }
-
-    public void setClient(ClientDTO client) {
-        this.client = client;
     }
 }

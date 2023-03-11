@@ -1,5 +1,8 @@
 package ru.set404.clients.controllers;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -19,20 +22,15 @@ import java.time.LocalTime;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/clients")
 public class ClientController {
 
     private final AppointmentModelAssembler appointmentModelAssembler;
     private final TherapistService therapistService;
 
-    @Autowired
-    public ClientController(AppointmentModelAssembler appointmentModelAssembler, TherapistService therapistService) {
-        this.appointmentModelAssembler = appointmentModelAssembler;
-        this.therapistService = therapistService;
-    }
-
     @PostMapping("/appointment")
-    public ResponseEntity<?> newAppointment(@RequestBody AppointmentDTO newAppointment) {
+    public ResponseEntity<?> newAppointment(@Valid @RequestBody AppointmentDTO newAppointment) {
 
         Appointment appointment = therapistService.addAppointment(newAppointment);
 

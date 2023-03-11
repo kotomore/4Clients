@@ -1,31 +1,29 @@
-package ru.set404.clients.models;
+package ru.set404.clients.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
 
 @Getter
 @Setter
-public class Availabilities {
+public class AvailabilitiesDTO {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     private LocalDateTime startTime;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     private LocalDateTime endTime;
 
-    public Availabilities() {
+    public AvailabilitiesDTO() {
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Availabilities that = (Availabilities) o;
+        AvailabilitiesDTO that = (AvailabilitiesDTO) o;
         return Objects.equals(startTime, that.startTime) && Objects.equals(endTime, that.endTime);
     }
 

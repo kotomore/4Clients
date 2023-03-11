@@ -1,10 +1,8 @@
 package ru.set404.clients.repositories;
 
 import ru.set404.clients.dto.AppointmentsForSiteDTO;
-import ru.set404.clients.models.Appointment;
-import ru.set404.clients.models.Client;
-import ru.set404.clients.models.Service;
-import ru.set404.clients.models.Therapist;
+import ru.set404.clients.dto.AvailabilitiesDTO;
+import ru.set404.clients.models.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -55,9 +53,9 @@ public interface TherapistsRepository {
 
     boolean isHaveAvailableTime(Long therapistId, LocalDate date);
 
-    void addOrUpdateAvailableTime(Long therapistId, LocalDate date, LocalTime timeStart, LocalTime timeEnd);
+    void addOrUpdateAvailableTime(Long therapistId, Availability availability);
 
-    void addOrUpdateAvailableTime(Long therapistId, LocalDateTime timeStart, LocalDateTime timeEnd);
+    void addOrUpdateAvailableTime(Long therapistId, AvailabilitiesDTO availabilitiesDTO);
 
     void deleteAvailableTime(Long therapistId, LocalDate date);
 

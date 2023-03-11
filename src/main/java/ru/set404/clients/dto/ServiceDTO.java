@@ -1,50 +1,23 @@
 package ru.set404.clients.dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class ServiceDTO {
+    @NotEmpty(message = "Not be empty")
     private String name;
+    @NotEmpty(message = "Not be empty")
     private String description;
+    @Min(value = 1, message = "> 1")
     private int duration;
+    @Min(value = 1, message = "> 1")
     private int price;
-
-    public ServiceDTO(String name, String description, int duration, int price) {
-        this.name = name;
-        this.description = description;
-        this.duration = duration;
-        this.price = price;
-    }
-
-    public ServiceDTO() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
-    }
 }

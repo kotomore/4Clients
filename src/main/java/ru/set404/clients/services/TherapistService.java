@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.dto.AppointmentsForSiteDTO;
+import ru.set404.clients.dto.AvailabilitiesDTO;
 import ru.set404.clients.dto.ServiceDTO;
 import ru.set404.clients.exceptions.*;
 import ru.set404.clients.models.*;
@@ -86,12 +87,12 @@ public class TherapistService {
         repository.updateTherapist(therapist);
     }
 
-    public void addAvailableTime(Long therapistId, LocalDate date, LocalTime timeStart, LocalTime timeEnd) {
-        repository.addOrUpdateAvailableTime(therapistId, date, timeStart, timeEnd);
+    public void addAvailableTime(Long therapistId, Availability availability) {
+        repository.addOrUpdateAvailableTime(therapistId, availability);
     }
 
-    public void addAvailableTime(Long therapistId, LocalDateTime timeStart, LocalDateTime timeEnd) {
-        repository.addOrUpdateAvailableTime(therapistId, timeStart, timeEnd);
+    public void addAvailableTime(Long therapistId, AvailabilitiesDTO availabilitiesDTO) {
+        repository.addOrUpdateAvailableTime(therapistId, availabilitiesDTO);
     }
 
     public void deleteAvailableTime(Long therapistId, LocalDate date) {

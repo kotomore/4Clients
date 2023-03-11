@@ -1,6 +1,8 @@
 package ru.set404.clients.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -13,9 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import ru.set404.clients.dto.AppointmentsForSiteDTO;
-import ru.set404.clients.dto.ServiceDTO;
-import ru.set404.clients.dto.TherapistDTO;
+import ru.set404.clients.dto.*;
 import ru.set404.clients.models.*;
 import ru.set404.clients.security.TherapistDetails;
 import ru.set404.clients.services.TherapistService;
@@ -31,6 +31,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/therapists")
 @CrossOrigin(allowedHeaders = {"Authorization", "Origin"}, value = "*")
 public class TherapistController {
@@ -40,15 +41,7 @@ public class TherapistController {
     private final ClientModelAssembler clientModelAssembler;
     private final TherapistService therapistService;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public TherapistController(AppointmentModelAssembler appointmentModelAssembler, TherapistModelAssembler therapistModelAssembler, ClientModelAssembler clientModelAssembler, TherapistService therapistService, PasswordEncoder passwordEncoder) {
-        this.appointmentModelAssembler = appointmentModelAssembler;
-        this.therapistModelAssembler = therapistModelAssembler;
-        this.clientModelAssembler = clientModelAssembler;
-        this.therapistService = therapistService;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final ModelMapper modelMapper;
 
     @GetMapping()
     public EntityModel<Therapist> getTherapistById() {
@@ -58,7 +51,7 @@ public class TherapistController {
     }
 
     @PutMapping
-    ResponseEntity<?> updateTherapist(@RequestBody TherapistDTO newTherapist) {
+    ResponseEntity<?> updateTherapist(@Valid @RequestBody TherapistDTO newTherapist) {
         Long therapistId = getAuthUserId();
         Therapist updatedTherapist = therapistService.findTherapistById(therapistId);
         updatedTherapist.setName(newTherapist.getName());
@@ -129,18 +122,18 @@ public class TherapistController {
     }
 
     @PostMapping("/availabilities")
-    ResponseEntity<EntityModel<Therapist>> newAvailableTime(@RequestBody Availability availability) {
+    ResponseEntity<EntityModel<Therapist>> newAvailableTime(@Valid @RequestBody AvailabilityDTO availabilityDTO) {
         Long therapistId = getAuthUserId();
-        therapistService.addAvailableTime(therapistId, availability.getDate(), availability.getStartTime(), availability.getEndTime());
+        therapistService.addAvailableTime(therapistId, modelMapper.map(availabilityDTO, Availability.class));
         return ResponseEntity
                 .ok()
                 .build();
     }
 
     @PostMapping("/availabilities/few")
-    ResponseEntity<EntityModel<Therapist>> newAvailableTime(@RequestBody Availabilities availabilities) {
+    ResponseEntity<EntityModel<Therapist>> newAvailableTime(@Valid @RequestBody AvailabilitiesDTO availabilitiesDTO) {
         Long therapistId = getAuthUserId();
-        therapistService.addAvailableTime(therapistId, availabilities.getStartTime(), availabilities.getEndTime());
+        therapistService.addAvailableTime(therapistId, availabilitiesDTO);
         return ResponseEntity
                 .ok()
                 .build();
@@ -162,7 +155,7 @@ public class TherapistController {
     }
 
     @PostMapping("/services")
-    public EntityModel<Service> newService(@RequestBody ServiceDTO serviceDTO) {
+    public EntityModel<Service> newService(@Valid @RequestBody ServiceDTO serviceDTO) {
         Long therapistId = getAuthUserId();
         therapistService.addOrUpdateService(therapistId, serviceDTO);
         Service service = therapistService.findService(therapistId);

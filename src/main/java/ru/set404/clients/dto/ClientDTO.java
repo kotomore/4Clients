@@ -1,34 +1,24 @@
 package ru.set404.clients.dto;
 
 
+import jakarta.validation.constraints.NotEmpty;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.set404.clients.models.Client;
 
 import java.util.Objects;
 
+@NoArgsConstructor
+@Getter
+@Setter
 public class ClientDTO {
+    @NotEmpty(message = "Not be empty")
     private String name;
+    @NotEmpty(message = "Not be empty")
     private String phone;
-
-    public ClientDTO() {
-    }
-
-    public String getName() {
-        return name;
-    }
 
     public Client toClient() {
         return new Client(name, phone);
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 }

@@ -3,6 +3,7 @@ package ru.set404.clients.repositories;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import ru.set404.clients.dto.AppointmentsForSiteDTO;
+import ru.set404.clients.dto.AvailabilitiesDTO;
 import ru.set404.clients.models.*;
 
 import java.sql.*;
@@ -446,10 +447,10 @@ public class TherapistsRepositorySQLImpl implements TherapistsRepository {
     }
 
     @Override
-    public void addOrUpdateAvailableTime(Long therapistId, LocalDate date, LocalTime timeStart, LocalTime timeEnd) {
+    public void addOrUpdateAvailableTime(Long therapistId, Availability availability) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String sql;
-            if (isHaveAvailableTime(therapistId, date)) {
+            if (isHaveAvailableTime(therapistId, availability.getDate())) {
                 sql = "INSERT INTO AVAILABILITY (START_TIME, END_TIME, THERAPIST_ID, AVAILABLE_DATE) " +
                         "VALUES (?, ?, ?, ?)";
             } else {
@@ -457,22 +458,24 @@ public class TherapistsRepositorySQLImpl implements TherapistsRepository {
 
             }
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setTime(1, Time.valueOf(timeStart));
-            statement.setTime(2, Time.valueOf(timeEnd));
+            statement.setTime(1, Time.valueOf(availability.getStartTime()));
+            statement.setTime(2, Time.valueOf(availability.getEndTime()));
             statement.setLong(3, therapistId);
-            statement.setDate(4, Date.valueOf(date));
+            statement.setDate(4, Date.valueOf(availability.getDate()));
             statement.executeUpdate();
 
-            markAvailabilityAs(therapistId, date, findAvailableTimes(therapistId, date).size() < 1);
+            markAvailabilityAs(therapistId, availability.getDate(), findAvailableTimes(therapistId, availability.getDate()).size() < 1);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void addOrUpdateAvailableTime(Long therapistId, LocalDateTime timeStart, LocalDateTime timeEnd) {
+    public void addOrUpdateAvailableTime(Long therapistId, AvailabilitiesDTO availabilitiesDTO) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            for (LocalDate date = timeStart.toLocalDate(); date.isBefore(timeEnd.toLocalDate()); date = date.plusDays(1)) {
+            for (LocalDate date = availabilitiesDTO.getStartTime().toLocalDate();
+                 date.isBefore(availabilitiesDTO.getEndTime().toLocalDate());
+                 date = date.plusDays(1)) {
                 String sql;
                 if (isHaveAvailableTime(therapistId, date)) {
                     sql = "INSERT INTO AVAILABILITY (START_TIME, END_TIME, THERAPIST_ID, AVAILABLE_DATE) " +
@@ -483,8 +486,8 @@ public class TherapistsRepositorySQLImpl implements TherapistsRepository {
                 }
 
                 PreparedStatement statement = connection.prepareStatement(sql);
-                statement.setTime(1, Time.valueOf(timeStart.toLocalTime()));
-                statement.setTime(2, Time.valueOf(timeEnd.toLocalTime()));
+                statement.setTime(1, Time.valueOf(availabilitiesDTO.getStartTime().toLocalTime()));
+                statement.setTime(2, Time.valueOf(availabilitiesDTO.getEndTime().toLocalTime()));
                 statement.setLong(3, therapistId);
                 statement.setDate(4, Date.valueOf(date));
                 statement.executeUpdate();

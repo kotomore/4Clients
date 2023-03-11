@@ -18,6 +18,7 @@ import ru.set404.clients.ClientsApplication;
 import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.dto.ClientDTO;
 import ru.set404.clients.dto.ServiceDTO;
+import ru.set404.clients.models.Availability;
 import ru.set404.clients.models.Role;
 import ru.set404.clients.models.Therapist;
 import ru.set404.clients.services.RegistrationService;
@@ -128,6 +129,10 @@ public class ClientControllerTest {
         ServiceDTO serviceDTO = new ServiceDTO("Name", "Description", 60, 5000);
 
         service.addOrUpdateService(therapistId, serviceDTO);
-        service.addAvailableTime(therapistId, LocalDate.now().plusDays(1), LocalTime.of(0, 0), LocalTime.of(23, 0));
+        Availability availability = new Availability();
+        availability.setDate(LocalDate.now().plusDays(1));
+        availability.setStartTime(LocalTime.of(0, 0));
+        availability.setEndTime(LocalTime.of(23, 0));
+        service.addAvailableTime(therapistId, availability);
     }
 }

@@ -1,7 +1,10 @@
 package ru.set404.clients.dto;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.set404.clients.models.Appointment;
 
 import java.util.List;
@@ -9,32 +12,13 @@ import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class TherapistDTO {
+    @NotEmpty(message = "Not be empty")
     private String name;
+    @NotEmpty(message = "Not be empty")
     private String phone;
+    @NotEmpty(message = "Not be empty")
     private String password;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

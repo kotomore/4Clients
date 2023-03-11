@@ -21,9 +21,8 @@ import ru.set404.clients.dto.ClientDTO;
 import ru.set404.clients.dto.ServiceDTO;
 import ru.set404.clients.dto.TherapistDTO;
 import ru.set404.clients.exceptions.TimeNotAvailableException;
-import ru.set404.clients.models.Availabilities;
+import ru.set404.clients.dto.AvailabilitiesDTO;
 import ru.set404.clients.models.Availability;
-import ru.set404.clients.models.Role;
 import ru.set404.clients.models.Therapist;
 import ru.set404.clients.dto.securitydto.JwtRequest;
 import ru.set404.clients.services.TherapistService;
@@ -82,7 +81,7 @@ public class TherapistControllerTest {
 
     @Test
     public void updateTherapist() throws Exception {
-        Therapist therapist = new Therapist("John", "12345", "12345", Role.USER);
+        TherapistDTO therapist = new TherapistDTO("John", "12345", "12345");
         mvc.perform(put("/therapists").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + getAccessToken())
                         .content(objectMapper.writeValueAsString(therapist)))
@@ -175,7 +174,7 @@ public class TherapistControllerTest {
         String token = getAccessToken();
         createAppointment();
 
-        Availabilities availability = new Availabilities();
+        AvailabilitiesDTO availability = new AvailabilitiesDTO();
         availability.setStartTime(LocalDate.now().plusDays(4).atTime(0, 0));
         availability.setEndTime(LocalDate.now().plusDays(5).atTime(23, 0));
 
@@ -272,7 +271,11 @@ public class TherapistControllerTest {
         appointmentDTO.setServiceId(service.findService(therapistId).getServiceId());
         appointmentDTO.setStartTime(LocalDate.now().plusDays(1).atTime(10, 0));
 
-        service.addAvailableTime(therapistId, LocalDate.now().plusDays(1), LocalTime.of(0, 0), LocalTime.of(23, 0));
+        Availability availability = new Availability();
+        availability.setDate(LocalDate.now().plusDays(1));
+        availability.setStartTime(LocalTime.of(0, 0));
+        availability.setEndTime(LocalTime.of(23, 0));
+        service.addAvailableTime(therapistId, availability);
         service.addAppointment(appointmentDTO);
 
         return appointmentDTO;
