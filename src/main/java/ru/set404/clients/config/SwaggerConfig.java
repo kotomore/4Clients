@@ -19,15 +19,15 @@ import java.time.format.DateTimeFormatter;
 public class SwaggerConfig {
     static {
         var schema = new Schema<LocalTime>();
-        schema.example(LocalTime.of(0,0).format(DateTimeFormatter.ofPattern("HH:mm")));
+        schema.example(LocalTime.of(0, 0).format(DateTimeFormatter.ofPattern("HH:mm")));
         SpringDocUtils.getConfig().replaceWithSchema(LocalTime.class, schema);
 
         var schema2 = new Schema<Timestamp>();
-        schema2.example(LocalDateTime.of(2023,1,1,0,0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        schema2.example(LocalDateTime.of(2023, 1, 1, 0, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         SpringDocUtils.getConfig().replaceWithSchema(Timestamp.class, schema2);
 
         var schema3 = new Schema<LocalDateTime>();
-        schema3.example(LocalDateTime.of(2023,1,1,0,0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        schema3.example(LocalDateTime.of(2023, 1, 1, 0, 0).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         SpringDocUtils.getConfig().replaceWithSchema(LocalDateTime.class, schema3);
 
         var schema4 = new Schema<LocalDate>();

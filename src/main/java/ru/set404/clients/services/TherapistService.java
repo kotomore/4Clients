@@ -13,7 +13,6 @@ import ru.set404.clients.models.*;
 import ru.set404.clients.repositories.TherapistsRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 

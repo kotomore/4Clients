@@ -207,6 +207,7 @@ public class TherapistsRepositorySQLImpl implements TherapistsRepository {
         String clientPhone = resultSet.getString("phone");
         return new Client(clientId, clientName, clientPhone);
     }
+
     @Override
     public Optional<List<Client>> findClientsForTherapist(Long therapistId) {
         List<Client> clients = new ArrayList<>();

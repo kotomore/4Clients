@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.set404.clients.models.Client;
 
-import java.util.Objects;
-
 @NoArgsConstructor
 @Getter
 @Setter

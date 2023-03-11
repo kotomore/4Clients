@@ -11,9 +11,9 @@ import java.util.Objects;
 @Getter
 @Setter
 public class AvailabilitiesDTO {
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime startTime;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime endTime;
 
     public AvailabilitiesDTO() {

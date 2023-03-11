@@ -37,7 +37,7 @@ public class UserExceptionAdvice {
     @ResponseBody
     @ExceptionHandler(AppointmentNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<Object>  appointmentNotFoundHandler(AppointmentNotFoundException ex) {
+    public ResponseEntity<Object> appointmentNotFoundHandler(AppointmentNotFoundException ex) {
         return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 

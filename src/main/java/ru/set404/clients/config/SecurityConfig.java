@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +15,7 @@ import ru.set404.clients.services.TherapistDetailsService;
 
 @Configuration
 @RequiredArgsConstructor
-public class  SecurityConfig {
+public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final TherapistDetailsService therapistDetailsService;
@@ -44,7 +43,6 @@ public class  SecurityConfig {
                 )
                 .build();
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {

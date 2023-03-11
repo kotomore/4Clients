@@ -18,7 +18,7 @@ public class AuthExceptionAdvice {
     @ResponseBody
     @ExceptionHandler(AuthException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<Object>  authExceptionHandler(AuthException ex) {
+    public ResponseEntity<Object> authExceptionHandler(AuthException ex) {
         return new ResponseEntity<>(new ErrorMessage("Authorization error. " + ex.getMessage()), new HttpHeaders(), HttpStatus.FORBIDDEN);
 
     }
