@@ -7,8 +7,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -27,7 +25,7 @@ import ru.set404.clients.models.Availabilities;
 import ru.set404.clients.models.Availability;
 import ru.set404.clients.models.Role;
 import ru.set404.clients.models.Therapist;
-import ru.set404.clients.security.JwtRequest;
+import ru.set404.clients.dto.securitydto.JwtRequest;
 import ru.set404.clients.services.TherapistService;
 
 
@@ -45,7 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ClientsApplication.class})
 @AutoConfigureMockMvc
-@EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ActiveProfiles("test")
 @Sql(scripts = {"classpath:delete-data.sql", "classpath:init-data.sql"})
@@ -57,18 +54,6 @@ public class TherapistControllerTest {
     private TherapistService service;
     @Autowired
     private ObjectMapper objectMapper;
-
-    private String getAccessToken() throws Exception {
-        TherapistDTO therapist = createTestTherapist();
-
-        JwtRequest request = new JwtRequest();
-        request.setLogin(therapist.getPhone());
-        request.setPassword(therapist.getPassword());
-
-        String response = mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))).andReturn().getResponse().getContentAsString();
-        return new JSONObject(response).get("accessToken").toString();
-    }
 
     @Test
     public void getTherapistAfterLogin() throws Exception {
@@ -90,7 +75,7 @@ public class TherapistControllerTest {
     @Test
     public void createTherapist() throws Exception {
         TherapistDTO therapist = new TherapistDTO("Bob", "88005553535", "qwerty");
-        mvc.perform(post("/therapists/create").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/auth/registration").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(therapist)))
                 .andExpect(status().is(201));
     }
@@ -252,10 +237,22 @@ public class TherapistControllerTest {
 
     private TherapistDTO createTestTherapist() throws Exception {
         TherapistDTO therapistDTO = new TherapistDTO("Bob", "88005553535", "qwerty");
-        mvc.perform(post("/therapists/create").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/auth/registration").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(therapistDTO)))
                 .andExpect(status().is(201));
         return therapistDTO;
+    }
+
+    private String getAccessToken() throws Exception {
+        TherapistDTO therapist = createTestTherapist();
+
+        JwtRequest request = new JwtRequest();
+        request.setLogin(therapist.getPhone());
+        request.setPassword(therapist.getPassword());
+
+        String response = mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))).andReturn().getResponse().getContentAsString();
+        return new JSONObject(response).get("accessToken").toString();
     }
 
     private AppointmentDTO createAppointment() throws AuthException {

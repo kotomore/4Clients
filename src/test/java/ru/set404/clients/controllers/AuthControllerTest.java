@@ -7,14 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -26,13 +21,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import ru.set404.clients.ClientsApplication;
 import ru.set404.clients.dto.TherapistDTO;
-import ru.set404.clients.security.JwtRequest;
+import ru.set404.clients.dto.securitydto.JwtRequest;
 
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ClientsApplication.class})
 @AutoConfigureMockMvc
-@EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ActiveProfiles("test")
 @Sql(scripts = {"classpath:delete-data.sql", "classpath:init-data.sql"})
@@ -66,7 +60,7 @@ public class AuthControllerTest {
 
         mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is(403)).andExpect(jsonPath("$.message", is("Authorization error. User with phone - " + request.getLogin() + " not found")));
+                .andExpect(status().is(403)).andExpect(jsonPath("$.message", is("Authorization error. Invalid credentials")));
     }
 
     @Test
@@ -79,12 +73,12 @@ public class AuthControllerTest {
 
         mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is(403)).andExpect(jsonPath("$.message", is("Authorization error. Wrong password")));
+                .andExpect(status().is(403)).andExpect(jsonPath("$.message", is("Authorization error. Invalid credentials")));
     }
 
     private TherapistDTO createTestTherapist() throws Exception {
         TherapistDTO therapistDTO = new TherapistDTO("Bob", "88005553535", "qwerty");
-        mvc.perform(post("/therapists/create").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/auth/registration").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(therapistDTO)))
                 .andExpect(status().is(201));
         return therapistDTO;

@@ -6,8 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -20,15 +18,15 @@ import ru.set404.clients.ClientsApplication;
 import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.dto.ClientDTO;
 import ru.set404.clients.dto.ServiceDTO;
-import ru.set404.clients.dto.TherapistDTO;
+import ru.set404.clients.models.Role;
+import ru.set404.clients.models.Therapist;
+import ru.set404.clients.services.RegistrationService;
 import ru.set404.clients.services.TherapistService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,7 +35,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {ClientsApplication.class})
 @AutoConfigureMockMvc
-@EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ActiveProfiles("test")
 @Sql(scripts = {"classpath:delete-data.sql", "classpath:init-data.sql"})
@@ -47,6 +44,9 @@ public class ClientControllerTest {
     private MockMvc mvc;
     @Autowired
     private TherapistService service;
+
+    @Autowired
+    private RegistrationService registrationService;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -123,8 +123,8 @@ public class ClientControllerTest {
 
     @Before
     public void createTestTherapist() {
-        TherapistDTO therapist = new TherapistDTO("Bob", "88005553535", "qwerty");
-        Long therapistId = service.saveTherapist(therapist);
+        Therapist therapist = new Therapist("Bob", "88005553535", "qwerty", Role.USER);
+        Long therapistId = registrationService.saveTherapist(therapist);
         ServiceDTO serviceDTO = new ServiceDTO("Name", "Description", 60, 5000);
 
         service.addOrUpdateService(therapistId, serviceDTO);

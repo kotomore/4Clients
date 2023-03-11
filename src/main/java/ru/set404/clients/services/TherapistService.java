@@ -7,10 +7,9 @@ import org.springframework.stereotype.Component;
 import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.dto.AppointmentsForSiteDTO;
 import ru.set404.clients.dto.ServiceDTO;
-import ru.set404.clients.dto.TherapistDTO;
 import ru.set404.clients.exceptions.*;
 import ru.set404.clients.models.*;
-import ru.set404.clients.repositories.TherapistsRepositorySQL;
+import ru.set404.clients.repositories.TherapistsRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,11 +18,11 @@ import java.util.List;
 
 @Component
 public class TherapistService {
-    private final TherapistsRepositorySQL repository;
+    private final TherapistsRepository repository;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public TherapistService(TherapistsRepositorySQL repository, ModelMapper modelMapper) {
+    public TherapistService(TherapistsRepository repository, ModelMapper modelMapper) {
         this.repository = repository;
         this.modelMapper = modelMapper;
     }
@@ -69,14 +68,6 @@ public class TherapistService {
 
     public void deleteAppointment(Long therapistId, Long appointmentId) {
         repository.deleteAppointment(therapistId, appointmentId);
-    }
-
-    public Long saveTherapist(TherapistDTO therapist) {
-        if (repository.findTherapistByPhone(therapist.getPhone()).isPresent())
-            throw new UserAlreadyExistException();
-        Therapist newTherapist = modelMapper.map(therapist, Therapist.class);
-        newTherapist.setRole(Role.USER);
-        return repository.createTherapist(newTherapist);
     }
 
     public Therapist findTherapistById(Long therapistId) {

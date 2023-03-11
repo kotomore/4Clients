@@ -1,4 +1,4 @@
-package ru.set404.clients.security;
+package ru.set404.clients.dto.securitydto;
 
 import lombok.Getter;
 

@@ -17,6 +17,7 @@ import ru.set404.clients.dto.AppointmentsForSiteDTO;
 import ru.set404.clients.dto.ServiceDTO;
 import ru.set404.clients.dto.TherapistDTO;
 import ru.set404.clients.models.*;
+import ru.set404.clients.security.TherapistDetails;
 import ru.set404.clients.services.TherapistService;
 import ru.set404.clients.util.AppointmentModelAssembler;
 import ru.set404.clients.util.ClientModelAssembler;
@@ -56,21 +57,12 @@ public class TherapistController {
         return therapistModelAssembler.toModel(therapist);
     }
 
-    @PostMapping("/create")
-    @CrossOrigin
-    ResponseEntity<EntityModel<TherapistDTO>> newTherapist(@RequestBody TherapistDTO therapist) {
-        therapist.setPassword(passwordEncoder.encode(therapist.getPassword()));
-        therapistService.saveTherapist(therapist);
-        return ResponseEntity
-                .created(linkTo(methodOn(TherapistController.class).getTherapistById()).toUri()).build();
-    }
-
     @PutMapping
     ResponseEntity<?> updateTherapist(@RequestBody TherapistDTO newTherapist) {
         Long therapistId = getAuthUserId();
         Therapist updatedTherapist = therapistService.findTherapistById(therapistId);
         updatedTherapist.setName(newTherapist.getName());
-        updatedTherapist.setPassword(newTherapist.getPassword());
+        updatedTherapist.setPassword(passwordEncoder.encode(newTherapist.getPassword()));
         updatedTherapist.setPhone(newTherapist.getPhone());
         updatedTherapist.setRole(Role.USER);
         therapistService.updateTherapist(updatedTherapist);
@@ -187,6 +179,6 @@ public class TherapistController {
 
     private Long getAuthUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (Long) authentication.getPrincipal();
+        return ((TherapistDetails) authentication.getPrincipal()).getTherapist().getId();
     }
 }

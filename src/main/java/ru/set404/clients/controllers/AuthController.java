@@ -2,15 +2,23 @@ package ru.set404.clients.controllers;
 
 import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.set404.clients.security.JwtRequest;
-import ru.set404.clients.security.JwtResponse;
-import ru.set404.clients.security.RefreshJwtRequest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.bind.annotation.*;
+import ru.set404.clients.dto.TherapistDTO;
+import ru.set404.clients.dto.securitydto.JwtRequest;
+import ru.set404.clients.dto.securitydto.JwtResponse;
+import ru.set404.clients.dto.securitydto.RefreshJwtRequest;
+import ru.set404.clients.models.Therapist;
 import ru.set404.clients.services.AuthService;
+import ru.set404.clients.services.RegistrationService;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/auth")
@@ -18,9 +26,30 @@ import ru.set404.clients.services.AuthService;
 public class AuthController {
 
     private final AuthService authService;
+    private final RegistrationService registrationService;
+    private final AuthenticationManager authenticationManager;
+    private final ModelMapper modelMapper;
+
+
+    @PostMapping("/registration")
+    @CrossOrigin
+    ResponseEntity<EntityModel<TherapistDTO>> newTherapist(@RequestBody TherapistDTO therapist) {
+        registrationService.saveTherapist(modelMapper.map(therapist, Therapist.class));
+        return ResponseEntity
+                .created(linkTo(methodOn(TherapistController.class).getTherapistById()).toUri()).build();
+    }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest authRequest) throws AuthException {
+    public ResponseEntity<JwtResponse> performLogin(@RequestBody JwtRequest authRequest) throws AuthException {
+        UsernamePasswordAuthenticationToken authInputToken =
+                new UsernamePasswordAuthenticationToken(authRequest.getLogin(), authRequest.getPassword());
+
+        try {
+            authenticationManager.authenticate(authInputToken);
+        } catch (BadCredentialsException e) {
+            throw new AuthException("Invalid credentials");
+        }
+
         final JwtResponse token = authService.login(authRequest);
         return ResponseEntity.ok(token);
     }
