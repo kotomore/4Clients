@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+  app:
+    image: 'docker-4clients:latest'
+    ports:
+      - "8080:8080"
+    build:
+      context: .
+    container_name: 4Clients
+    environment:
+      - SPRING_DATASOURCE_URL=
+      - SPRING_DATASOURCE_USERNAME=
+      - SPRING_DATASOURCE_PASSWORD=
+      - DB_URL=
+      - DB_USER=
+      - DB_PASSWORD=
