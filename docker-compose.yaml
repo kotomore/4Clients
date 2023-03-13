@@ -9,9 +9,9 @@ services:
       context: .
     container_name: 4Clients
     environment:
-      - SPRING_DATASOURCE_URL=
-      - SPRING_DATASOURCE_USERNAME=
-      - SPRING_DATASOURCE_PASSWORD=
-      - DB_URL=
-      - DB_USER=
-      - DB_PASSWORD=
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:test
+      - SPRING_DATASOURCE_USERNAME=test
+      - SPRING_DATASOURCE_PASSWORD=test
+      - DB_URL=jdbc:h2:mem:test
+      - DB_USER=test
+      - DB_PASSWORD=test
