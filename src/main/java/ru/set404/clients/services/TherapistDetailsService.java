@@ -1,6 +1,6 @@
 package ru.set404.clients.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,15 +12,10 @@ import ru.set404.clients.security.TherapistDetails;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TherapistDetailsService implements UserDetailsService {
 
     private final TherapistsRepository therapistsRepository;
-
-    @Autowired
-    public TherapistDetailsService(TherapistsRepository therapistsRepository) {
-        this.therapistsRepository = therapistsRepository;
-    }
-
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {

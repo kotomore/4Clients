@@ -100,7 +100,7 @@ public class TherapistControllerTest {
     @Test
     public void deleteAppointmentById() throws Exception {
         String token = getAccessToken();
-        createAppointment();
+        createAppointmentAndAvailability();
         mvc.perform(delete("/therapists/appointments/1").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().is(204));
@@ -109,7 +109,7 @@ public class TherapistControllerTest {
     @Test
     public void getAppointmentById() throws Exception {
         String token = getAccessToken();
-        AppointmentDTO appointmentDTO = createAppointment();
+        AppointmentDTO appointmentDTO = createAppointmentAndAvailability();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         mvc.perform(get("/therapists/appointments/1").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token))
@@ -120,7 +120,7 @@ public class TherapistControllerTest {
     @Test
     public void getAppointments() throws Exception {
         String token = getAccessToken();
-        AppointmentDTO appointmentDTO = createAppointment();
+        AppointmentDTO appointmentDTO = createAppointmentAndAvailability();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         mvc.perform(get("/therapists/appointments").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token))
@@ -131,7 +131,7 @@ public class TherapistControllerTest {
     @Test
     public void getAppointmentByDate() throws Exception {
         String token = getAccessToken();
-        AppointmentDTO appointmentDTO = createAppointment();
+        AppointmentDTO appointmentDTO = createAppointmentAndAvailability();
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         mvc.perform(get("/therapists/appointments/byDate").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
@@ -143,7 +143,7 @@ public class TherapistControllerTest {
     @Test
     public void getAvailabilities() throws Exception {
         String token = getAccessToken();
-        createAppointment();
+        createAppointmentAndAvailability();
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_TIME;
         mvc.perform(get("/therapists/availabilities").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
@@ -155,7 +155,7 @@ public class TherapistControllerTest {
     @Test
     public void addAvailability() throws Exception {
         String token = getAccessToken();
-        createAppointment();
+        createAppointmentAndAvailability();
 
         Availability availability = new Availability();
         availability.setDate(LocalDate.now().plusDays(5));
@@ -172,7 +172,7 @@ public class TherapistControllerTest {
     @Test
     public void addAvailabilities() throws Exception {
         String token = getAccessToken();
-        createAppointment();
+        createAppointmentAndAvailability();
 
         AvailabilitiesDTO availability = new AvailabilitiesDTO();
         availability.setStartTime(LocalDate.now().plusDays(4).atTime(0, 0));
@@ -188,7 +188,7 @@ public class TherapistControllerTest {
     @Test
     public void deleteAvailability() throws Exception {
         String token = getAccessToken();
-        createAppointment();
+        createAppointmentAndAvailability();
 
         assertTrue(service.findAvailableDates(1L, LocalDate.now().plusDays(1)).size() > 0);
 
@@ -203,7 +203,7 @@ public class TherapistControllerTest {
     @Test
     public void getService() throws Exception {
         String token = getAccessToken();
-        AppointmentDTO appointmentDTO = createAppointment();
+        AppointmentDTO appointmentDTO = createAppointmentAndAvailability();
         mvc.perform(get("/therapists/services").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().is(200))
@@ -213,7 +213,7 @@ public class TherapistControllerTest {
     @Test
     public void updateService() throws Exception {
         String token = getAccessToken();
-        createAppointment();
+        createAppointmentAndAvailability();
         ServiceDTO serviceDTO = new ServiceDTO("DifferentName", "DifferentDescription", 30, 2000);
 
         mvc.perform(post("/therapists/services").contentType(MediaType.APPLICATION_JSON)
@@ -226,7 +226,7 @@ public class TherapistControllerTest {
     @Test
     public void getClients() throws Exception {
         String token = getAccessToken();
-        createAppointment();
+        createAppointmentAndAvailability();
         mvc.perform(get("/therapists/clients").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().is(200))
@@ -254,7 +254,7 @@ public class TherapistControllerTest {
         return new JSONObject(response).get("accessToken").toString();
     }
 
-    private AppointmentDTO createAppointment() throws AuthException {
+    private AppointmentDTO createAppointmentAndAvailability() throws AuthException {
         ClientDTO client = new ClientDTO();
         client.setName("JohnDoe");
         client.setPhone("88001234567");
