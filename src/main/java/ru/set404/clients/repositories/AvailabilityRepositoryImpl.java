@@ -25,17 +25,21 @@ public class AvailabilityRepositoryImpl implements AvailabilityRepository {
     @Override
     public boolean isTimeAvailable(Appointment appointment) {
         boolean isAvailable = true;
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT * FROM appointments WHERE therapist_id = ? AND start_time = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT * FROM appointments WHERE therapist_id = ? AND start_time = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setLong(1, appointment.getTherapistId());
             statement.setTimestamp(2, Timestamp.valueOf(appointment.getStartTime()));
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                isAvailable = false;
+
+            try (ResultSet resultSet = statement.executeQuery();){
+                if (resultSet.next()) {
+                    isAvailable = false;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            isAvailable = false;
         }
         return isAvailable;
     }
@@ -43,23 +47,25 @@ public class AvailabilityRepositoryImpl implements AvailabilityRepository {
     @Override
     public List<LocalTime> findAvailableTimes(Long therapistId, LocalDate date, List<LocalTime> appointedTime) {
         List<LocalTime> availableTimes = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT START_TIME, END_TIME, DURATION FROM AVAILABILITY " +
-                    "JOIN SERVICES ON AVAILABILITY.THERAPIST_ID = SERVICES.THERAPIST_ID " +
-                    "WHERE AVAILABILITY.therapist_id = ? AND AVAILABLE_DATE = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT START_TIME, END_TIME, DURATION FROM AVAILABILITY " +
+                "JOIN SERVICES ON AVAILABILITY.THERAPIST_ID = SERVICES.THERAPIST_ID " +
+                "WHERE AVAILABILITY.therapist_id = ? AND AVAILABLE_DATE = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setLong(1, therapistId);
             statement.setDate(2, Date.valueOf(date));
-            ResultSet resultSet = statement.executeQuery();
 
-            if (resultSet.next()) {
-                LocalTime startTime = resultSet.getTime("start_time").toLocalTime();
+            try (ResultSet resultSet = statement.executeQuery();){
+                if (resultSet.next()) {
+                    LocalTime startTime = resultSet.getTime("start_time").toLocalTime();
 
-                LocalTime endTime = resultSet.getTime("end_time").toLocalTime();
-                int duration = resultSet.getInt("duration");
-                for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(duration)) {
-                    if (!appointedTime.contains(time) && (!LocalDate.now().isEqual(date) || time.isAfter(LocalTime.now()))) {
-                        availableTimes.add(time);
+                    LocalTime endTime = resultSet.getTime("end_time").toLocalTime();
+                    int duration = resultSet.getInt("duration");
+                    for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(duration)) {
+                        if (!appointedTime.contains(time) && (!LocalDate.now().isEqual(date) || time.isAfter(LocalTime.now()))) {
+                            availableTimes.add(time);
+                        }
                     }
                 }
             }
@@ -72,21 +78,24 @@ public class AvailabilityRepositoryImpl implements AvailabilityRepository {
     @Override
     public List<LocalDate> findAvailableDates(Long therapistId, LocalDate date, List<LocalTime> appointedTime) {
         List<LocalDate> availableDates = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT AVAILABLE_DATE FROM AVAILABILITY " +
-                    "WHERE therapist_id = ? AND AVAILABLE_DATE >= CURRENT_DATE() AND MONTH(AVAILABLE_DATE) = ? " +
-                    "AND ISFULL = false";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT AVAILABLE_DATE FROM AVAILABILITY " +
+                "WHERE therapist_id = ? AND AVAILABLE_DATE >= CURRENT_DATE() AND MONTH(AVAILABLE_DATE) = ? " +
+                "AND ISFULL = false";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setLong(1, therapistId);
             statement.setInt(2, Date.valueOf(date).toLocalDate().getMonth().getValue());
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                LocalDate availableDate = resultSet.getDate("available_date").toLocalDate();
-                if (availableDate.isEqual(LocalDate.now()) && findAvailableTimes(therapistId, availableDate, appointedTime).size() < 1)
-                    markAvailabilityAs(therapistId, availableDate, true);
-                else
-                    availableDates.add(availableDate);
+            try (ResultSet resultSet = statement.executeQuery()){
+                while (resultSet.next()) {
+                    LocalDate availableDate = resultSet.getDate("available_date").toLocalDate();
+                    if (availableDate.isEqual(LocalDate.now()) && findAvailableTimes(therapistId, availableDate, appointedTime).size() < 1)
+                        markAvailabilityAs(therapistId, availableDate, true);
+                    else
+                        availableDates.add(availableDate);
+                }
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -95,31 +104,36 @@ public class AvailabilityRepositoryImpl implements AvailabilityRepository {
 
     @Override
     public boolean isHaveAvailableTime(Long therapistId, LocalDate date) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT * FROM AVAILABILITY WHERE THERAPIST_ID = ? AND AVAILABLE_DATE = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT * FROM AVAILABILITY WHERE THERAPIST_ID = ? AND AVAILABLE_DATE = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setLong(1, therapistId);
             statement.setDate(2, Date.valueOf(date));
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) return false;
+
+            try (ResultSet resultSet = statement.executeQuery();){
+                if (resultSet.next()) return false;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
         return true;
     }
 
     @Override
     public void addOrUpdateAvailableTime(Long therapistId, Availability availability, List<LocalTime> appointedTime) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql;
-            if (isHaveAvailableTime(therapistId, availability.getDate())) {
-                sql = "INSERT INTO AVAILABILITY (START_TIME, END_TIME, THERAPIST_ID, AVAILABLE_DATE) " +
-                        "VALUES (?, ?, ?, ?)";
-            } else {
-                sql = "UPDATE AVAILABILITY SET START_TIME = ?, END_TIME = ? WHERE THERAPIST_ID = ? AND AVAILABLE_DATE = ?";
+        String sql;
+        if (isHaveAvailableTime(therapistId, availability.getDate())) {
+            sql = "INSERT INTO AVAILABILITY (START_TIME, END_TIME, THERAPIST_ID, AVAILABLE_DATE) " +
+                    "VALUES (?, ?, ?, ?)";
+        } else {
+            sql = "UPDATE AVAILABILITY SET START_TIME = ?, END_TIME = ? WHERE THERAPIST_ID = ? AND AVAILABLE_DATE = ?";
 
-            }
-            PreparedStatement statement = connection.prepareStatement(sql);
+        }
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setTime(1, Time.valueOf(availability.getStartTime()));
             statement.setTime(2, Time.valueOf(availability.getEndTime()));
             statement.setLong(3, therapistId);
@@ -134,10 +148,13 @@ public class AvailabilityRepositoryImpl implements AvailabilityRepository {
 
     @Override
     public void addOrUpdateAvailableTime(Long therapistId, AvailabilitiesDTO availabilitiesDTO, List<LocalTime> appointedTime) {
+
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             for (LocalDate date = availabilitiesDTO.getStartTime().toLocalDate();
+
                  date.isBefore(availabilitiesDTO.getEndTime().toLocalDate());
                  date = date.plusDays(1)) {
+
                 String sql;
                 if (isHaveAvailableTime(therapistId, date)) {
                     sql = "INSERT INTO AVAILABILITY (START_TIME, END_TIME, THERAPIST_ID, AVAILABLE_DATE) " +
@@ -153,6 +170,7 @@ public class AvailabilityRepositoryImpl implements AvailabilityRepository {
                 statement.setLong(3, therapistId);
                 statement.setDate(4, Date.valueOf(date));
                 statement.executeUpdate();
+                statement.close();
 
                 markAvailabilityAs(therapistId, date, findAvailableTimes(therapistId, date, appointedTime).size() < 1);
 
@@ -165,25 +183,29 @@ public class AvailabilityRepositoryImpl implements AvailabilityRepository {
 
     @Override
     public void deleteAvailableTime(Long therapistId, LocalDate date) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "DELETE FROM AVAILABILITY WHERE THERAPIST_ID = ? and AVAILABLE_DATE = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "DELETE FROM AVAILABILITY WHERE THERAPIST_ID = ? and AVAILABLE_DATE = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql);) {
+
             statement.setLong(1, therapistId);
             statement.setDate(2, Date.valueOf(date));
             statement.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void markAvailabilityAs(Long therapistId, LocalDate date, boolean markAs) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "UPDATE AVAILABILITY SET ISFULL = ? WHERE THERAPIST_ID = ? AND AVAILABLE_DATE = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "UPDATE AVAILABILITY SET ISFULL = ? WHERE THERAPIST_ID = ? AND AVAILABLE_DATE = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql);) {
+
             statement.setBoolean(1, markAs);
             statement.setLong(2, therapistId);
             statement.setDate(3, Date.valueOf(date));
             statement.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

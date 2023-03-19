@@ -22,13 +22,17 @@ public class ClientsRepositoryImpl implements ClientsRepository {
     @Override
     public Optional<Client> findClientByPhoneNumber(String phoneNumber) {
         Optional<Client> client = Optional.empty();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT * FROM clients WHERE phone = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT * FROM clients WHERE phone = ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql);) {
+
             statement.setString(1, phoneNumber);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                client = Optional.of(makeClientFromResultSet(resultSet));
+
+            try (ResultSet resultSet = statement.executeQuery();){
+                if (resultSet.next()) {
+                    client = Optional.of(makeClientFromResultSet(resultSet));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -38,9 +42,10 @@ public class ClientsRepositoryImpl implements ClientsRepository {
 
     @Override
     public Client createClient(Client client) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "INSERT INTO clients (name, phone) VALUES (?, ?)";
-            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        String sql = "INSERT INTO clients (name, phone) VALUES (?, ?)";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
+
             statement.setString(1, client.getName());
             statement.setString(2, client.getPhone());
             statement.executeUpdate();
@@ -61,15 +66,18 @@ public class ClientsRepositoryImpl implements ClientsRepository {
     @Override
     public List<Client> findClientsForTherapist(Long therapistId) {
         List<Client> clients = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT C.CLIENT_ID, C.NAME, C.PHONE FROM appointments " +
-                    "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
-                    "WHERE APPOINTMENTS.therapist_id = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT C.CLIENT_ID, C.NAME, C.PHONE FROM appointments " +
+                "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
+                "WHERE APPOINTMENTS.therapist_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setLong(1, therapistId);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                clients.add(makeClientFromResultSet(resultSet));
+
+            try (ResultSet resultSet = statement.executeQuery();){
+                while (resultSet.next()) {
+                    clients.add(makeClientFromResultSet(resultSet));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -19,17 +19,17 @@ public class TherapistsRepositoryImpl implements TherapistsRepository {
 
     @Override
     public Long createTherapist(Therapist therapist) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-
-            String sql = "INSERT INTO therapists (name, phone, password, role) " +
-                    "VALUES (?, ?, ?, ?)";
-            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        String sql = "INSERT INTO therapists (name, phone, password, role) " +
+                "VALUES (?, ?, ?, ?)";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
 
             statement.setString(1, therapist.getName());
             statement.setString(2, therapist.getPhone());
             statement.setString(3, therapist.getPassword());
             statement.setString(4, therapist.getRole().getValue());
             statement.executeUpdate();
+
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     return generatedKeys.getLong(1);
@@ -46,13 +46,16 @@ public class TherapistsRepositoryImpl implements TherapistsRepository {
     @Override
     public Optional<Therapist> findTherapistById(Long therapistId) {
         Optional<Therapist> therapist = Optional.empty();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT * FROM THERAPISTS WHERE THERAPIST_ID = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT * FROM THERAPISTS WHERE THERAPIST_ID = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql);) {
+
             statement.setLong(1, therapistId);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                therapist = Optional.of(makeTherapistFromResultSet(resultSet));
+
+            try (ResultSet resultSet = statement.executeQuery()){
+                if (resultSet.next()) {
+                    therapist = Optional.of(makeTherapistFromResultSet(resultSet));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -63,13 +66,16 @@ public class TherapistsRepositoryImpl implements TherapistsRepository {
     @Override
     public Optional<Therapist> findTherapistByPhone(String phone) {
         Optional<Therapist> therapist = Optional.empty();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT * FROM THERAPISTS WHERE PHONE = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT * FROM THERAPISTS WHERE PHONE = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setString(1, phone);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                therapist = Optional.of(makeTherapistFromResultSet(resultSet));
+
+            try (ResultSet resultSet = statement.executeQuery()){
+                if (resultSet.next()) {
+                    therapist = Optional.of(makeTherapistFromResultSet(resultSet));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -79,9 +85,10 @@ public class TherapistsRepositoryImpl implements TherapistsRepository {
 
     @Override
     public void updateTherapist(Therapist therapist) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "UPDATE THERAPISTS SET NAME = ?, PASSWORD = ?, PHONE = ?, ROLE = ? WHERE THERAPIST_ID = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "UPDATE THERAPISTS SET NAME = ?, PASSWORD = ?, PHONE = ?, ROLE = ? WHERE THERAPIST_ID = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql);) {
+
             statement.setString(1, therapist.getName());
             statement.setString(2, therapist.getPassword());
             statement.setString(3, therapist.getPhone());
@@ -96,11 +103,13 @@ public class TherapistsRepositoryImpl implements TherapistsRepository {
 
     @Override
     public void deleteTherapist(Long therapistId) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "DELETE FROM THERAPISTS WHERE THERAPIST_ID = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "DELETE FROM THERAPISTS WHERE THERAPIST_ID = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql);) {
+
             statement.setLong(1, therapistId);
             statement.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

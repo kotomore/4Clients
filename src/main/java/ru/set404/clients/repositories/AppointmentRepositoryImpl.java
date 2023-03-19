@@ -27,21 +27,22 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     @Override
     public List<Appointment> findAppointmentsForTherapist(Long therapistId) {
         List<Appointment> appointments = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT * FROM appointments " +
-                    "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
-                    "JOIN SERVICES S on S.SERVICE_ID = APPOINTMENTS.SERVICE_ID " +
-                    "WHERE APPOINTMENTS.therapist_id = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT * FROM appointments " +
+                "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
+                "JOIN SERVICES S on S.SERVICE_ID = APPOINTMENTS.SERVICE_ID " +
+                "WHERE APPOINTMENTS.therapist_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql);) {
             statement.setLong(1, therapistId);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Long appointmentId = resultSet.getLong("appointment_id");
-                Long serviceId = resultSet.getLong("service_id");
-                Timestamp startTime = resultSet.getTimestamp("start_time");
-                Client client = makeClientFromResultSet(resultSet);
-                Appointment appointment = new Appointment(appointmentId, startTime.toLocalDateTime(), serviceId, therapistId, client);
-                appointments.add(appointment);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Long appointmentId = resultSet.getLong("appointment_id");
+                    Long serviceId = resultSet.getLong("service_id");
+                    Timestamp startTime = resultSet.getTimestamp("start_time");
+                    Client client = makeClientFromResultSet(resultSet);
+                    Appointment appointment = new Appointment(appointmentId, startTime.toLocalDateTime(), serviceId, therapistId, client);
+                    appointments.add(appointment);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -52,27 +53,28 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     @Override
     public List<AppointmentsForSiteDTO> findAppointmentsForTherapistSite(Long therapistId) {
         List<AppointmentsForSiteDTO> appointments = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT * FROM appointments " +
-                    "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
-                    "JOIN SERVICES S on S.SERVICE_ID = APPOINTMENTS.SERVICE_ID " +
-                    "WHERE APPOINTMENTS.therapist_id = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT * FROM appointments " +
+                "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
+                "JOIN SERVICES S on S.SERVICE_ID = APPOINTMENTS.SERVICE_ID " +
+                "WHERE APPOINTMENTS.therapist_id = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, therapistId);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Long appointmentId = resultSet.getLong("appointment_id");
-                Timestamp startTime = resultSet.getTimestamp("start_time");
-                int duration = resultSet.getInt("duration");
-                String clientName = resultSet.getString("name");
-                String clientPhone = resultSet.getString("phone");
-                AppointmentsForSiteDTO appointment = new AppointmentsForSiteDTO();
-                appointment.setId(appointmentId);
-                appointment.setTitle(clientName);
-                appointment.setStart(startTime.toLocalDateTime());
-                appointment.setEnd(startTime.toLocalDateTime().plusMinutes(duration));
-                appointment.setCategory(clientPhone);
-                appointments.add(appointment);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Long appointmentId = resultSet.getLong("appointment_id");
+                    Timestamp startTime = resultSet.getTimestamp("start_time");
+                    int duration = resultSet.getInt("duration");
+                    String clientName = resultSet.getString("name");
+                    String clientPhone = resultSet.getString("phone");
+                    AppointmentsForSiteDTO appointment = new AppointmentsForSiteDTO();
+                    appointment.setId(appointmentId);
+                    appointment.setTitle(clientName);
+                    appointment.setStart(startTime.toLocalDateTime());
+                    appointment.setEnd(startTime.toLocalDateTime().plusMinutes(duration));
+                    appointment.setCategory(clientPhone);
+                    appointments.add(appointment);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -83,20 +85,21 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     @Override
     public Optional<Appointment> findAppointmentForTherapistById(Long therapistId, Long appointmentId) {
         Appointment appointment = null;
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT * FROM appointments " +
-                    "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
-                    "JOIN SERVICES S on S.SERVICE_ID = APPOINTMENTS.SERVICE_ID " +
-                    "WHERE APPOINTMENTS.therapist_id = ? AND APPOINTMENT_ID = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT * FROM appointments " +
+                "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
+                "JOIN SERVICES S on S.SERVICE_ID = APPOINTMENTS.SERVICE_ID " +
+                "WHERE APPOINTMENTS.therapist_id = ? AND APPOINTMENT_ID = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, therapistId);
             statement.setLong(2, appointmentId);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                Long serviceId = resultSet.getLong("service_id");
-                Timestamp startTime = resultSet.getTimestamp("start_time");
-                Client client = makeClientFromResultSet(resultSet);
-                appointment = new Appointment(appointmentId, startTime.toLocalDateTime(), serviceId, therapistId, client);
+            try (ResultSet resultSet = statement.executeQuery();){
+                if (resultSet.next()) {
+                    Long serviceId = resultSet.getLong("service_id");
+                    Timestamp startTime = resultSet.getTimestamp("start_time");
+                    Client client = makeClientFromResultSet(resultSet);
+                    appointment = new Appointment(appointmentId, startTime.toLocalDateTime(), serviceId, therapistId, client);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -106,14 +109,12 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
         else return Optional.empty();
     }
 
-
     @Override
     public void createAppointment(Appointment appointment) {
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "INSERT INTO appointments (client_id, therapist_id, service_id, start_time) " +
-                    "VALUES (?, ?, ?, ?)";
-            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        String sql = "INSERT INTO appointments (client_id, therapist_id, service_id, start_time) " +
+                "VALUES (?, ?, ?, ?)";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
             statement.setLong(1, appointment.getClient().getId());
             statement.setLong(2, appointment.getTherapistId());
             statement.setLong(3, appointment.getServiceId());
@@ -127,7 +128,6 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
                     throw new SQLException("Creating client failed, no ID obtained.");
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -136,16 +136,17 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     @Override
     public List<LocalTime> findAppointmentsByDay(Long therapistId, LocalDate date) {
         List<LocalTime> appointments = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT START_TIME FROM appointments " +
-                    "WHERE therapist_id = ? AND FORMATDATETIME(start_time, 'yyyy-MM-dd', 'de') = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        String sql = "SELECT START_TIME FROM appointments " +
+                "WHERE therapist_id = ? AND FORMATDATETIME(start_time, 'yyyy-MM-dd', 'de') = ?";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, therapistId);
             statement.setDate(2, Date.valueOf(date));
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                LocalDateTime startTime = resultSet.getTimestamp("start_time").toLocalDateTime();
-                appointments.add(startTime.toLocalTime());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    LocalDateTime startTime = resultSet.getTimestamp("start_time").toLocalDateTime();
+                    appointments.add(startTime.toLocalTime());
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -156,8 +157,8 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     @Override
     public LocalDate deleteAppointment(Long therapistId, Long appointmentId) {
         LocalDate date = null;
+        String sql = "SELECT * FROM appointments WHERE appointment_id = ? AND THERAPIST_ID = ?";
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String sql = "SELECT * FROM appointments WHERE appointment_id = ? AND THERAPIST_ID = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, appointmentId);
             statement.setLong(2, therapistId);
