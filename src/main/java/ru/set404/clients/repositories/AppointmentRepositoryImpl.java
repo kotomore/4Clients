@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+//@Repository
 public class AppointmentRepositoryImpl implements AppointmentRepository {
 
     @Value("${db.url}")
@@ -93,7 +93,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, therapistId);
             statement.setLong(2, appointmentId);
-            try (ResultSet resultSet = statement.executeQuery();){
+            try (ResultSet resultSet = statement.executeQuery();) {
                 if (resultSet.next()) {
                     Long serviceId = resultSet.getLong("service_id");
                     Timestamp startTime = resultSet.getTimestamp("start_time");
@@ -104,9 +104,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (appointment != null)
-            return Optional.of(appointment);
-        else return Optional.empty();
+        return Optional.ofNullable(appointment);
     }
 
     @Override

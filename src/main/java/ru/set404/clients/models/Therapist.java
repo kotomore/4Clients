@@ -1,24 +1,25 @@
 package ru.set404.clients.models;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 import java.util.Objects;
 
 @Getter
 @Setter
+@Entity(name = "Therapists")
+@NoArgsConstructor
 public class Therapist {
+    @Id
+    @Column(name = "therapist_id")
     private Long id;
     private String name;
     private String phone;
     private String password;
     private Role role;
-    private List<Appointment> appointments;
-
-
-    public Therapist() {
-    }
 
     public Therapist(String name, String phone, String password, Role role) {
         this.name = name;

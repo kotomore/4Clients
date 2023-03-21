@@ -1,6 +1,7 @@
 package ru.set404.clients.models;
 
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,10 +9,16 @@ import java.util.Objects;
 
 @Getter
 @Setter
+@Entity(name = "Clients")
 public class Client {
+    @Id
+    @Column(name = "client_id")
     private Long id;
     private String name;
     private String phone;
+
+    @Transient
+    private Appointment appointments;
 
     public Client() {
     }

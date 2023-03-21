@@ -1,7 +1,11 @@
 package ru.set404.clients.models;
 
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -10,13 +14,19 @@ import java.util.Objects;
 
 @Getter
 @Setter
+@Entity
+@NoArgsConstructor
 public class Availability {
+    @Id
+    private Long availabilityId;
+
+    private Long therapistId;
+    @Column(name = "available_date")
     private LocalDate date;
+
     private LocalTime startTime;
     private LocalTime endTime;
-
-    public Availability() {
-    }
+    private boolean isFull;
 
     @Override
     public boolean equals(Object o) {
