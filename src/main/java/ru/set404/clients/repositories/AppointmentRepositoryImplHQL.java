@@ -1,10 +1,8 @@
 package ru.set404.clients.repositories;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.*;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.set404.clients.dto.AppointmentsForSiteDTO;
 import ru.set404.clients.models.Appointment;
 
@@ -20,15 +18,14 @@ public class AppointmentRepositoryImplHQL implements AppointmentRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
+
     @Override
     public List<Appointment> findAppointmentsForTherapist(Long therapistId) {
         String hql = "SELECT a FROM Appointments a " +
-                "JOIN FETCH Clients c " +
-                "JOIN FETCH Services s " +
-                "WHERE s.serviceId = a.serviceId and a.therapistId = :therapistId and a.client.id = c.id";
-            TypedQuery<Appointment> query = entityManager.createQuery(hql, Appointment.class);
-            query.setParameter("therapistId", therapistId);
-            return query.getResultList();
+                "WHERE a.therapistId = :therapistId";
+        TypedQuery<Appointment> query = entityManager.createQuery(hql, Appointment.class);
+        query.setParameter("therapistId", therapistId);
+        return query.getResultList();
     }
 
     public List<AppointmentsForSiteDTO> findAppointmentsForTherapistSite(Long therapistId) {
@@ -52,11 +49,7 @@ public class AppointmentRepositoryImplHQL implements AppointmentRepository {
     public Optional<Appointment> findAppointmentForTherapistById(Long therapistId, Long appointmentId) {
         try {
             String hql = "SELECT a FROM Appointments a "
-                    + "JOIN FETCH a.client "
-                    + "JOIN FETCH Services s "
-                    + "JOIN FETCH Therapists t "
-                    + "WHERE a.therapistId = :therapistId and s.serviceId = a.serviceId and t.id = a.therapistId "
-                    + "AND a.appointmentId = :appointmentId";
+                    + "WHERE a.therapistId = :therapistId AND a.appointmentId = :appointmentId";
             Appointment appointment = entityManager.createQuery(hql, Appointment.class)
                     .setParameter("therapistId", therapistId)
                     .setParameter("appointmentId", appointmentId)
@@ -64,14 +57,13 @@ public class AppointmentRepositoryImplHQL implements AppointmentRepository {
             return Optional.of(appointment);
         } catch (NoResultException e) {
             return Optional.empty();
-        } catch (Exception e) {
-            throw new RuntimeException("Error finding appointment for therapist by id", e);
         }
     }
 
     @Override
+    @Transactional
     public void createAppointment(Appointment appointment) {
-
+        entityManager.persist(appointment);
     }
 
     @Override
