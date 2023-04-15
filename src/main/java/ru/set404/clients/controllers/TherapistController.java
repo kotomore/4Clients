@@ -44,7 +44,7 @@ public class TherapistController {
     private final ModelMapper modelMapper;
 
     @GetMapping()
-    public EntityModel<Therapist> getTherapistById() {
+    public EntityModel<Therapist> getCurrentTherapist() {
         Long therapistId = getAuthUserId();
         Therapist therapist = therapistService.findTherapistById(therapistId);
         return therapistModelAssembler.toModel(therapist);
@@ -77,13 +77,13 @@ public class TherapistController {
     public EntityModel<Appointment> getAppointmentById(@PathVariable Long appointmentId) {
         Long therapistId = getAuthUserId();
         Appointment appointment = therapistService.findAppointmentById(therapistId, appointmentId);
-        return appointmentModelAssembler.toModel(appointment);
+        return EntityModel.of(appointment);
     }
 
     @GetMapping("/appointments")
-    public CollectionModel<EntityModel<Appointment>> allAppointments() {
+    public CollectionModel<EntityModel<AppointmentDTO>> allAppointments() {
         Long therapistId = getAuthUserId();
-        List<Appointment> appointments = therapistService.findAllAppointments(therapistId);
+        List<AppointmentDTO> appointments = therapistService.findAllAppointments(therapistId);
         return appointmentModelAssembler.toCollectionModel(appointments);
     }
 
@@ -110,7 +110,8 @@ public class TherapistController {
 
     @GetMapping("/availabilities")
     public ResponseEntity<?> availableTimes(@RequestParam LocalDate date) {
-        List<LocalTime> availableTimes = therapistService.findAvailableTimes(1L, date);
+        Long therapistId = getAuthUserId();
+        List<LocalTime> availableTimes = therapistService.findAvailableTimes(therapistId, date);
         if (availableTimes.isEmpty())
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -151,7 +152,7 @@ public class TherapistController {
         Long therapistId = getAuthUserId();
         Service service = therapistService.findService(therapistId);
         return EntityModel.of(service, linkTo(methodOn(TherapistController.class)
-                .getTherapistById()).withRel("therapist"));
+                .getCurrentTherapist()).withRel("therapist"));
     }
 
     @PostMapping("/services")
@@ -160,7 +161,7 @@ public class TherapistController {
         therapistService.addOrUpdateService(therapistId, serviceDTO);
         Service service = therapistService.findService(therapistId);
         return EntityModel.of(service, linkTo(methodOn(TherapistController.class)
-                .getTherapistById()).withRel("therapist"));
+                .getCurrentTherapist()).withRel("therapist"));
     }
 
     @GetMapping("/clients")

@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class AppointmentDTO {
+
+    private Long appointmentId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @NotNull(message = "Not be empty")
     private LocalDateTime startTime;

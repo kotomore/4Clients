@@ -37,7 +37,7 @@ public class AuthController {
     ResponseEntity<EntityModel<TherapistDTO>> newTherapist(@RequestBody TherapistDTO therapist) {
         registrationService.saveTherapist(modelMapper.map(therapist, Therapist.class));
         return ResponseEntity
-                .created(linkTo(methodOn(TherapistController.class).getTherapistById()).toUri()).build();
+                .created(linkTo(methodOn(TherapistController.class).getCurrentTherapist()).toUri()).build();
     }
 
     @PostMapping("/login")

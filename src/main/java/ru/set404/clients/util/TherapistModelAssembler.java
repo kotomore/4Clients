@@ -17,7 +17,7 @@ public class TherapistModelAssembler implements RepresentationModelAssembler<The
     public EntityModel<Therapist> toModel(Therapist entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(TherapistController.class)
-                        .getTherapistById())
+                        .getCurrentTherapist())
                         .withSelfRel());
     }
 

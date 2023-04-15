@@ -1,5 +1,6 @@
 package ru.set404.clients.repositories;
 
+import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.dto.AppointmentsForSiteDTO;
 import ru.set404.clients.models.Appointment;
 

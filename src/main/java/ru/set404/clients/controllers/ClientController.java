@@ -37,7 +37,7 @@ public class ClientController {
                     .status(412)
                     .body("Date is not available");
 
-        EntityModel<Appointment> entityModel = appointmentModelAssembler.toModel(appointment);
+        EntityModel<Appointment> entityModel = EntityModel.of(appointment);
 
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())

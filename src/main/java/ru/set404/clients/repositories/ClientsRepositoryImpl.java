@@ -66,7 +66,7 @@ public class ClientsRepositoryImpl implements ClientsRepository {
     @Override
     public List<Client> findClientsForTherapist(Long therapistId) {
         List<Client> clients = new ArrayList<>();
-        String sql = "SELECT C.CLIENT_ID, C.NAME, C.PHONE FROM appointments " +
+        String sql = "SELECT DISTINCT C.CLIENT_ID, C.NAME, C.PHONE FROM appointments " +
                 "JOIN CLIENTS C on C.CLIENT_ID = APPOINTMENTS.CLIENT_ID " +
                 "WHERE APPOINTMENTS.therapist_id = ?";
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);

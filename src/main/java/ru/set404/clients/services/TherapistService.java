@@ -49,9 +49,10 @@ public class TherapistService {
         return appointment;
     }
 
-    public List<Appointment> findAllAppointments(Long therapistId) {
+    public List<AppointmentDTO> findAllAppointments(Long therapistId) {
 
-        List<Appointment> appointments = appointmentRepository.findAppointmentsForTherapist(therapistId);
+        List<AppointmentDTO> appointments = appointmentRepository.findAppointmentsForTherapist(therapistId)
+                .stream().map(a -> modelMapper.map(a, AppointmentDTO.class)).toList();
         if (appointments.size() > 0) {
             return appointments;
         } else {
