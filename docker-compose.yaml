@@ -1,17 +1,70 @@
 version: '2'
 
 services:
-  app:
-    image: 'docker-4clients:latest'
+  localRabbitMQ:
+    image: rabbitmq:3.11.13
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  auth-service:
+    build: ./auth-service
     ports:
       - "8080:8080"
-    build:
-      context: .
-    container_name: 4Clients
+    container_name: auth-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:test
-      - SPRING_DATASOURCE_USERNAME=test
-      - SPRING_DATASOURCE_PASSWORD=test
-      - DB_URL=jdbc:h2:mem:test
-      - DB_USER=test
-      - DB_PASSWORD=test
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - DB_URL=${DB_URL}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - spring_rabbitmq_host=localRabbitMQ
+    links:
+      - "localRabbitMQ"
+    env_file:
+      - ./docker.env
+
+  therapist-service:
+    build: ./management-service
+    ports:
+      - "8081:8081"
+    container_name: management-service
+    environment:
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - DB_URL=${DB_URL}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - spring_rabbitmq_host=localRabbitMQ
+    links:
+      - "localRabbitMQ"
+    env_file:
+      - ./docker.env
+
+  client-service:
+    build: ./client-service
+    ports:
+      - "8082:8082"
+    container_name: client-service
+    environment:
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - DB_URL=${DB_URL}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - ./docker.env
+
+  db:
+    image: 'postgres:15.0-alpine'
+    container_name: db
+    environment:
+      - POSTGRES_DB=ads_metrika_db
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
