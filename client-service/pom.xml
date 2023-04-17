@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.set404</groupId>
-    <artifactId>client-service</artifactId>
+    <artifactId>client-agentService</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>client-service</name>
-    <description>client-service</description>
+    <name>client-agentService</name>
+    <description>client-agentService</description>
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -84,6 +84,13 @@
             <artifactId>java-jwt</artifactId>
             <version>3.18.3</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-mongodb -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <version>3.0.5</version>
+        </dependency>
+
     </dependencies>
 
     <build>
