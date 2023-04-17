@@ -4,25 +4,25 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
-import ru.set404.clients.controllers.TherapistController;
-import ru.set404.clients.models.Therapist;
+import ru.set404.clients.controllers.ManagementController;
+import ru.set404.clients.dto.AgentDTO;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class TherapistModelAssembler implements RepresentationModelAssembler<Therapist, EntityModel<Therapist>> {
+public class AgentModelAssembler implements RepresentationModelAssembler<AgentDTO, EntityModel<AgentDTO>> {
 
     @Override
-    public EntityModel<Therapist> toModel(Therapist entity) {
+    public EntityModel<AgentDTO> toModel(AgentDTO entity) {
         return EntityModel.of(entity,
-                linkTo(methodOn(TherapistController.class)
+                linkTo(methodOn(ManagementController.class)
                         .getCurrentTherapist())
                         .withSelfRel());
     }
 
     @Override
-    public CollectionModel<EntityModel<Therapist>> toCollectionModel(Iterable<? extends Therapist> entities) {
+    public CollectionModel<EntityModel<AgentDTO>> toCollectionModel(Iterable<? extends AgentDTO> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 }

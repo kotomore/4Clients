@@ -10,13 +10,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import ru.set404.clients.services.TherapistDetailsService;
+import ru.set404.clients.services.AgentDetailsService;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final TherapistDetailsService therapistDetailsService;
+    private final AgentDetailsService agentDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -41,7 +41,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(therapistDetailsService)
+                .userDetailsService(agentDetailsService)
                 .passwordEncoder(encoder())
                 .and()
                 .build();

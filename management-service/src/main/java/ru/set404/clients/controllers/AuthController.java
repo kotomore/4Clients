@@ -3,34 +3,31 @@ package ru.set404.clients.controllers;
 import jakarta.security.auth.message.AuthException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.set404.clients.dto.TherapistDTO;
+import ru.set404.clients.dto.AgentDTO;
 import ru.set404.clients.dto.security.JwtRequest;
 import ru.set404.clients.dto.security.JwtResponse;
 import ru.set404.clients.dto.security.RefreshJwtRequest;
-import ru.set404.clients.models.Therapist;
 import ru.set404.clients.services.RegistrationService;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final RegistrationService registrationService;
-    private final ModelMapper modelMapper;
     private final AmqpTemplate template;
 
     @PostMapping("/registration")
-    ResponseEntity<EntityModel<TherapistDTO>> newTherapist(@RequestBody TherapistDTO therapist) {
-        registrationService.saveTherapist(modelMapper.map(therapist, Therapist.class));
+    ResponseEntity<EntityModel<AgentDTO>> newTherapist(@RequestBody AgentDTO agentDTO) {
+        registrationService.saveAgent(agentDTO);
         return ResponseEntity
-                .created(linkTo(methodOn(TherapistController.class).getCurrentTherapist()).toUri()).build();
+                .created(linkTo(methodOn(ManagementController.class).getCurrentTherapist()).toUri()).build();
     }
 
     @PostMapping("/login")
@@ -53,5 +50,4 @@ public class AuthController {
         if (token != null && token.getAccessToken() == null) throw new AuthException("Invalid token");
         return ResponseEntity.ok(token);
     }
-
 }

@@ -5,19 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-
+@Document("agents")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Document("appointments")
-public class Appointment {
+@AllArgsConstructor
+public class Agent {
     @Id
     private String id;
-    private TimeSlot timeSlot;
-    private String agentId;
-    private Client client;
-    private String serviceId;
+    private String name;
+    @Indexed(unique = true)
+    private String phone;
+    private String password;
+    private Role role;
 }

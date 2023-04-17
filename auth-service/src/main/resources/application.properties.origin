@@ -1,12 +1,13 @@
-spring.datasource.url=
-spring.datasource.driverClassName=org.h2.Driver
-spring.datasource.username=
-spring.datasource.password=
-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+
+
+
+spring.data.mongodb.uri==
+spring.data.mongodb.auto-index-creation=true
+
 spring.jpa.properties.hibernate.show_sql=true
 spring.jpa.open-in-view=true
 
-springdoc.swagger-ui.path=/swagger-ui.html
+springdoc.swagger-ui.path=/swagger-uil.html
 
 jwt.secret.access=
 jwt.secret.refresh=
@@ -14,11 +15,9 @@ jwt.secret.access.expired-minutes=60
 jwt.secret.refresh.expired-days=60
 
 server.port=8080
+spring.rabbitmq.host=localhost
+spring.rabbitmq.username=guest
+spring.rabbitmq.password=guest
 
 management.endpoints.web.exposure.include=*
 management.endpoint.shutdown.enabled=true
-endpoints.shutdown.enabled=true
-
-db.url=
-db.user=
-db.password=

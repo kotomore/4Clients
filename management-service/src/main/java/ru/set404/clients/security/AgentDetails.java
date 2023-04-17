@@ -1,35 +1,33 @@
 package ru.set404.clients.security;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import ru.set404.clients.models.Therapist;
+import ru.set404.clients.models.Agent;
 
 import java.util.Collection;
 import java.util.Collections;
 
 @Getter
-public class TherapistDetails implements UserDetails {
+@AllArgsConstructor
+public class AgentDetails implements UserDetails {
 
-    private final Therapist therapist;
-
-    public TherapistDetails(Therapist therapist) {
-        this.therapist = therapist;
-    }
+    private Agent agent;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(therapist.getRole());
+        return Collections.singletonList(agent.getRole());
     }
 
     @Override
     public String getPassword() {
-        return therapist.getPassword();
+        return agent.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return therapist.getPhone();
+        return agent.getPhone();
     }
 
     @Override

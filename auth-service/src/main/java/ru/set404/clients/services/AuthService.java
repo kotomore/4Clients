@@ -10,9 +10,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Service;
 import ru.set404.clients.dto.security.JwtRequest;
 import ru.set404.clients.dto.security.JwtResponse;
-import ru.set404.clients.models.Therapist;
+import ru.set404.clients.models.Agent;
+import ru.set404.clients.security.AgentDetails;
 import ru.set404.clients.security.JwtProvider;
-import ru.set404.clients.security.TherapistDetails;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final TherapistDetailsService service;
+    private final AgentDetailsService service;
     private final Map<String, String> refreshStorage = new HashMap<>();
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
@@ -35,10 +35,10 @@ public class AuthService {
             return new JwtResponse(null, null);
         }
 
-        final Therapist therapist = ((TherapistDetails) service.loadUserByUsername(authRequest.getLogin())).getTherapist();
-        final String accessToken = jwtProvider.generateAccessToken(therapist);
-        final String refreshToken = jwtProvider.generateRefreshToken(therapist);
-        refreshStorage.put(therapist.getPhone(), refreshToken);
+        final Agent agent = ((AgentDetails) service.loadUserByUsername(authRequest.getLogin())).getAgent();
+        final String accessToken = jwtProvider.generateAccessToken(agent);
+        final String refreshToken = jwtProvider.generateRefreshToken(agent);
+        refreshStorage.put(agent.getPhone(), refreshToken);
         return new JwtResponse(accessToken, refreshToken);
     }
 
@@ -48,10 +48,10 @@ public class AuthService {
             final String login = claims.getSubject();
             final String saveRefreshToken = refreshStorage.get(login);
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-                final Therapist therapist = ((TherapistDetails) service.loadUserByUsername(login)).getTherapist();
-                final String accessToken = jwtProvider.generateAccessToken(therapist);
-                final String newRefreshToken = jwtProvider.generateRefreshToken(therapist);
-                refreshStorage.put(therapist.getPhone(), newRefreshToken);
+                final Agent agent = ((AgentDetails) service.loadUserByUsername(login)).getAgent();
+                final String accessToken = jwtProvider.generateAccessToken(agent);
+                final String newRefreshToken = jwtProvider.generateRefreshToken(agent);
+                refreshStorage.put(agent.getPhone(), newRefreshToken);
                 return new JwtResponse(accessToken, newRefreshToken);
             }
         }
@@ -64,8 +64,8 @@ public class AuthService {
             final String login = claims.getSubject();
             final String saveRefreshToken = refreshStorage.get(login);
             if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-                final Therapist therapist = ((TherapistDetails) service.loadUserByUsername(login)).getTherapist();
-                final String accessToken = jwtProvider.generateAccessToken(therapist);
+                final Agent agent = ((AgentDetails) service.loadUserByUsername(login)).getAgent();
+                final String accessToken = jwtProvider.generateAccessToken(agent);
                 return new JwtResponse(accessToken, null);
             }
         }

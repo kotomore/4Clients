@@ -1,11 +1,11 @@
 package ru.set404.clients.services;
 
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.models.*;
 import ru.set404.clients.repositories.AppointmentRepository;
-import ru.set404.clients.repositories.ClientRepository;
 import ru.set404.clients.repositories.ScheduleRepository;
 import ru.set404.clients.repositories.ServiceRepository;
 
@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,7 +23,7 @@ public class ClientService {
     private final ScheduleRepository scheduleRepository;
     private final AppointmentRepository appointmentRepository;
     private final ServiceRepository serviceRepository;
-    private final ClientRepository clientRepository;
+    private final ModelMapper modelMapper;
 
 
     public void createAppointment(AppointmentDTO appointmentDTO) {
@@ -36,24 +35,11 @@ public class ClientService {
 
         TimeSlot timeSlot = new TimeSlot(startTime.toLocalTime(), endTime.toLocalTime());
 
-        Client client = clientRepository.findByPhone(appointmentDTO.getClient().getPhone())
-                .orElseGet(() -> {
-                    Client newClient = new Client();
-                    newClient.setName(appointmentDTO.getClient().getName());
-                    newClient.setPhone(appointmentDTO.getClient().getPhone());
-                    return clientRepository.save(newClient);
-                });
-
-        if (!Objects.equals(client.getName(), appointmentDTO.getClient().getName())) {
-            client.setName(appointmentDTO.getClient().getName());
-            clientRepository.save(client);
-        }
-
         Appointment appointment = new Appointment();
         appointment.setServiceId(appointmentDTO.getServiceId());
         appointment.setAgentId(appointmentDTO.getAgentId());
         appointment.setTimeSlot(timeSlot);
-        appointment.setClientId(client.getId());
+        appointment.setClient(modelMapper.map(appointmentDTO.getClient(), Client.class));
 
         appointmentRepository.save(appointment);
     }
