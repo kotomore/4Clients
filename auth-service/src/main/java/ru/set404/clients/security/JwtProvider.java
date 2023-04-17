@@ -6,11 +6,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import jakarta.security.auth.message.AuthException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
-import ru.set404.clients.models.Therapist;
+import ru.set404.clients.models.Agent;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -38,7 +37,7 @@ public class JwtProvider {
         this.jwtRefreshSecret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtRefreshSecret));
     }
 
-    public String generateAccessToken(@NonNull Therapist user) {
+    public String generateAccessToken(@NonNull Agent user) {
         final LocalDateTime now = LocalDateTime.now();
         final Instant accessExpirationInstant = now.plusMinutes(jwtExpiredMinutes).atZone(ZoneId.systemDefault()).toInstant();
         final Date accessExpiration = Date.from(accessExpirationInstant);
@@ -52,7 +51,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String generateRefreshToken(@NonNull Therapist user) {
+    public String generateRefreshToken(@NonNull Agent user) {
         final LocalDateTime now = LocalDateTime.now();
         final Instant refreshExpirationInstant = now.plusDays(jwtRefreshExpiredDays).atZone(ZoneId.systemDefault()).toInstant();
         final Date refreshExpiration = Date.from(refreshExpirationInstant);

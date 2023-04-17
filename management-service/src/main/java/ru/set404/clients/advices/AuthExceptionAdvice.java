@@ -3,7 +3,7 @@ package ru.set404.clients.advices;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.security.auth.message.AuthException;
-import org.springdoc.api.ErrorMessage;
+import org.modelmapper.spi.ErrorMessage;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

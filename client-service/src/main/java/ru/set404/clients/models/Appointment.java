@@ -1,45 +1,23 @@
 package ru.set404.clients.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.*;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name = "Appointments")
+@AllArgsConstructor
 @NoArgsConstructor
+@Document("appointments")
 public class Appointment {
     @Id
-    @Column(name = "appointment_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long appointmentId;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    @Column(name = "start_time")
-    private LocalDateTime startTime;
-    @Column(name = "service_id")
-    private Long serviceId;
-    @Column(name = "therapist_id")
-    private Long therapistId;
-    @OneToOne(orphanRemoval = true)
-    @JoinColumn(name = "client_id")
+    private String id;
+    private TimeSlot timeSlot;
+    private String agentId;
     private Client client;
-
-    public Appointment(Long appointmentId, LocalDateTime startTime, Long serviceId, Long therapistId, Client client) {
-        this.appointmentId = appointmentId;
-        this.startTime = startTime;
-        this.serviceId = serviceId;
-        this.therapistId = therapistId;
-        this.client = client;
-    }
-
-    public Appointment(LocalDateTime startTime, Long serviceId, Long therapistId, Client client) {
-        this.startTime = startTime;
-        this.serviceId = serviceId;
-        this.therapistId = therapistId;
-        this.client = client;
-    }
+    private String serviceId;
 }

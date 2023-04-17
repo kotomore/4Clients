@@ -1,6 +1,6 @@
 package ru.set404.clients.advices;
 
-import org.springdoc.api.ErrorMessage;
+import org.modelmapper.spi.ErrorMessage;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +21,9 @@ public class UserExceptionAdvice {
     }
 
     @ResponseBody
-    @ExceptionHandler(TherapistNotFoundException.class)
+    @ExceptionHandler(AgentNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<Object> therapistNotFoundHandler(TherapistNotFoundException ex) {
+    public ResponseEntity<Object> therapistNotFoundHandler(AgentNotFoundException ex) {
         return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 

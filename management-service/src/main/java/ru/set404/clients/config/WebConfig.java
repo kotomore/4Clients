@@ -36,6 +36,4 @@ public class WebConfig implements WebMvcConfigurer {
         converters.add(converter);
         WebMvcConfigurer.super.extendMessageConverters(converters);
     }
-
-
 }

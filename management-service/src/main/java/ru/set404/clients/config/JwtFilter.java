@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.set404.clients.security.JwtProvider;
-import ru.set404.clients.services.TherapistDetailsService;
+import ru.set404.clients.services.AgentDetailsService;
 
 import java.io.IOException;
 
@@ -25,10 +25,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final String AUTHORIZATION = "Authorization";
     private final JwtProvider jwtProvider;
-    private final TherapistDetailsService service;
+    private final AgentDetailsService service;
 
     @Autowired
-    public JwtFilter(JwtProvider jwtProvider, TherapistDetailsService service) {
+    public JwtFilter(JwtProvider jwtProvider, AgentDetailsService service) {
         this.jwtProvider = jwtProvider;
         this.service = service;
     }

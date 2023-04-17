@@ -1,24 +1,28 @@
 package ru.set404.clients.services;
 
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.set404.clients.dto.AgentDTO;
 import ru.set404.clients.exceptions.UserAlreadyExistException;
+import ru.set404.clients.models.Agent;
 import ru.set404.clients.models.Role;
-import ru.set404.clients.models.Therapist;
-import ru.set404.clients.repositories.TherapistsRepository;
+import ru.set404.clients.repositories.AgentRepository;
 
 @Service
 @RequiredArgsConstructor
 public class RegistrationService {
-    private final TherapistsRepository therapistsRepository;
+    private final AgentRepository agentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
 
-    public Long saveTherapist(Therapist therapist) {
-        if (therapistsRepository.findTherapistByPhone(therapist.getPhone()).isPresent())
+    public void saveAgent(AgentDTO agentDTO) {
+        if (agentRepository.findAgentByPhone(agentDTO.getPhone()).isPresent())
             throw new UserAlreadyExistException();
-        therapist.setPassword(passwordEncoder.encode(therapist.getPassword()));
-        therapist.setRole(Role.USER);
-        return therapistsRepository.createTherapist(therapist);
+        Agent agent = modelMapper.map(agentDTO, Agent.class);
+        agent.setPassword(passwordEncoder.encode(agentDTO.getPassword()));
+        agent.setRole(Role.USER);
+        agentRepository.save(agent);
     }
 }
