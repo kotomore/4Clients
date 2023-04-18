@@ -15,9 +15,9 @@ import java.io.Serializable;
 @Setter
 public class JwtRequest implements Serializable {
     @NotEmpty(message = "Not be empty")
-    @Size(min = 3, max = 20, message = "Login size must be between 3 and 10 characters")
+    @Size(min = 3, max = 20, message = "Login size must be between 3 and 20 characters")
     private String login;
     @NotEmpty(message = "Not be empty")
-    @Size(min = 3, max = 20, message = "Password size must be between 3 and 10 characters")
+    @Size(min = 3, max = 20, message = "Password size must be between 3 and 20 characters")
     private String password;
 }

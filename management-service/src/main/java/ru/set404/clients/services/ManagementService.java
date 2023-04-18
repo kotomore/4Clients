@@ -2,9 +2,12 @@ package ru.set404.clients.services;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.set404.clients.dto.AgentDTO;
+import ru.set404.clients.dto.AgentServiceDTO;
 import ru.set404.clients.dto.TimeSlotDTO;
 import ru.set404.clients.exceptions.*;
 import ru.set404.clients.models.*;
@@ -77,7 +80,7 @@ public class ManagementService {
     }
 
     public void deleteAppointment(String agentId, String appointmentId) {
-        appointmentRepository.findByIdAndAgentId(appointmentId, agentId);
+        appointmentRepository.deleteByIdAndAgentId(appointmentId, agentId);
     }
 
     public Agent findAgentById(String agentId) {
@@ -95,17 +98,22 @@ public class ManagementService {
         agent.setName(agentDTO.getName());
         agent.setPhone(agentDTO.getPhone());
         agent.setPassword(passwordEncoder.encode(agentDTO.getPassword()));
-        agentRepository.save(agent);
+        try {
+            agentRepository.save(agent);
+        } catch (DuplicateKeyException exception) {
+            throw new UserAlreadyExistException();
+        }
     }
 
+    @Transactional
     public void addAvailableTime(String agentId, TimeSlotDTO timeSlotDTO) {
         List<TimeSlot> timeSlots = createTimeSlots(timeSlotDTO);
 
+        List<Schedule> schedules = new ArrayList<>();
         for (LocalDate date = timeSlotDTO.getDateStart();
-             date.isBefore(timeSlotDTO.getDateEnd());
+             date.isBefore(timeSlotDTO.getDateEnd().plusDays(1));
              date = date.plusDays(1)) {
 
-            scheduleRepository.deleteByAgentIdAndDate(agentId, date);
             Optional<Schedule> oldSchedule = scheduleRepository.findByAgentIdAndDate(agentId, date);
 
             Schedule schedule = new Schedule();
@@ -113,8 +121,10 @@ public class ManagementService {
             schedule.setDate(date);
             schedule.setAgentId(agentId);
             schedule.setAvailableSlots(timeSlots);
-            scheduleRepository.save(schedule);
+
+            schedules.add(schedule);
         }
+        scheduleRepository.saveAll(schedules);
     }
 
     private List<TimeSlot> createTimeSlots(TimeSlotDTO timeSlotDTO) {
@@ -124,9 +134,10 @@ public class ManagementService {
                 .map(ru.set404.clients.models.AgentService::getDuration)
                 .orElseThrow(() -> new IllegalArgumentException("Service not found"));
 
-        for (LocalDateTime date = LocalDateTime.of(timeSlotDTO.getDateStart(), timeSlotDTO.getTimeStart());
-             date.isBefore(LocalDateTime.of(timeSlotDTO.getDateEnd(), timeSlotDTO.getTimeEnd()));
+        for (LocalDateTime date = LocalDate.now().atTime(timeSlotDTO.getTimeStart());
+             date.isBefore(LocalDate.now().atTime(timeSlotDTO.getTimeEnd()));
              date = date.plusMinutes(serviceDuration)) {
+
             LocalDateTime end = date.plusMinutes(serviceDuration);
             TimeSlot timeSlot = new TimeSlot(date.toLocalTime(), end.toLocalTime());
             timeSlots.add(timeSlot);
@@ -160,7 +171,9 @@ public class ManagementService {
         }
     }
 
-    public void addOrUpdateService(AgentService service) {
-        serviceRepository.save(service);
+    public AgentService addOrUpdateService(String agentId, AgentServiceDTO service) {
+        AgentService newAgentService = modelMapper.map(service, AgentService.class);
+        newAgentService.setAgentId(agentId);
+        return serviceRepository.save(newAgentService);
     }
 }

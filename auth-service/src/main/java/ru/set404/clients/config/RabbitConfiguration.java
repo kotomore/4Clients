@@ -17,4 +17,19 @@ public class RabbitConfiguration {
     public MessageConverter messageConverter() {
         return new JacksonMessageConverter();
     }
+
+    @Bean
+    public Queue login() {
+        return new Queue("login");
+    }
+
+    @Bean
+    public Queue refresh() {
+        return new Queue("refresh");
+    }
+
+    @Bean
+    public Queue access() {
+        return new Queue("access");
+    }
 }

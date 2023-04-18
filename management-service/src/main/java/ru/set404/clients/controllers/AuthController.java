@@ -24,7 +24,7 @@ public class AuthController {
     private final AmqpTemplate template;
 
     @PostMapping("/registration")
-    ResponseEntity<EntityModel<AgentDTO>> newTherapist(@RequestBody AgentDTO agentDTO) {
+    ResponseEntity<EntityModel<AgentDTO>> newTherapist(@Valid @RequestBody AgentDTO agentDTO) {
         registrationService.saveAgent(agentDTO);
         return ResponseEntity
                 .ok().body(EntityModel.of(agentDTO));

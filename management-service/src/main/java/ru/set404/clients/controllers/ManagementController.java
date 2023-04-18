@@ -12,8 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import ru.set404.clients.dto.AgentDTO;
+import ru.set404.clients.dto.AgentServiceDTO;
 import ru.set404.clients.dto.TimeSlotDTO;
 import ru.set404.clients.models.AgentService;
 import ru.set404.clients.models.Appointment;
@@ -43,18 +45,22 @@ public class ManagementController {
     private final ManagementService managementService;
 
     @GetMapping()
-    public EntityModel<AgentDTO> getCurrentAgent() {
+    public ResponseEntity<?> getCurrentAgent() {
         String agentId = getAuthUserId();
-        AgentDTO agent = managementService.findAgentDTOById(agentId);
-        return agentModelAssembler.toModel(agent);
+        if (agentId != null) {
+            AgentDTO agent = managementService.findAgentDTOById(agentId);
+            return ResponseEntity.ok().body(agent);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @PutMapping
     ResponseEntity<?> updateAgent(@Valid @RequestBody AgentDTO newAgent) {
         String agentId = getAuthUserId();
         managementService.updateAgent(agentId, newAgent);
-        EntityModel<AgentDTO> entityModel = agentModelAssembler.toModel(newAgent);
 
+        EntityModel<AgentDTO> entityModel = agentModelAssembler.toModel(newAgent);
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel);
@@ -119,16 +125,17 @@ public class ManagementController {
 
     @GetMapping("/services")
     public EntityModel<AgentService> getService() {
-        String therapistId = getAuthUserId();
-        AgentService service = managementService.findService(therapistId);
+        String agentId = getAuthUserId();
+        AgentService service = managementService.findService(agentId);
         return EntityModel.of(service, linkTo(methodOn(ManagementController.class)
                 .getCurrentAgent()).withRel("therapist"));
     }
 
     @PostMapping("/services")
-    public EntityModel<AgentService> newService(@Valid @RequestBody AgentService service) {
-        managementService.addOrUpdateService(service);
-        return EntityModel.of(service, linkTo(methodOn(ManagementController.class)
+    public EntityModel<AgentService> newService(@Valid @RequestBody AgentServiceDTO service) {
+        String agentId = getAuthUserId();
+        AgentService savedService = managementService.addOrUpdateService(agentId, service);
+        return EntityModel.of(savedService, linkTo(methodOn(ManagementController.class)
                 .getCurrentAgent()).withRel("therapist"));
     }
 
@@ -140,7 +147,12 @@ public class ManagementController {
     }
 
     private String getAuthUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return ((AgentDetails) authentication.getPrincipal()).getAgent().getId();
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            return ((AgentDetails) authentication.getPrincipal()).getAgent().getId();
+        } catch (Exception ex) {
+            return null;
+        }
+
     }
 }

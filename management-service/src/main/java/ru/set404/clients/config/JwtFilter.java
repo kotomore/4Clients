@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -53,6 +54,10 @@ public class JwtFilter extends OncePerRequestFilter {
         } catch (AuthException ex) {
             httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     "Invalid JWT Token");
+        }
+        catch (UsernameNotFoundException ex) {
+            httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                    ex.getMessage());
         }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);
