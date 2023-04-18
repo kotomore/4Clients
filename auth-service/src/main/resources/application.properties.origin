@@ -1,7 +1,6 @@
 
 
 
-spring.data.mongodb.uri==
 spring.data.mongodb.auto-index-creation=true
 
 spring.jpa.properties.hibernate.show_sql=true
@@ -9,8 +8,8 @@ spring.jpa.open-in-view=true
 
 springdoc.swagger-ui.path=/swagger-uil.html
 
-jwt.secret.access=
-jwt.secret.refresh=
+jwt.secret.access=efdwkjnfdskjndfjssdasfkjnkadfnsmefdwkjnfdskjndfjssfkjnkadfnsmefdwkjnfdskjndfjssfkjnkadfnsm
+jwt.secret.refresh=dfswrpkoemfkjnferjknwjkenjkwvdfswrpkoemfkjnferjknwjkenjkwvdfswrpkoemfkjnferjknwjkenjkwv
 jwt.secret.access.expired-minutes=60
 jwt.secret.refresh.expired-days=60
 
