@@ -26,7 +26,11 @@ public class RabbitMQListener {
 
     @RabbitListener(queues = "login", returnExceptions = "true")
     public JwtResponse login(JwtRequest authRequest) throws AuthException {
-        log.info("Try login : " + authRequest.getLogin());
+
+        if (authRequest == null || (authRequest.getLogin() == null || authRequest.getPassword() == null)) {
+            throw new AuthException("Invalid credentials");
+        }
+        log.info("Try authenticate with login - " + authRequest.getLogin());
         UsernamePasswordAuthenticationToken authInputToken =
                 new UsernamePasswordAuthenticationToken(authRequest.getLogin(), authRequest.getPassword());
         authenticationManager.authenticate(authInputToken);

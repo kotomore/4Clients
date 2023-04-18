@@ -27,7 +27,7 @@ public class AuthController {
     ResponseEntity<EntityModel<AgentDTO>> newTherapist(@RequestBody AgentDTO agentDTO) {
         registrationService.saveAgent(agentDTO);
         return ResponseEntity
-                .created(linkTo(methodOn(ManagementController.class).getCurrentTherapist()).toUri()).build();
+                .ok().body(EntityModel.of(agentDTO));
     }
 
     @PostMapping("/login")

@@ -17,7 +17,7 @@ public class AgentModelAssembler implements RepresentationModelAssembler<AgentDT
     public EntityModel<AgentDTO> toModel(AgentDTO entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(ManagementController.class)
-                        .getCurrentTherapist())
+                        .getCurrentAgent())
                         .withSelfRel());
     }
 

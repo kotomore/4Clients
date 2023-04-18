@@ -43,14 +43,14 @@ public class ManagementController {
     private final ManagementService managementService;
 
     @GetMapping()
-    public EntityModel<AgentDTO> getCurrentTherapist() {
+    public EntityModel<AgentDTO> getCurrentAgent() {
         String agentId = getAuthUserId();
         AgentDTO agent = managementService.findAgentDTOById(agentId);
         return agentModelAssembler.toModel(agent);
     }
 
     @PutMapping
-    ResponseEntity<?> updateTherapist(@Valid @RequestBody AgentDTO newAgent) {
+    ResponseEntity<?> updateAgent(@Valid @RequestBody AgentDTO newAgent) {
         String agentId = getAuthUserId();
         managementService.updateAgent(agentId, newAgent);
         EntityModel<AgentDTO> entityModel = agentModelAssembler.toModel(newAgent);
@@ -61,7 +61,7 @@ public class ManagementController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<?> deleteTherapist() {
+    public ResponseEntity<?> deleteAgent() {
         String agentId = getAuthUserId();
         managementService.deleteTherapist(agentId);
         return ResponseEntity.noContent().build();
@@ -122,14 +122,14 @@ public class ManagementController {
         String therapistId = getAuthUserId();
         AgentService service = managementService.findService(therapistId);
         return EntityModel.of(service, linkTo(methodOn(ManagementController.class)
-                .getCurrentTherapist()).withRel("therapist"));
+                .getCurrentAgent()).withRel("therapist"));
     }
 
     @PostMapping("/services")
     public EntityModel<AgentService> newService(@Valid @RequestBody AgentService service) {
         managementService.addOrUpdateService(service);
         return EntityModel.of(service, linkTo(methodOn(ManagementController.class)
-                .getCurrentTherapist()).withRel("therapist"));
+                .getCurrentAgent()).withRel("therapist"));
     }
 
     @GetMapping("/clients")

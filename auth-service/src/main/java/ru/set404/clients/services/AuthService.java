@@ -32,7 +32,8 @@ public class AuthService {
         try {
             authenticationManager.authenticate(authInputToken);
         } catch (BadCredentialsException e) {
-            return new JwtResponse(null, null);
+            throw new AuthException("Bad credentials");
+//            return new JwtResponse(null, null);
         }
 
         final Agent agent = ((AgentDetails) service.loadUserByUsername(authRequest.getLogin())).getAgent();
