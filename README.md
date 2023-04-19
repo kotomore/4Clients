@@ -13,6 +13,8 @@ http://45.159.249.5:8091/swagger-ui/index.html
 <br>
 <b>Select API definition (Management & Client)</b>
 
+## Sample
+<b>Clients side - </b>http://a90527jl.beget.tech/dist/
 ## Install
 Fill in the properties file and:
 ```
