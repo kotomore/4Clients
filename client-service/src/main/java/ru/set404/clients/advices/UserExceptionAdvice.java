@@ -12,28 +12,26 @@ import ru.set404.clients.exceptions.AgentNotFoundException;
 import ru.set404.clients.exceptions.AgentServiceNotFoundException;
 import ru.set404.clients.exceptions.TimeNotAvailableException;
 
-import javax.management.ServiceNotFoundException;
-
 @ControllerAdvice
 public class UserExceptionAdvice {
 
     @ExceptionHandler(value = {TimeNotAvailableException.class})
-    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> timeNotAvailableException(TimeNotAvailableException ex) {
-        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NOT_ACCEPTABLE);
+        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.OK);
     }
 
     @ResponseBody
     @ExceptionHandler(AgentServiceNotFoundException.class)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> serviceNotFoundHandler(AgentServiceNotFoundException ex) {
-        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.OK);
     }
 
     @ResponseBody
     @ExceptionHandler(AgentNotFoundException.class)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> agentNotFoundHandler(AgentNotFoundException ex) {
-        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.OK);
     }
 }

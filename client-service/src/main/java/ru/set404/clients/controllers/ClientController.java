@@ -42,13 +42,6 @@ private final ClientService clientService;
     @GetMapping("/availableTimes")
     public ResponseEntity<?> availableTimes(@RequestParam String agentId, @RequestParam LocalDate date) {
         List<LocalTime> availableTimes = clientService.findAvailableTimes(agentId, date);
-        if (availableTimes.isEmpty())
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
-                    .body(Problem.create()
-                            .withTitle("Not found")
-                            .withDetail("There is no available time for appointment to date - " + date));
         return new ResponseEntity<>(availableTimes, HttpStatus.OK);
     }
 
@@ -57,14 +50,6 @@ private final ClientService clientService;
     public ResponseEntity<?> availableDates(@RequestParam String agentId, @RequestParam LocalDate date) {
 
         List<LocalDate> availableDates = clientService.findAvailableDates(agentId, date);
-
-        if (availableDates.isEmpty())
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
-                    .body(Problem.create()
-                            .withTitle("Not found")
-                            .withDetail("There is no available date for appointment to month - " + date.getMonth()));
         return new ResponseEntity<>(availableDates, HttpStatus.OK);
     }
 

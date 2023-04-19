@@ -16,9 +16,9 @@ public class UserExceptionAdvice {
 
     @ResponseBody
     @ExceptionHandler(ClientNotFoundException.class)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> clientNotFoundHandler(ClientNotFoundException ex) {
-        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.OK);
     }
 
     @ResponseBody
@@ -30,23 +30,23 @@ public class UserExceptionAdvice {
 
     @ResponseBody
     @ExceptionHandler(AgentNotFoundException.class)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> agentNotFoundHandler(AgentNotFoundException ex) {
-        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.OK);
     }
 
     @ResponseBody
     @ExceptionHandler(ServiceNotFoundException.class)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> serviceNotFoundHandler(ServiceNotFoundException ex) {
-        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.OK);
     }
 
     @ResponseBody
     @ExceptionHandler(AppointmentNotFoundException.class)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> appointmentNotFoundHandler(AppointmentNotFoundException ex) {
-        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.OK);
     }
 
     @ExceptionHandler(value = {TimeNotAvailableException.class})

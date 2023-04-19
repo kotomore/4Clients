@@ -15,13 +15,10 @@ import ru.set404.clients.repositories.AppointmentRepository;
 import ru.set404.clients.repositories.ScheduleRepository;
 import ru.set404.clients.repositories.ServiceRepository;
 
-import javax.management.ServiceNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,6 +64,7 @@ public class ClientService {
                 .findByAgentIdAndDateGreaterThanEqual(agentId, date)
                 .stream()
                 .map(Schedule::getDate)
+                .filter(scheduleDate -> scheduleDate.isAfter(LocalDate.now().minusDays(1)))
                 .collect(Collectors.toList());
         if (dates.isEmpty()) {
             throw new TimeNotAvailableException();
@@ -74,7 +72,21 @@ public class ClientService {
         return dates;
     }
 
-    public AgentServiceDTO findService(String agentId) throws ServiceNotFoundException {
+    public List<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
+        List<LocalTime> times = scheduleRepository.findByAgentIdAndDate(agentId, date)
+                .map(schedule -> schedule.getAvailableSlots()
+                        .stream()
+                        .map(TimeSlot::getStartTime)
+                        .filter(startTime -> date.isAfter(LocalDate.now()) || (date.isEqual(LocalDate.now()) && startTime.isAfter(LocalTime.now())))
+                        .collect(Collectors.toList()))
+                .orElseThrow(TimeNotAvailableException::new);
+        if (times.isEmpty()) {
+            throw new TimeNotAvailableException();
+        }
+        return times;
+    }
+
+    public AgentServiceDTO findService(String agentId) {
         AgentService agentService = serviceRepository
                 .findByAgentId(agentId)
                 .orElseThrow(() -> new AgentServiceNotFoundException(agentId));
@@ -86,20 +98,5 @@ public class ClientService {
         agentServiceDTO.setAgentPhone(agent.getPhone());
 
         return agentServiceDTO;
-    }
-
-    public List<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
-        List<LocalTime> times;
-
-        Optional<Schedule> schedules = scheduleRepository.findByAgentIdAndDate(agentId, date);
-        if (schedules.isPresent()) {
-            times = schedules.get().getAvailableSlots()
-                    .stream()
-                    .map(TimeSlot::getStartTime)
-                    .collect(Collectors.toList());
-        } else {
-            throw new TimeNotAvailableException();
-        }
-        return times;
     }
 }
