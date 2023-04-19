@@ -44,27 +44,38 @@ public class ClientService {
         Appointment appointment = new Appointment();
         appointment.setServiceId(appointmentDTO.getServiceId());
         appointment.setAgentId(appointmentDTO.getAgentId());
+        appointment.setDate(appointmentDTO.getStartTime().toLocalDate());
         appointment.setTimeSlot(timeSlot);
         appointment.setClient(modelMapper.map(appointmentDTO.getClient(), Client.class));
 
-        appointmentRepository.save(appointment);
         updateSchedule(appointmentDTO.getAgentId(), appointmentDTO.getStartTime().toLocalDate(), timeSlot);
+        appointmentRepository.save(appointment);
     }
 
     private void updateSchedule(String agentId, LocalDate date, TimeSlot timeSlot) {
         Schedule updatedSchedule = scheduleRepository.findByAgentIdAndDate(agentId, date).orElseThrow(TimeNotAvailableException::new);
-        updatedSchedule.getAvailableSlots().remove(timeSlot);
+        if (updatedSchedule.getAvailableSlots().contains(timeSlot)) {
+            updatedSchedule.getAvailableSlots().remove(timeSlot);
+            if (updatedSchedule.getAvailableSlots().isEmpty()) {
+                scheduleRepository.delete(updatedSchedule);
+            } else {
+                scheduleRepository.save(updatedSchedule);
+            }
+        } else {
+            throw new TimeNotAvailableException();
+        }
 
-        scheduleRepository.save(updatedSchedule);
     }
 
-
     public List<LocalDate> findAvailableDates(String agentId, LocalDate date) {
-        List<LocalDate> dates = scheduleRepository
-                .findByAgentIdAndDateGreaterThanEqual(agentId, date)
+        List<LocalDate> dates = scheduleRepository.findByAgentIdAndDateAfter(agentId, date)
                 .stream()
                 .map(Schedule::getDate)
-                .filter(scheduleDate -> scheduleDate.isAfter(LocalDate.now().minusDays(1)))
+                .filter(scheduleDate -> scheduleRepository.findByAgentIdAndDate(agentId, scheduleDate)
+                        .map(Schedule::getAvailableSlots)
+                        .filter(timeSlots -> !timeSlots.isEmpty() || !scheduleDate.equals(LocalDate.now()))
+                        .filter(timeSlots -> timeSlots.stream().anyMatch(timeSlot -> timeSlot.getStartTime().isAfter(LocalTime.now())))
+                        .isPresent())
                 .collect(Collectors.toList());
         if (dates.isEmpty()) {
             throw new TimeNotAvailableException();
@@ -72,7 +83,8 @@ public class ClientService {
         return dates;
     }
 
-    public List<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
+
+        public List<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
         List<LocalTime> times = scheduleRepository.findByAgentIdAndDate(agentId, date)
                 .map(schedule -> schedule.getAvailableSlots()
                         .stream()

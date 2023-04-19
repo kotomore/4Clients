@@ -80,8 +80,22 @@ public class ManagementService {
     }
 
     public void deleteAppointment(String agentId, String appointmentId) {
+        Optional<Appointment> appointment = appointmentRepository.findByIdAndAgentId(appointmentId, agentId);
+        Optional<Schedule> oldSchedule = scheduleRepository.findByAgentIdAndDate(agentId, appointment.map(Appointment::getDate)
+                .orElseThrow(() -> new AppointmentNotFoundException(agentId)));
+
+        oldSchedule.ifPresentOrElse(schedule -> {
+            List<TimeSlot> timeSlots = new ArrayList<>(schedule.getAvailableSlots());
+            appointment.map(Appointment::getTimeSlot).ifPresent(timeSlots::remove);
+            Schedule updatedSchedule = new Schedule(schedule.getId(), agentId, schedule.getDate(), timeSlots);
+            scheduleRepository.save(updatedSchedule);
+        }, () -> {
+            throw new RuntimeException("Schedule not found");
+        });
+
         appointmentRepository.deleteByIdAndAgentId(appointmentId, agentId);
     }
+
 
     public Agent findAgentById(String agentId) {
         return agentRepository.findById(agentId)
@@ -107,12 +121,22 @@ public class ManagementService {
 
     @Transactional
     public void addAvailableTime(String agentId, TimeSlotDTO timeSlotDTO) {
+
         List<TimeSlot> timeSlots = createTimeSlots(timeSlotDTO);
 
-        List<Schedule> schedules = new ArrayList<>();
+        List<Appointment> appointments = appointmentRepository.findByAgentIdAndDateAfter(agentId, timeSlotDTO.getDateStart());
+        List<LocalDateTime> appointedTime = appointments
+                .stream()
+                .map(appointment -> LocalDateTime.of(appointment.getDate(), appointment.getTimeSlot().getStartTime())).toList();
+
         for (LocalDate date = timeSlotDTO.getDateStart();
-             date.isBefore(timeSlotDTO.getDateEnd().plusDays(1));
+             !date.isAfter(timeSlotDTO.getDateEnd());
              date = date.plusDays(1)) {
+
+            LocalDate finalDate = date;
+            List<TimeSlot> timeSlotsWithoutAppointment = timeSlots.stream()
+                    .filter(timeSlot -> !appointedTime.contains(LocalDateTime.of(finalDate, timeSlot.getStartTime())))
+                    .collect(Collectors.toList());
 
             Optional<Schedule> oldSchedule = scheduleRepository.findByAgentIdAndDate(agentId, date);
 
@@ -120,19 +144,22 @@ public class ManagementService {
             oldSchedule.ifPresent(value -> schedule.setId(value.getId()));
             schedule.setDate(date);
             schedule.setAgentId(agentId);
-            schedule.setAvailableSlots(timeSlots);
+            schedule.setAvailableSlots(timeSlotsWithoutAppointment);
 
-            schedules.add(schedule);
+            if (!timeSlotsWithoutAppointment.isEmpty()) {
+                scheduleRepository.save(schedule);
+            } else {
+                scheduleRepository.deleteByAgentIdAndDate(agentId, date);
+            }
         }
-        scheduleRepository.saveAll(schedules);
     }
 
     private List<TimeSlot> createTimeSlots(TimeSlotDTO timeSlotDTO) {
         List<TimeSlot> timeSlots = new ArrayList<>();
 
         int serviceDuration = serviceRepository.findById(timeSlotDTO.getServiceId())
-                .map(ru.set404.clients.models.AgentService::getDuration)
-                .orElseThrow(() -> new IllegalArgumentException("Service not found"));
+                .map(AgentService::getDuration)
+                .orElseThrow(() -> new ServiceNotFoundException("Service not found"));
 
         for (LocalDateTime date = LocalDate.now().atTime(timeSlotDTO.getTimeStart());
              date.isBefore(LocalDate.now().atTime(timeSlotDTO.getTimeEnd()));
@@ -142,8 +169,10 @@ public class ManagementService {
             TimeSlot timeSlot = new TimeSlot(date.toLocalTime(), end.toLocalTime());
             timeSlots.add(timeSlot);
         }
+
         return timeSlots;
     }
+
 
     public void deleteAvailableTime(String agentId, LocalDate date) {
         scheduleRepository.deleteByAgentIdAndDate(agentId, date);
@@ -164,7 +193,7 @@ public class ManagementService {
                 .map(Appointment::getClient)
                 .collect(Collectors.toList());
 
-        if (clients.size() > 0) {
+        if (!clients.isEmpty()) {
             return clients;
         } else {
             throw new ClientNotFoundException(agentId);
@@ -174,6 +203,9 @@ public class ManagementService {
     public AgentService addOrUpdateService(String agentId, AgentServiceDTO service) {
         AgentService newAgentService = modelMapper.map(service, AgentService.class);
         newAgentService.setAgentId(agentId);
+
+        Optional<AgentService> updatedAgentService = serviceRepository.findByAgentId(agentId);
+        updatedAgentService.ifPresent(agentService -> newAgentService.setId(agentService.getId()));
         return serviceRepository.save(newAgentService);
     }
 }

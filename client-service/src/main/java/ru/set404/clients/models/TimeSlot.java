@@ -21,7 +21,7 @@ public class TimeSlot {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TimeSlot timeSlot = (TimeSlot) o;
-        return Objects.equals(startTime, timeSlot.startTime) && Objects.equals(endTime, timeSlot.endTime);
+        return startTime.equals(timeSlot.startTime) && endTime.equals(timeSlot.endTime);
     }
 
     @Override
