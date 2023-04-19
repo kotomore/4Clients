@@ -1,17 +1,19 @@
-package ru.set404.clients.models;
+package ru.set404.clients.dto;
 
-import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class AgentService {
-    @Id
+public class AgentServiceDTO {
+    //Service side
     private String id;
     private String name;
     private String description;
     private double price;
     private int duration;
-    private String agentId;
+
+    //Agent side
+    private String agentName;
+    private String agentPhone;
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
 public class AuthExceptionAdvice {
@@ -24,7 +25,7 @@ public class AuthExceptionAdvice {
 
     }
 
-    @ExceptionHandler(value = {JwtException.class})
+    @ExceptionHandler(value = {ExpiredJwtException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException ex) {
         return new ResponseEntity<>(new ErrorMessage(ex.getMessage()), new HttpHeaders(), HttpStatus.FORBIDDEN);

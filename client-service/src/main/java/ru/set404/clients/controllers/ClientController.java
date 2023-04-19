@@ -9,12 +9,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.set404.clients.dto.AgentServiceDTO;
 import ru.set404.clients.dto.AppointmentDTO;
+import ru.set404.clients.models.AgentService;
 import ru.set404.clients.services.ClientService;
 
+import javax.management.ServiceNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,5 +66,12 @@ private final ClientService clientService;
                             .withTitle("Not found")
                             .withDetail("There is no available date for appointment to month - " + date.getMonth()));
         return new ResponseEntity<>(availableDates, HttpStatus.OK);
+    }
+
+    @CrossOrigin
+    @GetMapping("/services")
+    public ResponseEntity<?> getService(@RequestParam String agentId) throws ServiceNotFoundException {
+        AgentServiceDTO service = clientService.findService(agentId);
+        return new ResponseEntity<>(service, HttpStatus.OK);
     }
 }

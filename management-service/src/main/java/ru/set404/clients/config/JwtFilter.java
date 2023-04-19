@@ -1,6 +1,7 @@
 package ru.set404.clients.config;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -51,13 +52,9 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
-        } catch (AuthException ex) {
-            httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid JWT Token");
-        }
-        catch (UsernameNotFoundException ex) {
-            httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    ex.getMessage());
+        } catch (AuthException | UsernameNotFoundException | ExpiredJwtException ex) {
+            httpServletResponse.getWriter().write(ex.getMessage());
+
         }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);

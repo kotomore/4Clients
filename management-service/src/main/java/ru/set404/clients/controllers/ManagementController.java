@@ -128,7 +128,7 @@ public class ManagementController {
         String agentId = getAuthUserId();
         AgentService service = managementService.findService(agentId);
         return EntityModel.of(service, linkTo(methodOn(ManagementController.class)
-                .getCurrentAgent()).withRel("therapist"));
+                .getCurrentAgent()).withRel("agent"));
     }
 
     @PostMapping("/services")
@@ -136,7 +136,7 @@ public class ManagementController {
         String agentId = getAuthUserId();
         AgentService savedService = managementService.addOrUpdateService(agentId, service);
         return EntityModel.of(savedService, linkTo(methodOn(ManagementController.class)
-                .getCurrentAgent()).withRel("therapist"));
+                .getCurrentAgent()).withRel("agent"));
     }
 
     @GetMapping("/clients")
@@ -150,7 +150,7 @@ public class ManagementController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             return ((AgentDetails) authentication.getPrincipal()).getAgent().getId();
-        } catch (Exception ex) {
+        } catch (ClassCastException ex) {
             return null;
         }
 

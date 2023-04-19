@@ -153,7 +153,7 @@ public class ManagementService {
         agentRepository.deleteById(agentId);
     }
 
-    public ru.set404.clients.models.AgentService findService(String agentId) {
+    public AgentService findService(String agentId) {
         return serviceRepository.findByAgentId(agentId).orElseThrow(() -> new ServiceNotFoundException(agentId));
     }
 
