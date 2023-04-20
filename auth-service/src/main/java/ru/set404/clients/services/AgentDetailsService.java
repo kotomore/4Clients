@@ -19,7 +19,7 @@ public class AgentDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        Optional<Agent> agent = agentRepository.findTherapistByPhone(s);
+        Optional<Agent> agent = agentRepository.findAgentByPhone(s);
 
         if (agent.isEmpty())
             throw new UsernameNotFoundException(String.format("User with phone - %s not found", s));

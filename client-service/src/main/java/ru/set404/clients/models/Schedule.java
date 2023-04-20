@@ -13,6 +13,7 @@ public class Schedule {
     @Id
     private String id;
     private String agentId;
+    private String serviceId;
     private LocalDate date;
     private List<TimeSlot> availableSlots;
 }

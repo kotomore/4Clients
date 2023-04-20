@@ -68,23 +68,40 @@ public class ClientService {
     }
 
     public List<LocalDate> findAvailableDates(String agentId, LocalDate date) {
-        List<LocalDate> dates = scheduleRepository.findByAgentIdAndDateAfter(agentId, date)
+        List<Schedule> schedules = scheduleRepository
+                .findByAgentIdAndDateAfter(agentId, date);
+
+        List<LocalDate> dates = schedules
                 .stream()
                 .map(Schedule::getDate)
-                .filter(scheduleDate -> scheduleRepository.findByAgentIdAndDate(agentId, scheduleDate)
-                        .map(Schedule::getAvailableSlots)
-                        .filter(timeSlots -> !timeSlots.isEmpty() || !scheduleDate.equals(LocalDate.now()))
-                        .filter(timeSlots -> timeSlots.stream().anyMatch(timeSlot -> timeSlot.getStartTime().isAfter(LocalTime.now())))
-                        .isPresent())
                 .collect(Collectors.toList());
+
+        for (Schedule schedule : schedules) {
+            if (schedule.getAvailableSlots().isEmpty()) {
+                dates.remove(schedule.getDate());
+                continue;
+            }
+            if (schedule.getDate().equals(LocalDate.now())) {
+                int count = 0;
+                for (TimeSlot timeSlot : schedule.getAvailableSlots()) {
+                    if (timeSlot.getStartTime().isAfter(LocalTime.now())) {
+                        count++;
+                        break;
+                    }
+                }
+                if (count == 0) {
+                    dates.remove(schedule.getDate());
+                }
+            }
+        }
+
         if (dates.isEmpty()) {
             throw new TimeNotAvailableException();
         }
         return dates;
     }
 
-
-        public List<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
+    public List<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
         List<LocalTime> times = scheduleRepository.findByAgentIdAndDate(agentId, date)
                 .map(schedule -> schedule.getAvailableSlots()
                         .stream()

@@ -1,7 +1,6 @@
 package ru.set404.clients.services;
 
 import io.jsonwebtoken.Claims;
-import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,15 +24,14 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
 
-    public JwtResponse login(@NonNull JwtRequest authRequest) throws AuthException {
+    public JwtResponse login(@NonNull JwtRequest authRequest) {
         UsernamePasswordAuthenticationToken authInputToken =
                 new UsernamePasswordAuthenticationToken(authRequest.getLogin(),
                         authRequest.getPassword());
         try {
             authenticationManager.authenticate(authInputToken);
         } catch (BadCredentialsException e) {
-            throw new AuthException("Bad credentials");
-//            return new JwtResponse(null, null);
+            return new JwtResponse(null, null);
         }
 
         final Agent agent = ((AgentDetails) service.loadUserByUsername(authRequest.getLogin())).getAgent();
@@ -43,7 +41,7 @@ public class AuthService {
         return new JwtResponse(accessToken, refreshToken);
     }
 
-    public JwtResponse refresh(@NonNull String refreshToken) throws AuthException {
+    public JwtResponse refresh(@NonNull String refreshToken) {
         if (jwtProvider.validateRefreshToken(refreshToken)) {
             final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
             final String login = claims.getSubject();

@@ -1,7 +1,5 @@
 package ru.set404.clients.listeners;
 
-import jakarta.security.auth.message.AuthException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
@@ -9,11 +7,12 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.set404.clients.dto.security.JwtRequest;
 import ru.set404.clients.dto.security.JwtResponse;
 import ru.set404.clients.dto.security.RefreshJwtRequest;
+import ru.set404.clients.models.Agent;
 import ru.set404.clients.services.AuthService;
+import ru.set404.clients.services.RegistrationService;
 
 @EnableRabbit
 @Slf4j
@@ -22,14 +21,17 @@ import ru.set404.clients.services.AuthService;
 public class RabbitMQListener {
 
     private final AuthService authService;
+    private final RegistrationService registrationService;
     private final AuthenticationManager authenticationManager;
 
-    @RabbitListener(queues = "login", returnExceptions = "true")
-    public JwtResponse login(JwtRequest authRequest) throws AuthException {
+    @RabbitListener(queues = "register", returnExceptions = "true")
+    public Agent register(Agent agent) {
+        log.info("Register new agent with phone - " + agent.getPhone());
+        return registrationService.saveAgent(agent);
+    }
 
-        if (authRequest == null || (authRequest.getLogin() == null || authRequest.getPassword() == null)) {
-            throw new AuthException("Invalid credentials");
-        }
+    @RabbitListener(queues = "login", returnExceptions = "true")
+    public JwtResponse login(JwtRequest authRequest) {
         log.info("Try authenticate with login - " + authRequest.getLogin());
         UsernamePasswordAuthenticationToken authInputToken =
                 new UsernamePasswordAuthenticationToken(authRequest.getLogin(), authRequest.getPassword());
@@ -37,17 +39,15 @@ public class RabbitMQListener {
         return authService.login(authRequest);
     }
 
-    @RabbitListener(queues = "refresh")
-    public JwtResponse refresh_token(RefreshJwtRequest request) throws AuthException {
+    @RabbitListener(queues = "refresh", returnExceptions = "true")
+    public JwtResponse refresh_token(RefreshJwtRequest request) {
         log.info("refresh token");
-        if (request.refreshToken == null) throw new AuthException("Invalid token");
         return authService.refresh(request.getRefreshToken());
     }
 
-    @RabbitListener(queues = "access")
-    public JwtResponse getNewAccessToken(@Valid @RequestBody RefreshJwtRequest request) throws AuthException {
+    @RabbitListener(queues = "access", returnExceptions = "true")
+    public JwtResponse getNewAccessToken(RefreshJwtRequest request) {
         log.info("Get access token");
-        if (request.refreshToken == null) throw new AuthException("Invalid token");
         return authService.getAccessToken(request.getRefreshToken());
     }
 }

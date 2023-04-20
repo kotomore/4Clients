@@ -32,4 +32,9 @@ public class RabbitConfiguration {
     public Queue access() {
         return new Queue("access");
     }
+
+    @Bean
+    public Queue register() {
+        return new Queue("register");
+    }
 }

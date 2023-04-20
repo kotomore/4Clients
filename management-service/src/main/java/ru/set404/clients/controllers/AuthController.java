@@ -3,31 +3,35 @@ package ru.set404.clients.controllers;
 import jakarta.security.auth.message.AuthException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.set404.clients.dto.AgentDTO;
 import ru.set404.clients.dto.security.JwtRequest;
 import ru.set404.clients.dto.security.JwtResponse;
 import ru.set404.clients.dto.security.RefreshJwtRequest;
-import ru.set404.clients.services.RegistrationService;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import ru.set404.clients.exceptions.UserAlreadyExistException;
+import ru.set404.clients.models.Agent;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final RegistrationService registrationService;
+    private final ModelMapper modelMapper;
     private final AmqpTemplate template;
 
     @PostMapping("/registration")
-    ResponseEntity<EntityModel<AgentDTO>> newTherapist(@Valid @RequestBody AgentDTO agentDTO) {
-        registrationService.saveAgent(agentDTO);
+    ResponseEntity<EntityModel<Agent>> registration(@Valid @RequestBody AgentDTO agentDTO) {
+        Agent savedAgent = modelMapper.map(agentDTO, Agent.class);
+        Agent agent = (Agent) template.convertSendAndReceive("register", savedAgent);
+        if (agent == null || agent.getPhone() == null) throw new UserAlreadyExistException();
         return ResponseEntity
-                .ok().body(EntityModel.of(agentDTO));
+                .ok().body(EntityModel.of(agent));
     }
 
     @PostMapping("/login")

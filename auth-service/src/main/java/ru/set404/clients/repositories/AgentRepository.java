@@ -6,5 +6,5 @@ import ru.set404.clients.models.Agent;
 import java.util.Optional;
 
 public interface AgentRepository extends MongoRepository<Agent, String> {
-    Optional<Agent> findTherapistByPhone(String phone);
+    Optional<Agent> findAgentByPhone(String phone);
 }

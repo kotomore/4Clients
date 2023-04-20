@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import ru.set404.clients.dto.AgentDTO;
 import ru.set404.clients.dto.AgentServiceDTO;
@@ -108,7 +107,16 @@ public class ManagementController {
     }
 
     @PostMapping("/availabilities")
-    ResponseEntity<EntityModel<?>> newAvailableTime(@Valid @RequestBody TimeSlotDTO timeSlotDTO) {
+    ResponseEntity<?> newAvailableTime(@Valid @RequestBody TimeSlotDTO timeSlotDTO) {
+        final long MAX_DAYS_TO_ADD = 30;
+        if (timeSlotDTO.getDateEnd().toEpochDay() - timeSlotDTO.getDateStart().toEpochDay() > MAX_DAYS_TO_ADD) {
+            return ResponseEntity
+                    .status(HttpStatus.PAYLOAD_TOO_LARGE)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+                    .body(Problem.create()
+                            .withTitle("The date range")
+                            .withDetail("The date range should be within " + MAX_DAYS_TO_ADD + " days"));
+        }
         String agentId = getAuthUserId();
         managementService.addAvailableTime(agentId, timeSlotDTO);
         return ResponseEntity

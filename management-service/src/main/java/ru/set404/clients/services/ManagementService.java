@@ -138,7 +138,8 @@ public class ManagementService {
                     .filter(timeSlot -> !appointedTime.contains(LocalDateTime.of(finalDate, timeSlot.getStartTime())))
                     .collect(Collectors.toList());
 
-            Optional<Schedule> oldSchedule = scheduleRepository.findByAgentIdAndDate(agentId, date);
+            Optional<Schedule> oldSchedule = scheduleRepository
+                    .findByAgentIdAndDate(agentId, date);
 
             Schedule schedule = new Schedule();
             oldSchedule.ifPresent(value -> schedule.setId(value.getId()));
