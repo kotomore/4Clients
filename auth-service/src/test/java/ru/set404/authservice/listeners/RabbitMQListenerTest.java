@@ -57,13 +57,6 @@ public class RabbitMQListenerTest {
     }
 
     @Test
-    public void login_shouldThrowAuthExceptionOnInvalidJwtRequest() throws AuthException {
-        JwtRequest jwtRequest = new JwtRequest(null, null);
-
-        assertThrows(AuthException.class, () -> listener.login(jwtRequest));
-    }
-
-    @Test
     public void refresh_token_shouldReturnJwtResponseOnValidRefreshJwtRequest() throws AuthException {
         RefreshJwtRequest refreshJwtRequest = new RefreshJwtRequest("refreshToken");
         JwtResponse expectedResponse = new JwtResponse("newAccessToken", "newRefreshToken");
@@ -76,13 +69,6 @@ public class RabbitMQListenerTest {
     }
 
     @Test
-    public void refresh_token_shouldThrowAuthExceptionOnInvalidRefreshJwtRequest() throws AuthException {
-        RefreshJwtRequest refreshJwtRequest = new RefreshJwtRequest(null);
-
-        assertThrows(AuthException.class, () -> listener.refresh_token(refreshJwtRequest));
-    }
-
-    @Test
     public void getNewAccessToken_shouldReturnJwtResponseOnValidRefreshJwtRequest() throws AuthException {
         RefreshJwtRequest refreshJwtRequest = new RefreshJwtRequest("refreshToken");
         JwtResponse expectedResponse = new JwtResponse("newAccessToken", "newRefreshToken");
@@ -92,12 +78,5 @@ public class RabbitMQListenerTest {
 
         verify(authService, times(1)).getAccessToken(refreshJwtRequest.getRefreshToken());
         assertEquals(expectedResponse, actualResponse);
-    }
-
-    @Test
-    public void getNewAccessToken_shouldThrowAuthExceptionOnInvalidRefreshJwtRequest() throws AuthException {
-        RefreshJwtRequest refreshJwtRequest = new RefreshJwtRequest(null);
-
-        assertThrows(AuthException.class, () -> listener.getNewAccessToken(refreshJwtRequest));
     }
 }

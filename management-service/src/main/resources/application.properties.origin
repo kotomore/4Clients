@@ -9,14 +9,14 @@ springdoc.swagger-ui.path=/swagger-ui.html
 management.endpoints.web.cors.allowed-headers=*
 
 springdoc.swagger-ui.urls[0].name=Management API
-springdoc.swagger-ui.urls[0].url=http://localhost:8081/v3/api-docs
+springdoc.swagger-ui.urls[0].url=http://localhost:8091/v3/api-docs
 
 springdoc.swagger-ui.urls[1].name=Client API
-springdoc.swagger-ui.urls[1].url=http://localhost:8082/v3/api-docs
+springdoc.swagger-ui.urls[1].url=http://localhost:8092/v3/api-docs
 
 jwt.secret.access=efdwkjnfdskjndfjssdasfkjnkadfnsmefdwkjnfdskjndfjssfkjnkadfnsmefdwkjnfdskjndfjssfkjnkadfnsm
 
-server.port=8081
+server.port=8091
 
 server.forward-headers-strategy=framework
 spring.rabbitmq.host=localhost

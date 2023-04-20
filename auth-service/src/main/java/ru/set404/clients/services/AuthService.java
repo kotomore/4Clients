@@ -31,7 +31,7 @@ public class AuthService {
         try {
             authenticationManager.authenticate(authInputToken);
         } catch (BadCredentialsException e) {
-            return new JwtResponse(null, null);
+            return new JwtResponse();
         }
 
         final Agent agent = ((AgentDetails) service.loadUserByUsername(authRequest.getLogin())).getAgent();
@@ -54,7 +54,7 @@ public class AuthService {
                 return new JwtResponse(accessToken, newRefreshToken);
             }
         }
-        return new JwtResponse(null, null);
+        return new JwtResponse();
     }
 
     public JwtResponse getAccessToken(@NonNull String refreshToken) {
@@ -68,6 +68,6 @@ public class AuthService {
                 return new JwtResponse(accessToken, null);
             }
         }
-        return new JwtResponse(null, null);
+        return new JwtResponse();
     }
 }
