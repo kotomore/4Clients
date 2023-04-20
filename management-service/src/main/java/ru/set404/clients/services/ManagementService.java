@@ -30,11 +30,9 @@ public class ManagementService {
     private final ScheduleRepository scheduleRepository;
     private final AppointmentRepository appointmentRepository;
     private final ServiceRepository serviceRepository;
-
     private final ModelMapper modelMapper;
     private final AgentRepository agentRepository;
     private final PasswordEncoder passwordEncoder;
-
 
     public List<Appointment> findAllAppointments(String agentId) {
 
@@ -50,7 +48,6 @@ public class ManagementService {
         return appointmentRepository.findByIdAndAgentId(appointmentId, agentId)
                 .orElseThrow(() -> new AppointmentNotFoundException(agentId));
     }
-
 
     public List<LocalDate> findAvailableDates(String agentId, LocalDate date) {
         List<LocalDate> dates = scheduleRepository
@@ -95,7 +92,6 @@ public class ManagementService {
 
         appointmentRepository.deleteByIdAndAgentId(appointmentId, agentId);
     }
-
 
     public Agent findAgentById(String agentId) {
         return agentRepository.findById(agentId)
@@ -174,7 +170,6 @@ public class ManagementService {
         return timeSlots;
     }
 
-
     public void deleteAvailableTime(String agentId, LocalDate date) {
         scheduleRepository.deleteByAgentIdAndDate(agentId, date);
     }
@@ -185,6 +180,15 @@ public class ManagementService {
 
     public AgentService findService(String agentId) {
         return serviceRepository.findByAgentId(agentId).orElseThrow(() -> new ServiceNotFoundException(agentId));
+    }
+
+    public Agent findOrCreateAgentByPhone(String phone) {
+        return agentRepository.findAgentByPhone(phone)
+                .orElseGet(() -> {
+                    Agent newAgent = new Agent();
+                    newAgent.setPhone(phone);
+                    return agentRepository.save(newAgent);
+                });
     }
 
     public List<Client> findClients(String agentId) {

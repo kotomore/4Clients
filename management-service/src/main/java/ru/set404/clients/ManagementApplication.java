@@ -11,7 +11,6 @@ import ru.set404.clients.config.RabbitConfiguration;
 @SpringBootApplication
 @Import(RabbitConfiguration.class)
 public class ManagementApplication {
-
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
