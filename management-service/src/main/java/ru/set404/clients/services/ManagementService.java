@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.set404.clients.dto.AgentDTO;
 import ru.set404.clients.dto.AgentServiceDTO;
 import ru.set404.clients.dto.TimeSlotDTO;
+import ru.set404.clients.dto.telegram.ScheduleMSG;
 import ru.set404.clients.exceptions.*;
 import ru.set404.clients.models.*;
 import ru.set404.clients.repositories.AgentRepository;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -105,9 +107,11 @@ public class ManagementService {
 
     public void updateAgent(String agentId, AgentDTO agentDTO) {
         Agent agent = findAgentById(agentId);
-        agent.setName(agentDTO.getName());
-        agent.setPhone(agentDTO.getPhone());
-        agent.setPassword(passwordEncoder.encode(agentDTO.getPassword()));
+
+        if (agentDTO.getName() != null) agent.setName(agentDTO.getName());
+        if (agentDTO.getPhone() != null) agent.setPhone(agentDTO.getPhone());
+        if (agentDTO.getPassword() != null) agent.setPassword(passwordEncoder.encode(agentDTO.getPassword()));
+
         try {
             agentRepository.save(agent);
         } catch (DuplicateKeyException exception) {
@@ -140,6 +144,8 @@ public class ManagementService {
             Schedule schedule = new Schedule();
             oldSchedule.ifPresent(value -> schedule.setId(value.getId()));
             schedule.setDate(date);
+            schedule.setWorkTimeStart(timeSlotDTO.getTimeStart());
+            schedule.setWorkTimeEnd(timeSlotDTO.getTimeEnd());
             schedule.setAgentId(agentId);
             schedule.setAvailableSlots(timeSlotsWithoutAppointment);
 
@@ -166,8 +172,27 @@ public class ManagementService {
             TimeSlot timeSlot = new TimeSlot(date.toLocalTime(), end.toLocalTime());
             timeSlots.add(timeSlot);
         }
-
         return timeSlots;
+    }
+
+    public ScheduleMSG findAvailableTime(String agentId) {
+        List<Schedule> schedules = scheduleRepository.findByAgentId(agentId);
+        if (!schedules.isEmpty()) {
+            schedules.sort(Comparator.comparing(Schedule::getDate));
+
+            ScheduleMSG scheduleMSG = new ScheduleMSG();
+            scheduleMSG.setServiceId(findService(agentId).getId());
+            scheduleMSG.setDateStart(schedules.get(0).getDate().toString());
+            scheduleMSG.setDateEnd(schedules.get(schedules.size() - 1).getDate().toString());
+            scheduleMSG.setTimeStart(schedules.get(0).getWorkTimeStart().toString());
+            scheduleMSG.setTimeEnd(schedules.get(0).getWorkTimeEnd().toString());
+            scheduleMSG.setAgentId(agentId);
+            return scheduleMSG;
+        } else {
+            ScheduleMSG scheduleMSG = new ScheduleMSG();
+            scheduleMSG.setAgentId(agentId);
+            return scheduleMSG;
+        }
     }
 
     public void deleteAvailableTime(String agentId, LocalDate date) {
@@ -207,10 +232,26 @@ public class ManagementService {
 
     public AgentService addOrUpdateService(String agentId, AgentServiceDTO service) {
         AgentService newAgentService = modelMapper.map(service, AgentService.class);
+
+
         newAgentService.setAgentId(agentId);
 
         Optional<AgentService> updatedAgentService = serviceRepository.findByAgentId(agentId);
         updatedAgentService.ifPresent(agentService -> newAgentService.setId(agentService.getId()));
         return serviceRepository.save(newAgentService);
+    }
+
+    public void addOrUpdateService(String agentId, AgentService service) {
+        AgentService newAgentService = serviceRepository.findByAgentId(service.getAgentId()).orElse(new AgentService());
+        if (service.getName() != null) newAgentService.setName(service.getName());
+        if (service.getDescription() != null) newAgentService.setDescription(service.getDescription());
+        if (service.getPrice() != 0d) newAgentService.setPrice(service.getPrice());
+        if (service.getDuration() != 0) newAgentService.setDuration(service.getDuration());
+
+        newAgentService.setAgentId(agentId);
+
+        Optional<AgentService> updatedAgentService = serviceRepository.findByAgentId(agentId);
+        updatedAgentService.ifPresent(agentService -> newAgentService.setId(agentService.getId()));
+        serviceRepository.save(newAgentService);
     }
 }

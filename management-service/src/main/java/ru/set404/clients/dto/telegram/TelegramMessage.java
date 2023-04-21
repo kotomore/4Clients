@@ -1,4 +1,4 @@
-package ru.set404.clients.dto;
+package ru.set404.clients.dto.telegram;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +12,8 @@ public class TelegramMessage {
     public enum Action {
         REGISTER_BOT,
         AGENT_INFO,
-        SERVICE_INFO
+        SERVICE_INFO,
+        SCHEDULES,
+        APPOINTMENTS
     }
 }
-

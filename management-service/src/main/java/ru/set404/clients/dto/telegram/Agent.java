@@ -1,4 +1,4 @@
-package ru.set404.telegramservice.models;
+package ru.set404.clients.dto.telegram;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

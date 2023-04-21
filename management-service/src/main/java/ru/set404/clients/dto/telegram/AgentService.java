@@ -1,6 +1,5 @@
-package ru.set404.telegramservice.models;
+package ru.set404.clients.dto.telegram;
 
-import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -11,4 +11,5 @@ public interface ScheduleRepository extends MongoRepository<Schedule, String> {
     List<Schedule> findByAgentIdAndDateGreaterThanEqual(String agentId, LocalDate date);
     void deleteByAgentIdAndDate(String agentId, LocalDate date);
     Optional<Schedule> findByAgentIdAndDate(String agentId, LocalDate date);
+    List<Schedule> findByAgentId(String agentId);
 }

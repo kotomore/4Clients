@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import ru.set404.telegramservice.telegram.WriteReadBot;
+import ru.set404.telegramservice.telegram.handlers.CallbackQueryHandler;
 import ru.set404.telegramservice.telegram.handlers.TelegramMessageHandler;
 
 
@@ -20,10 +21,11 @@ public class SpringConfig {
 
     @Bean
     public WriteReadBot springWebhookBot(SetWebhook setWebhook,
-                                         TelegramMessageHandler telegramMessageHandler) {
+                                         TelegramMessageHandler telegramMessageHandler,
+                                         CallbackQueryHandler callbackQueryHandler) {
         String botToken = telegramConfig.getBotToken();
 
-        WriteReadBot bot = new WriteReadBot(setWebhook, botToken, telegramMessageHandler);
+        WriteReadBot bot = new WriteReadBot(setWebhook, botToken, telegramMessageHandler, callbackQueryHandler);
 
         bot.setBotPath(telegramConfig.getWebhookPath());
         bot.setBotUsername(telegramConfig.getBotName());
