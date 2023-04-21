@@ -14,7 +14,6 @@ import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.repositories.TelegramUserRepository;
 import ru.set404.telegramservice.services.MessageService;
 
-import java.util.List;
 import java.util.Optional;
 
 @EnableRabbit
@@ -79,11 +78,9 @@ public class RabbitMQListener {
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.appointment"
     ))
-    public void receiveAppointmentMSG(@Payload List<AppointmentMSG> appointmentMSGS) {
-        if (!appointmentMSGS.isEmpty()) {
-            log.info("Message to telegram schedule for agent - " + appointmentMSGS.get(0).getAgentId());
-            TelegramUser user = repository.findByAgentId(appointmentMSGS.get(0).getAgentId()).orElse(new TelegramUser());
-            messageService.sendAgentAppointmentsMessage(user, appointmentMSGS);
-        }
+    public void receiveAppointmentMSG(@Payload AppointmentMSG appointmentMSG) {
+        log.info("Message to telegram schedule for agent - " + appointmentMSG.getAgentId());
+        TelegramUser user = repository.findByAgentId(appointmentMSG.getAgentId()).orElse(new TelegramUser());
+        messageService.sendAgentAppointmentsMessage(user, appointmentMSG);
     }
 }

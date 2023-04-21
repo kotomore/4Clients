@@ -9,8 +9,9 @@ import ru.set404.clients.models.TimeSlot;
 @Getter
 @Setter
 public class AppointmentMSG {
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private TimeSlot time;
+    private String date;
+    private String startTime;
+    private String endTime;
     private String serviceName;
     private ClientDTO client;
     private String agentId;

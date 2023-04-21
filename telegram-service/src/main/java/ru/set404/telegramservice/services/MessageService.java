@@ -14,8 +14,6 @@ import ru.set404.telegramservice.telegram.WriteReadBot;
 import ru.set404.telegramservice.telegram.keyboards.InlineKeyboardMaker;
 import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
 
-import java.util.List;
-
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -39,7 +37,7 @@ public class MessageService {
         if (user.getChatId() != null) {
             String answer = "Название: " + (service.getName() == null ? "" : service.getName()) + "\n" +
                     "Описание: " + (service.getDescription() == null ? "" : service.getDescription()) + "\n" +
-                    "Длительность: " + (service.getDuration() == 0 ? "" : service.getDuration())  + " мин.\n" +
+                    "Длительность: " + (service.getDuration() == 0 ? "" : service.getDuration()) + " мин.\n" +
                     "Цена: " + (service.getPrice() == 0d ? "" : service.getPrice()) + " .руб";
 
             SendMessage sendMessage = new SendMessage(user.getChatId(), answer);
@@ -67,21 +65,18 @@ public class MessageService {
         }
     }
 
-    public void sendAgentAppointmentsMessage(TelegramUser user, List<AppointmentMSG> appointmentMSGS) {
+    public void sendAgentAppointmentsMessage(TelegramUser user, AppointmentMSG appointmentMSG) {
         if (user.getChatId() != null) {
-            StringBuilder builder = new StringBuilder();
-            for (AppointmentMSG appointmentMSG : appointmentMSGS) {
-                builder.append("клиент:\n")
-                        .append("    Имя: ").append(appointmentMSG.getClient().getName()).append("\n")
-                        .append("    Телефон: ").append(appointmentMSG.getClient().getPhone()).append("\n")
-                        .append("Время:\n")
-                        .append("    Начало: ").append(appointmentMSG.getTime().getStartTime())
-                        .append("    Окончание: ").append(appointmentMSG.getTime().getEndTime());
-            }
+            String builder = "*Дата*: " + appointmentMSG.getDate() + "\n" +
+                    "*Клиент:*\n" +
+                    "    Имя: " + appointmentMSG.getClient().getName() + "\n" +
+                    "    Телефон: " + appointmentMSG.getClient().getPhone() + "\n" +
+                    "*Время*:\n" +
+                    "    Начало: " + appointmentMSG.getStartTime() + "\n" +
+                    "    Окончание: " + appointmentMSG.getEndTime();
 
-            SendMessage sendMessage = new SendMessage(user.getChatId(), builder.toString());
+            SendMessage sendMessage = new SendMessage(user.getChatId(), builder);
             sendMessage.enableMarkdown(true);
-            sendMessage.setReplyMarkup(inlineKeyboardMaker.getAgentInlineButton());
             try {
                 writeReadBot.execute(sendMessage);
             } catch (TelegramApiException tAe) {

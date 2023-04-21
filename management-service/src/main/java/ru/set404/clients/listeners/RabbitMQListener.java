@@ -9,7 +9,6 @@ import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import ru.set404.clients.dto.AgentDTO;
-import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.dto.ClientDTO;
 import ru.set404.clients.dto.TimeSlotDTO;
 import ru.set404.clients.dto.telegram.AppointmentMSG;
@@ -25,7 +24,6 @@ import ru.set404.clients.services.ManagementService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @EnableRabbit
@@ -77,24 +75,26 @@ public class RabbitMQListener {
             }
 
             case APPOINTMENTS -> {
-                List<Appointment> appointments = new ArrayList<>();
-                List<AppointmentMSG> appointmentMSGS = new ArrayList<>();
+                List<Appointment> appointments;
                 try {
                     appointments = managementService.findAllAppointments(message.getAgentId());
                     for (Appointment appointment : appointments) {
                         AppointmentMSG appointmentMSG = new AppointmentMSG();
-                        appointmentMSG.setTime(appointment.getTimeSlot());
+                        appointmentMSG.setStartTime(appointment.getTimeSlot().getStartTime().toString());
+                        appointmentMSG.setEndTime(appointment.getTimeSlot().getEndTime().toString());
+                        appointmentMSG.setDate(appointment.getDate().toString());
+                        appointmentMSG.setAgentId(message.getAgentId());
 
                         AgentService agentService = managementService.findService(message.getAgentId());
                         appointmentMSG.setServiceName(agentService.getId());
 
                         ClientDTO clientDTO = new ClientDTO(appointment.getClient().getName(), appointment.getClient().getPhone());
                         appointmentMSG.setClient(clientDTO);
+                        template.convertAndSend(telegramExchange.getName(), "telegram_key.appointment", appointmentMSG);
+
                     }
-                } catch (AppointmentNotFoundException ex) {
-                    appointmentMSGS.add(new AppointmentMSG());
+                } catch (AppointmentNotFoundException ignore) {
                 }
-                template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", appointmentMSGS);
             }
 
             case REGISTER_BOT -> {
@@ -103,6 +103,7 @@ public class RabbitMQListener {
             }
         }
     }
+
     @RabbitListener(queues = "telegram_update_service", returnExceptions = "false")
     public void receiveServiceUpdate(AgentService service) {
         managementService.addOrUpdateService(service.getAgentId(), service);
