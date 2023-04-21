@@ -1,4 +1,5 @@
 telegram.api-url=https://api.telegram.org/
+telegram.webhook-path=
 telegram.bot-name=
 telegram.bot-token=
 
