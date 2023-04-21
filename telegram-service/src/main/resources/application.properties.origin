@@ -1,0 +1,16 @@
+telegram.api-url=https://api.telegram.org/
+telegram.bot-name=
+telegram.bot-token=
+
+
+server.port=8093
+
+spring.datasource.url=jdbc:h2:file:./db/TestDataBase;AUTO_SERVER=TRUE
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=user
+spring.datasource.password=password
+
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.defer-datasource-initialization=true

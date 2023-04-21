@@ -55,6 +55,21 @@ services:
       - mongo
       - localRabbitMQ
 
+  telegram-service:
+    build: ./telegram-service
+    ports:
+      - "8093:8093"
+    container_name: telegram-service
+    environment:
+      - spring_rabbitmq_host=localRabbitMQ
+      -
+    links:
+      - localRabbitMQ
+    networks:
+      - mongo-net
+    depends_on:
+      - localRabbitMQ
+
   client-service:
     build: ./client-service
     ports:
