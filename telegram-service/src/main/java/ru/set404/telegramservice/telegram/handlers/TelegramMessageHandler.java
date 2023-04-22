@@ -63,6 +63,8 @@ public class TelegramMessageHandler {
                 if (user.isPresent()) {
                     try {
                         String fileName = "telegram-service/src/main/resources/frontend.html";
+                        System.out.println(Paths.get(fileName).toAbsolutePath());
+
                         String text = String.join("\n", Files.readAllLines(Paths.get(fileName)));
                         text = "`" + text.replace("${therapistId}", user.get().getAgentId()) + "`";
 

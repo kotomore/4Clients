@@ -30,7 +30,9 @@ https://t.me/clientsmanagement_bot
 <img  src="github-images/tg_image.jpg">
 
 ## Install
-git clone, rename application.properties.origin to <b>application.properties</b> file, change project root dir and:
+>git clone, rename and fill application.properties.origin to <b>application.properties</b> file, choose project root dir
+
+then
 ```
 mvn package -f auth-service/pom.xml
 mvn package -f client-service/pom.xml
