@@ -12,7 +12,7 @@ import ru.set404.telegramservice.dto.telegram.AppointmentMSG;
 import ru.set404.telegramservice.dto.telegram.ScheduleMSG;
 import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.repositories.TelegramUserRepository;
-import ru.set404.telegramservice.services.MessageService;
+import ru.set404.telegramservice.services.TelegramMessageService;
 
 import java.util.Optional;
 
@@ -22,7 +22,7 @@ import java.util.Optional;
 @Component
 public class RabbitMQListener {
     private TelegramUserRepository repository;
-    private MessageService messageService;
+    private TelegramMessageService telegramMessageService;
 
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "telegram_queue_to_agent", durable = "true"),
@@ -32,7 +32,7 @@ public class RabbitMQListener {
     public void receiveAgent(@Payload AgentMSG agentMSG) {
         log.info("Message to telegram agent info with agent id- " + agentMSG.getName());
         TelegramUser user = repository.findByPhone(agentMSG.getPhone()).orElse(new TelegramUser());
-        messageService.sendAgentInfoMessage(user, agentMSG);
+        telegramMessageService.sendAgentInfoMessage(user, agentMSG);
     }
 
     @RabbitListener(bindings = @QueueBinding(
@@ -43,7 +43,7 @@ public class RabbitMQListener {
     public void receiveService(@Payload AgentServiceMSG service) {
         log.info("Message to telegram service - with agent id " + service.getName());
         TelegramUser user = repository.findByAgentId(service.getAgentId()).orElse(new TelegramUser());
-        messageService.sendAgentServiceMessage(user, service);
+        telegramMessageService.sendAgentServiceMessage(user, service);
     }
 
     @RabbitListener(bindings = @QueueBinding(
@@ -58,7 +58,7 @@ public class RabbitMQListener {
         if (user.isPresent()) {
             user.get().setAgentId(agentMSG.getId());
             repository.save(user.get());
-            messageService.sendSuccessRegMessage(user.get());
+            telegramMessageService.sendSuccessRegMessage(user.get());
         }
     }
 
@@ -70,7 +70,7 @@ public class RabbitMQListener {
     public void receiveScheduleMSG(@Payload ScheduleMSG scheduleMSG) {
         log.info("Message to telegram schedule for agent - " + scheduleMSG.getAgentId());
         TelegramUser user = repository.findByAgentId(scheduleMSG.getAgentId()).orElse(new TelegramUser());
-        messageService.sendAgentSchedule(user, scheduleMSG);
+        telegramMessageService.sendAgentSchedule(user, scheduleMSG);
     }
 
     @RabbitListener(bindings = @QueueBinding(
@@ -81,6 +81,6 @@ public class RabbitMQListener {
     public void receiveAppointmentMSG(@Payload AppointmentMSG appointmentMSG) {
         log.info("Message to telegram schedule for agent - " + appointmentMSG.getAgentId());
         TelegramUser user = repository.findByAgentId(appointmentMSG.getAgentId()).orElse(new TelegramUser());
-        messageService.sendAgentAppointmentsMessage(user, appointmentMSG);
+        telegramMessageService.sendAgentAppointmentsMessage(user, appointmentMSG);
     }
 }

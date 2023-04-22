@@ -9,7 +9,6 @@ import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import ru.set404.clients.dto.AgentDTO;
-import ru.set404.clients.dto.ClientDTO;
 import ru.set404.clients.dto.TimeSlotDTO;
 import ru.set404.clients.dto.telegram.AppointmentMSG;
 import ru.set404.clients.dto.telegram.ScheduleMSG;
@@ -84,12 +83,12 @@ public class RabbitMQListener {
                         appointmentMSG.setEndTime(appointment.getTimeSlot().getEndTime().toString());
                         appointmentMSG.setDate(appointment.getDate().toString());
                         appointmentMSG.setAgentId(message.getAgentId());
+                        appointmentMSG.setClientName(appointment.getClient().getName());
+                        appointmentMSG.setClientPhone(appointment.getClient().getPhone());
 
                         AgentService agentService = managementService.findService(message.getAgentId());
                         appointmentMSG.setServiceName(agentService.getId());
 
-                        ClientDTO clientDTO = new ClientDTO(appointment.getClient().getName(), appointment.getClient().getPhone());
-                        appointmentMSG.setClient(clientDTO);
                         template.convertAndSend(telegramExchange.getName(), "telegram_key.appointment", appointmentMSG);
 
                     }

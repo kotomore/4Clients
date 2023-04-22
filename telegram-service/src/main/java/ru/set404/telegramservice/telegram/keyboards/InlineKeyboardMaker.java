@@ -3,8 +3,8 @@ package ru.set404.telegramservice.telegram.keyboards;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.set404.telegramservice.enums.CallbackActionDefinitionEnum;
-import ru.set404.telegramservice.enums.CallbackActionPartsEnum;
+import ru.set404.telegramservice.constants.ActionDefinitionEnum;
+import ru.set404.telegramservice.constants.ActionPartEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,17 +16,17 @@ public class InlineKeyboardMaker {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(getButton(
                 "Название",
-                CallbackActionPartsEnum.SERVICE_.name() + CallbackActionDefinitionEnum.NAME.name()
+                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.NAME.name()
         ));
         rowList.add(getButton(
                 "Описание",
-                CallbackActionPartsEnum.SERVICE_.name() + CallbackActionDefinitionEnum.DESCRIPTION.name()        ));
+                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.DESCRIPTION.name()        ));
         rowList.add(getButton(
                 "Длительность",
-                CallbackActionPartsEnum.SERVICE_.name() + CallbackActionDefinitionEnum.DURATION.name()        ));
+                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.DURATION.name()        ));
         rowList.add(getButton(
                 "Цена",
-                CallbackActionPartsEnum.SERVICE_.name() + CallbackActionDefinitionEnum.PRICE.name()        ));
+                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.PRICE.name()        ));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowList);
@@ -37,11 +37,11 @@ public class InlineKeyboardMaker {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(getButton(
                 "Ф.И.О.",
-                CallbackActionPartsEnum.AGENT_.name() + CallbackActionDefinitionEnum.NAME.name()
+                ActionPartEnum.AGENT_.name() + ActionDefinitionEnum.NAME.name()
         ));
         rowList.add(getButton(
                 "Пароль",
-                CallbackActionPartsEnum.AGENT_.name() + CallbackActionDefinitionEnum.PASSWORD.name()
+                ActionPartEnum.AGENT_.name() + ActionDefinitionEnum.PASSWORD.name()
         ));
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowList);
@@ -52,7 +52,7 @@ public class InlineKeyboardMaker {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(getButton(
                 "Изменить",
-                CallbackActionPartsEnum.SCHEDULE_.name() + CallbackActionDefinitionEnum.TIME.name()
+                ActionPartEnum.SCHEDULE_.name() + ActionDefinitionEnum.TIME.name()
         ));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();

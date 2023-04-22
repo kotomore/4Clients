@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Agent {
+public class AgentMSG {
     private String id;
     private String name;
     private String phone;

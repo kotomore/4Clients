@@ -1,16 +1,16 @@
 package ru.set404.telegramservice.telegram.util;
 
-import ru.set404.telegramservice.enums.CallbackActionDefinitionEnum;
-import ru.set404.telegramservice.enums.CallbackActionPartsEnum;
+import ru.set404.telegramservice.constants.ActionDefinitionEnum;
+import ru.set404.telegramservice.constants.ActionPartEnum;
 
 import java.util.Objects;
 
-public record NeedAnswer(String chatId, CallbackActionPartsEnum actionPart, CallbackActionDefinitionEnum definition) {
+public record UserAwaitingResponse(String chatId, ActionPartEnum actionPart, ActionDefinitionEnum definition) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NeedAnswer that = (NeedAnswer) o;
+        UserAwaitingResponse that = (UserAwaitingResponse) o;
         return Objects.equals(chatId, that.chatId) && actionPart == that.actionPart && definition == that.definition;
     }
 }

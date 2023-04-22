@@ -17,7 +17,7 @@ import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class MessageService {
+public class TelegramMessageService {
     private ReplyKeyboardMaker replyKeyboardMaker;
     private InlineKeyboardMaker inlineKeyboardMaker;
     private WriteReadBot writeReadBot;
@@ -69,8 +69,8 @@ public class MessageService {
         if (user.getChatId() != null) {
             String builder = "*Дата*: " + appointmentMSG.getDate() + "\n" +
                     "*Клиент:*\n" +
-                    "    Имя: " + appointmentMSG.getClient().getName() + "\n" +
-                    "    Телефон: " + appointmentMSG.getClient().getPhone() + "\n" +
+                    "    Имя: " + appointmentMSG.getClientName() + "\n" +
+                    "    Телефон: " + appointmentMSG.getClientPhone() + "\n" +
                     "*Время*:\n" +
                     "    Начало: " + appointmentMSG.getStartTime() + "\n" +
                     "    Окончание: " + appointmentMSG.getEndTime();

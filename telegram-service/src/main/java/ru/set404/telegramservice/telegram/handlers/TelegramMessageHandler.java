@@ -7,19 +7,18 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.set404.telegramservice.constants.ActionDefinitionEnum;
+import ru.set404.telegramservice.constants.ActionPartEnum;
 import ru.set404.telegramservice.dto.telegram.AgentMSG;
 import ru.set404.telegramservice.dto.telegram.AgentServiceMSG;
 import ru.set404.telegramservice.dto.telegram.ScheduleMSG;
 import ru.set404.telegramservice.dto.telegram.TelegramMessage;
-import ru.set404.telegramservice.enums.CallbackActionDefinitionEnum;
-import ru.set404.telegramservice.enums.CallbackActionPartsEnum;
 import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.repositories.TelegramUserRepository;
 import ru.set404.telegramservice.services.RabbitService;
-import ru.set404.telegramservice.services.WaitAnswerService;
-import ru.set404.telegramservice.telegram.keyboards.InlineKeyboardMaker;
+import ru.set404.telegramservice.services.UserAwaitingService;
 import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
-import ru.set404.telegramservice.telegram.util.NeedAnswer;
+import ru.set404.telegramservice.telegram.util.UserAwaitingResponse;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -29,11 +28,9 @@ import java.util.Optional;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class TelegramMessageHandler {
-
-    InlineKeyboardMaker inlineKeyboardMaker;
     RabbitService rabbitService;
     TelegramUserRepository repository;
-    WaitAnswerService waitAnswerService;
+    UserAwaitingService userAwaitingService;
 
     public BotApiMethod<?> answerMessage(Message message) throws InterruptedException {
         String chatId = message.getChatId().toString();
@@ -58,36 +55,34 @@ public class TelegramMessageHandler {
                 user = repository.findByChatId(chatId);
                 user.ifPresent(telegramUser -> rabbitService.sendTelegramMessage(telegramUser.getAgentId(), TelegramMessage.Action.APPOINTMENTS));
                 return null;
-            case "test":
-                return sendScheduleMessage(chatId);
         }
 
-        if (waitAnswerService.contains(chatId)) {
-            NeedAnswer needAnswer = waitAnswerService.getWaiter(chatId);
-            CallbackActionPartsEnum actionPart = needAnswer.actionPart();
-            CallbackActionDefinitionEnum definition = needAnswer.definition();
+        if (userAwaitingService.contains(chatId)) {
+            UserAwaitingResponse userAwaitingResponse = userAwaitingService.getWaiter(chatId);
+            ActionPartEnum actionPart = userAwaitingResponse.actionPart();
+            ActionDefinitionEnum definition = userAwaitingResponse.definition();
 
-            if (actionPart == CallbackActionPartsEnum.SERVICE_) {
-                if (definition == CallbackActionDefinitionEnum.NAME) {
+            if (actionPart == ActionPartEnum.SERVICE_) {
+                if (definition == ActionDefinitionEnum.NAME) {
                     return updateAgentServiceName(message, chatId);
-                } else if (definition == CallbackActionDefinitionEnum.DESCRIPTION) {
+                } else if (definition == ActionDefinitionEnum.DESCRIPTION) {
                     return updateAgentServiceDescription(message, chatId);
-                } else if (definition == CallbackActionDefinitionEnum.DURATION) {
+                } else if (definition == ActionDefinitionEnum.DURATION) {
                     return updateAgentServiceDuration(message, chatId);
-                } else if (definition == CallbackActionDefinitionEnum.PRICE) {
+                } else if (definition == ActionDefinitionEnum.PRICE) {
                     return updateAgentServicePrice(message, chatId);
                 }
             }
 
-            if (actionPart == CallbackActionPartsEnum.AGENT_) {
-                if (definition == CallbackActionDefinitionEnum.NAME) {
+            if (actionPart == ActionPartEnum.AGENT_) {
+                if (definition == ActionDefinitionEnum.NAME) {
                     return updateAgentName(message, chatId);
-                } else if (definition == CallbackActionDefinitionEnum.PASSWORD) {
+                } else if (definition == ActionDefinitionEnum.PASSWORD) {
                     return updateAgentPassword(message, chatId);
                 }
             }
 
-            if (actionPart == CallbackActionPartsEnum.SCHEDULE_) {
+            if (actionPart == ActionPartEnum.SCHEDULE_) {
                 return updateAgentSchedule(message, chatId);
             }
         }
@@ -133,7 +128,7 @@ public class TelegramMessageHandler {
         if (user.isPresent()) {
             service.setAgentId(user.get().getAgentId());
             rabbitService.updateService(service);
-            waitAnswerService.removeFromWaitingList(chatId);
+            userAwaitingService.removeFromWaitingList(chatId);
             Thread.sleep(1000);
             rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.SERVICE_INFO);
         }
@@ -157,7 +152,7 @@ public class TelegramMessageHandler {
         if (user.isPresent()) {
             agentMSG.setId(user.get().getAgentId());
             rabbitService.updateAgent(agentMSG);
-            waitAnswerService.removeFromWaitingList(chatId);
+            userAwaitingService.removeFromWaitingList(chatId);
             Thread.sleep(1000);
             rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.AGENT_INFO);
         }
@@ -196,7 +191,7 @@ public class TelegramMessageHandler {
         if (user.isPresent()) {
             schedule.setAgentId(user.get().getAgentId());
             rabbitService.updateSchedule(schedule);
-            waitAnswerService.removeFromWaitingList(chatId);
+            userAwaitingService.removeFromWaitingList(chatId);
             Thread.sleep(1000);
             rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.SCHEDULES);
         }
@@ -214,7 +209,6 @@ public class TelegramMessageHandler {
         rabbitService.registerAgentByPhone(phone);
     }
 
-
     private SendMessage getRegMessage(String chatId) {
         String text = """
                 *4Clients* – сервис онлайн записи клиентов, предназначен для сферы услуг. Обеспечивает ведение клиентской базы и удобную запись для клиентов. Виджет можно установить на сайт или дать клиенту прямую ссылку.
@@ -226,12 +220,6 @@ public class TelegramMessageHandler {
 
         sendMessage.setReplyMarkup(maker.getSingleButtonKeyboard("Регистрация"));
 
-        return sendMessage;
-    }
-
-    private SendMessage sendScheduleMessage(String chatId) {
-        SendMessage sendMessage = new SendMessage(chatId, "Нажмите ");
-        sendMessage.setReplyMarkup(inlineKeyboardMaker.getServiceInlineButton());
         return sendMessage;
     }
 }
