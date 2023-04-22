@@ -19,8 +19,7 @@ http://45.159.249.5:8091/swagger-ui/index.html
 http://a90527jl.beget.tech/dist/
 <br>
 
-<img width="350" src="github-images/site_image1.jpeg">
-<img width="350" src="github-images/site_image2.jpeg">
+<img src="github-images/site_image.jpg">
 
 <br><br>
 
@@ -28,9 +27,7 @@ http://a90527jl.beget.tech/dist/
 https://t.me/clientsmanagement_bot
 <br>
 
-<img width="350" src="github-images/tg_image1.jpeg">
-<img width="350" src="github-images/tg_image2.jpeg">
-
+<img  src="github-images/tg_image.jpg">
 
 ## Install
 git clone, rename application.properties.origin to <b>application.properties</b> file, change project root dir and:
