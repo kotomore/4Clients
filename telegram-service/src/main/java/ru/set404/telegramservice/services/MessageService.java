@@ -23,7 +23,7 @@ public class MessageService {
     private WriteReadBot writeReadBot;
 
     public void sendSuccessRegMessage(TelegramUser user) {
-        SendMessage sendMessage = new SendMessage(user.getChatId(), "Регистрация завершена\nВыберите пункт меню:");
+        SendMessage sendMessage = new SendMessage(user.getChatId(), "Регистрация завершена\n*Выберите пункт меню*");
         sendMessage.enableMarkdown(true);
         sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboard());
         try {
@@ -35,10 +35,10 @@ public class MessageService {
 
     public void sendAgentServiceMessage(TelegramUser user, AgentServiceMSG service) {
         if (user.getChatId() != null) {
-            String answer = "Название: " + (service.getName() == null ? "" : service.getName()) + "\n" +
-                    "Описание: " + (service.getDescription() == null ? "" : service.getDescription()) + "\n" +
-                    "Длительность: " + (service.getDuration() == 0 ? "" : service.getDuration()) + " мин.\n" +
-                    "Цена: " + (service.getPrice() == 0d ? "" : service.getPrice()) + " .руб";
+            String answer = "*Название:* " + (service.getName() == null ? "" : service.getName()) + "\n" +
+                    "*Описание:* " + (service.getDescription() == null ? "" : service.getDescription()) + "\n" +
+                    "*Длительность:* " + (service.getDuration() == 0 ? "" : service.getDuration()) + " мин.\n" +
+                    "*Цена:* " + (service.getPrice() == 0d ? "" : service.getPrice()) + " руб.";
 
             SendMessage sendMessage = new SendMessage(user.getChatId(), answer);
             sendMessage.enableMarkdown(true);
@@ -53,7 +53,7 @@ public class MessageService {
 
     public void sendAgentInfoMessage(TelegramUser user, AgentMSG agentMSG) {
         if (user.getChatId() != null) {
-            String answer = "Ф.И.О.: " + (agentMSG.getName() == null ? "" : agentMSG.getName());
+            String answer = "*Ф.И.О.:* " + (agentMSG.getName() == null ? "" : agentMSG.getName());
             SendMessage sendMessage = new SendMessage(user.getChatId(), answer);
             sendMessage.enableMarkdown(true);
             sendMessage.setReplyMarkup(inlineKeyboardMaker.getAgentInlineButton());
@@ -87,11 +87,11 @@ public class MessageService {
 
     public void sendAgentSchedule(TelegramUser user, ScheduleMSG scheduleMSG) {
         if (user.getChatId() != null) {
-            String answer = "Период работы: " + (scheduleMSG.getDateStart() == null ?
+            String answer = "*Период работы:* " + (scheduleMSG.getDateStart() == null ?
                     "Не задано" :
                     (scheduleMSG.getDateStart() + " - " + scheduleMSG.getDateEnd())) + "\n" +
 
-                    "Часы работы: " + (scheduleMSG.getTimeStart() == null ?
+                    "*Часы работы:* " + (scheduleMSG.getTimeStart() == null ?
                     "Не задано" :
                     (scheduleMSG.getTimeStart() + " - " + scheduleMSG.getTimeEnd())) + "\n";
 

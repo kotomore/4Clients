@@ -216,7 +216,11 @@ public class TelegramMessageHandler {
 
 
     private SendMessage getRegMessage(String chatId) {
-        SendMessage sendMessage = new SendMessage(chatId, "Нажмите кнопку регистрация");
+        String text = """
+                *4Clients* – сервис онлайн записи клиентов, предназначен для сферы услуг. Обеспечивает ведение клиентской базы и удобную запись для клиентов. Виджет можно установить на сайт или дать клиенту прямую ссылку.
+
+                *Для входа или регистрации нажмите кнопку ниже.*""";
+        SendMessage sendMessage = new SendMessage(chatId, text);
         sendMessage.enableMarkdown(true);
         ReplyKeyboardMaker maker = new ReplyKeyboardMaker();
 

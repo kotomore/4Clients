@@ -62,7 +62,6 @@ services:
     container_name: telegram-service
     environment:
       - spring_rabbitmq_host=localRabbitMQ
-      -
     links:
       - localRabbitMQ
     networks:
