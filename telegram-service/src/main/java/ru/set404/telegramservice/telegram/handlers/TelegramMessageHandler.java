@@ -18,8 +18,11 @@ import ru.set404.telegramservice.repositories.TelegramUserRepository;
 import ru.set404.telegramservice.services.RabbitService;
 import ru.set404.telegramservice.services.UserAwaitingService;
 import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
-import ru.set404.telegramservice.telegram.util.UserAwaitingResponse;
+import ru.set404.telegramservice.models.UserAwaitingResponse;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
@@ -54,6 +57,30 @@ public class TelegramMessageHandler {
             case "Записи":
                 user = repository.findByChatId(chatId);
                 user.ifPresent(telegramUser -> rabbitService.sendTelegramMessage(telegramUser.getAgentId(), TelegramMessage.Action.APPOINTMENTS));
+                return null;
+            case "Код для сайта":
+                user = repository.findByChatId(chatId);
+                if (user.isPresent()) {
+                    try {
+                        String fileName = "telegram-service/src/main/resources/frontend.html";
+                        String text = String.join("\n", Files.readAllLines(Paths.get(fileName)));
+                        text = "`" + text.replace("${therapistId}", user.get().getAgentId()) + "`";
+
+                        String msg = """
+                                *Для добавления формы записи на сайт вставьте следующий код в нужный раздел вашего сайта.*
+                                Нажмите на код чтобы скопировать:
+
+
+                                """ +
+                                text;
+
+                        SendMessage sendMessage = new SendMessage(chatId, msg);
+                        sendMessage.enableMarkdown(true);
+                        return sendMessage;
+                    } catch (IOException e) {
+                        return null;
+                    }
+                }
                 return null;
         }
 

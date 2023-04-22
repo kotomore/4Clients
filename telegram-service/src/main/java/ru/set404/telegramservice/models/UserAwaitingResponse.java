@@ -1,4 +1,4 @@
-package ru.set404.telegramservice.telegram.util;
+package ru.set404.telegramservice.models;
 
 import ru.set404.telegramservice.constants.ActionDefinitionEnum;
 import ru.set404.telegramservice.constants.ActionPartEnum;

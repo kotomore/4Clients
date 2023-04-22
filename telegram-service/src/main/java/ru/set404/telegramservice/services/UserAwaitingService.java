@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.springframework.stereotype.Service;
 import ru.set404.telegramservice.constants.ActionDefinitionEnum;
 import ru.set404.telegramservice.constants.ActionPartEnum;
-import ru.set404.telegramservice.telegram.util.UserAwaitingResponse;
+import ru.set404.telegramservice.models.UserAwaitingResponse;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -21,9 +21,13 @@ public class ReplyKeyboardMaker {
         row2.add(new KeyboardButton("Личные данные"));
         row2.add(new KeyboardButton("Редактирование услуг"));
 
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add(new KeyboardButton("Код для сайта"));
+
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
         keyboard.add(row2);
+        keyboard.add(row3);
 
         final ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setKeyboard(keyboard);
@@ -36,7 +40,7 @@ public class ReplyKeyboardMaker {
 
     public ReplyKeyboardMarkup getSingleButtonKeyboard(String text) {
         KeyboardRow row1 = new KeyboardRow();
-        KeyboardButton keyboardButton =  new KeyboardButton(text);
+        KeyboardButton keyboardButton = new KeyboardButton(text);
         keyboardButton.setRequestContact(true);
         row1.add(keyboardButton);
 

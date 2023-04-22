@@ -20,13 +20,13 @@ public class InlineKeyboardMaker {
         ));
         rowList.add(getButton(
                 "Описание",
-                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.DESCRIPTION.name()        ));
+                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.DESCRIPTION.name()));
         rowList.add(getButton(
                 "Длительность",
-                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.DURATION.name()        ));
+                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.DURATION.name()));
         rowList.add(getButton(
                 "Цена",
-                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.PRICE.name()        ));
+                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.PRICE.name()));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowList);
