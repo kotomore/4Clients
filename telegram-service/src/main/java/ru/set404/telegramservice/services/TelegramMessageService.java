@@ -67,15 +67,18 @@ public class TelegramMessageService {
 
     public void sendAgentAppointmentsMessage(TelegramUser user, AppointmentMSG appointmentMSG) {
         if (user.getChatId() != null) {
-            String builder = "*Дата*: " + appointmentMSG.getDate() + "\n" +
-                    "*Клиент:*\n" +
-                    "    Имя: " + appointmentMSG.getClientName() + "\n" +
-                    "    Телефон: " + appointmentMSG.getClientPhone() + "\n" +
+            String text = (appointmentMSG.getType() == AppointmentMSG.Type.NEW ?
+                    "*Новая заявка:*\n\n" : "") +
+
+                    "*Дата*: " + appointmentMSG.getDate() + "\n" +
                     "*Время*:\n" +
                     "    Начало: " + appointmentMSG.getStartTime() + "\n" +
-                    "    Окончание: " + appointmentMSG.getEndTime();
+                    "    Окончание: " + appointmentMSG.getEndTime() + "\n" +
+                    "*Клиент:*\n" +
+                    "    Имя: " + appointmentMSG.getClientName() + "\n" +
+                    "    Телефон: `" + appointmentMSG.getClientPhone() + "`";
 
-            SendMessage sendMessage = new SendMessage(user.getChatId(), builder);
+            SendMessage sendMessage = new SendMessage(user.getChatId(), text);
             sendMessage.enableMarkdown(true);
             try {
                 writeReadBot.execute(sendMessage);

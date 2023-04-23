@@ -29,6 +29,7 @@ public class ClientService {
     private final ServiceRepository serviceRepository;
     private final AgentRepository agentRepository;
     private final ModelMapper modelMapper;
+    private final RabbitService rabbitService;
 
 
     @Transactional
@@ -50,6 +51,7 @@ public class ClientService {
 
         updateSchedule(appointmentDTO.getAgentId(), appointmentDTO.getStartTime().toLocalDate(), timeSlot);
         appointmentRepository.save(appointment);
+        rabbitService.sendTelegramNotification(appointment);
     }
 
     private void updateSchedule(String agentId, LocalDate date, TimeSlot timeSlot) {

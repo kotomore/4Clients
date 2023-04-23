@@ -85,6 +85,7 @@ public class RabbitMQListener {
                         appointmentMSG.setAgentId(message.getAgentId());
                         appointmentMSG.setClientName(appointment.getClient().getName());
                         appointmentMSG.setClientPhone(appointment.getClient().getPhone());
+                        appointmentMSG.setType(AppointmentMSG.Type.OLD);
 
                         AgentService agentService = managementService.findService(message.getAgentId());
                         appointmentMSG.setServiceName(agentService.getId());

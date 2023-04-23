@@ -13,4 +13,7 @@ public class AppointmentMSG {
     private String clientName;
     private String clientPhone;
     private String agentId;
+    private Type type;
+
+    public enum Type {OLD, NEW}
 }

@@ -3,24 +3,17 @@ package ru.set404.clients.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.mediatype.problem.Problem;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.set404.clients.dto.AgentServiceDTO;
 import ru.set404.clients.dto.AppointmentDTO;
-import ru.set404.clients.models.AgentService;
 import ru.set404.clients.services.ClientService;
 
 import javax.management.ServiceNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequiredArgsConstructor
