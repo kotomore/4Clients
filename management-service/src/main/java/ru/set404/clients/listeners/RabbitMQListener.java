@@ -78,20 +78,21 @@ public class RabbitMQListener {
                 try {
                     appointments = managementService.findAllAppointments(message.getAgentId());
                     for (Appointment appointment : appointments) {
-                        AppointmentMSG appointmentMSG = new AppointmentMSG();
-                        appointmentMSG.setStartTime(appointment.getTimeSlot().getStartTime().toString());
-                        appointmentMSG.setEndTime(appointment.getTimeSlot().getEndTime().toString());
-                        appointmentMSG.setDate(appointment.getDate().toString());
-                        appointmentMSG.setAgentId(message.getAgentId());
-                        appointmentMSG.setClientName(appointment.getClient().getName());
-                        appointmentMSG.setClientPhone(appointment.getClient().getPhone());
-                        appointmentMSG.setType(AppointmentMSG.Type.OLD);
+                        if (appointment.getDate().isAfter(LocalDate.now().minusDays(1))) {
+                            AppointmentMSG appointmentMSG = new AppointmentMSG();
+                            appointmentMSG.setStartTime(appointment.getTimeSlot().getStartTime().toString());
+                            appointmentMSG.setEndTime(appointment.getTimeSlot().getEndTime().toString());
+                            appointmentMSG.setDate(appointment.getDate().toString());
+                            appointmentMSG.setAgentId(message.getAgentId());
+                            appointmentMSG.setClientName(appointment.getClient().getName());
+                            appointmentMSG.setClientPhone(appointment.getClient().getPhone());
+                            appointmentMSG.setType(AppointmentMSG.Type.OLD);
 
-                        AgentService agentService = managementService.findService(message.getAgentId());
-                        appointmentMSG.setServiceName(agentService.getId());
+                            AgentService agentService = managementService.findService(message.getAgentId());
+                            appointmentMSG.setServiceName(agentService.getId());
 
-                        template.convertAndSend(telegramExchange.getName(), "telegram_key.appointment", appointmentMSG);
-
+                            template.convertAndSend(telegramExchange.getName(), "telegram_key.appointment", appointmentMSG);
+                        }
                     }
                 } catch (AppointmentNotFoundException ignore) {
                 }

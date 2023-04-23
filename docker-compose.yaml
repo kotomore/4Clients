@@ -76,12 +76,15 @@ services:
     container_name: client-service
     environment:
       - spring.data.mongodb.uri=mongodb://mongo:27017/clients
+      - spring_rabbitmq_host=localRabbitMQ
     links:
       - mongo
+      - localRabbitMQ
     networks:
       - mongo-net
     depends_on:
       - mongo
+      - localRabbitMQ
 
 networks:
   mongo-net:
