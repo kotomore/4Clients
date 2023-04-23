@@ -18,10 +18,8 @@ import ru.set404.clients.repositories.ScheduleRepository;
 import ru.set404.clients.repositories.ServiceRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,10 +48,13 @@ public class ClientServiceTest {
     @InjectMocks
     private ClientService clientService;
 
+    @Mock
+    private RabbitService rabbitService;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        clientService = new ClientService(scheduleRepository, appointmentRepository, serviceRepository, agentRepository, modelMapper);
+        clientService = new ClientService(scheduleRepository, appointmentRepository, serviceRepository, agentRepository, modelMapper, rabbitService);
     }
 
     @Test
