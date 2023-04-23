@@ -14,16 +14,17 @@ import ru.set404.telegramservice.dto.telegram.AgentServiceMSG;
 import ru.set404.telegramservice.dto.telegram.ScheduleMSG;
 import ru.set404.telegramservice.dto.telegram.TelegramMessage;
 import ru.set404.telegramservice.models.TelegramUser;
+import ru.set404.telegramservice.models.UserAwaitingResponse;
 import ru.set404.telegramservice.repositories.TelegramUserRepository;
 import ru.set404.telegramservice.services.RabbitService;
 import ru.set404.telegramservice.services.UserAwaitingService;
 import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
-import ru.set404.telegramservice.models.UserAwaitingResponse;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
@@ -63,7 +64,6 @@ public class TelegramMessageHandler {
                 if (user.isPresent()) {
                     try {
                         String fileName = "telegram-service/src/main/resources/frontend.html";
-                        System.out.println(Paths.get(fileName).toAbsolutePath());
 
                         String text = String.join("\n", Files.readAllLines(Paths.get(fileName)));
                         text = "`" + text.replace("${therapistId}", user.get().getAgentId()) + "`";
@@ -192,20 +192,31 @@ public class TelegramMessageHandler {
         ScheduleMSG scheduleMSG = new ScheduleMSG();
 
         String[] messages = message.getText().split("\n");
-        if (messages.length == 2) {
+        if (messages.length == 4) {
             try {
                 for (int i = 0; i < messages.length; i++) {
                     scheduleMSG.setAgentId(message.getText());
-                    LocalDateTime dateTime = LocalDateTime.parse(messages[i].replace(" ", "T"));
 
-                    if (i == 0) {
-                        scheduleMSG.setDateStart(dateTime.toLocalDate().toString());
-                        scheduleMSG.setTimeStart(dateTime.toLocalTime().toString());
-                    } else {
-                        scheduleMSG.setDateEnd(dateTime.toLocalDate().toString());
-                        scheduleMSG.setTimeEnd(dateTime.toLocalTime().toString());
+                    switch (i) {
+                        case 0 -> {
+                            LocalDate date = LocalDate.parse(messages[i]);
+                            scheduleMSG.setDateStart(date.toString());
+                        }
+                        case 1 -> {
+                            LocalDate date = LocalDate.parse(messages[i]);
+                            scheduleMSG.setDateEnd(date.toString());
+                        }
+                        case 2 -> {
+                            LocalTime time = LocalTime.parse(messages[i]);
+                            scheduleMSG.setTimeStart(time.toString());
+                        }
+                        case 3 -> {
+                            LocalTime time = LocalTime.parse(messages[i]);
+                            scheduleMSG.setTimeEnd(time.toString());
+                        }
                     }
                 }
+
                 return updateSchedule(chatId, scheduleMSG);
 
             } catch (DateTimeParseException ex) {
