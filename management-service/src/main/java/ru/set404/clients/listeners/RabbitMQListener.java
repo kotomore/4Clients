@@ -108,12 +108,14 @@ public class RabbitMQListener {
     @RabbitListener(queues = "telegram_update_service", returnExceptions = "false")
     public void receiveServiceUpdate(AgentService service) {
         managementService.addOrUpdateService(service.getAgentId(), service);
+        template.convertAndSend(telegramExchange.getName(), "telegram_key.service", service);
     }
 
     @RabbitListener(queues = "telegram_update_agent", returnExceptions = "false")
     public void receiveAgentUpdate(Agent agent) {
         AgentDTO agentDTO = modelMapper.map(agent, AgentDTO.class);
         managementService.updateAgent(agent.getId(), agentDTO);
+        template.convertAndSend(telegramExchange.getName(), "telegram_key.agent", agent);
     }
 
     @RabbitListener(queues = "telegram_update_schedule", returnExceptions = "false")
@@ -129,5 +131,7 @@ public class RabbitMQListener {
         timeSlotDTO.setServiceId(agentService.getId());
 
         managementService.addAvailableTime(scheduleMSG.getAgentId(), timeSlotDTO);
+        template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", scheduleMSG);
+
     }
 }

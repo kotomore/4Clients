@@ -12,9 +12,6 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 import ru.set404.telegramservice.telegram.handlers.CallbackQueryHandler;
 import ru.set404.telegramservice.telegram.handlers.TelegramMessageHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 public class WriteReadBot extends SpringWebhookBot {
@@ -43,7 +40,7 @@ public class WriteReadBot extends SpringWebhookBot {
         }
     }
 
-    private BotApiMethod<?> handleUpdate(Update update) throws InterruptedException {
+    private BotApiMethod<?> handleUpdate(Update update) {
         if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             return callbackQueryHandler.processCallbackQuery(callbackQuery);

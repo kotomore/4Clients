@@ -36,7 +36,7 @@ public class TelegramMessageHandler {
     TelegramUserRepository repository;
     UserAwaitingService userAwaitingService;
 
-    public BotApiMethod<?> answerMessage(Message message) throws InterruptedException {
+    public BotApiMethod<?> answerMessage(Message message) {
         String chatId = message.getChatId().toString();
         String inputText = message.getText();
 
@@ -118,19 +118,19 @@ public class TelegramMessageHandler {
         return null;
     }
 
-    private BotApiMethod<?> updateAgentServiceName(Message message, String chatId) throws InterruptedException {
+    private BotApiMethod<?> updateAgentServiceName(Message message, String chatId) {
         AgentServiceMSG service = new AgentServiceMSG();
         service.setName(message.getText());
         return updateService(chatId, service);
     }
 
-    private BotApiMethod<?> updateAgentServiceDescription(Message message, String chatId) throws InterruptedException {
+    private BotApiMethod<?> updateAgentServiceDescription(Message message, String chatId) {
         AgentServiceMSG service = new AgentServiceMSG();
         service.setDescription(message.getText());
         return updateService(chatId, service);
     }
 
-    private BotApiMethod<?> updateAgentServiceDuration(Message message, String chatId) throws InterruptedException {
+    private BotApiMethod<?> updateAgentServiceDuration(Message message, String chatId) {
         AgentServiceMSG service = new AgentServiceMSG();
         try {
             int duration = Integer.parseInt(message.getText());
@@ -141,7 +141,7 @@ public class TelegramMessageHandler {
         }
     }
 
-    private BotApiMethod<?> updateAgentServicePrice(Message message, String chatId) throws InterruptedException {
+    private BotApiMethod<?> updateAgentServicePrice(Message message, String chatId) {
         AgentServiceMSG service = new AgentServiceMSG();
         try {
             double price = Double.parseDouble(message.getText());
@@ -152,43 +152,41 @@ public class TelegramMessageHandler {
         }
     }
 
-    private BotApiMethod<?> updateService(String chatId, AgentServiceMSG service) throws InterruptedException {
+    private BotApiMethod<?> updateService(String chatId, AgentServiceMSG service) {
         Optional<TelegramUser> user = repository.findByChatId(chatId);
         if (user.isPresent()) {
             service.setAgentId(user.get().getAgentId());
             rabbitService.updateService(service);
             userAwaitingService.removeFromWaitingList(chatId);
-            Thread.sleep(1000);
             rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.SERVICE_INFO);
         }
         return null;
     }
 
-    private BotApiMethod<?> updateAgentName(Message message, String chatId) throws InterruptedException {
+    private BotApiMethod<?> updateAgentName(Message message, String chatId) {
         AgentMSG agentMSG = new AgentMSG();
         agentMSG.setName(message.getText());
         return updateAgent(chatId, agentMSG);
     }
 
-    private BotApiMethod<?> updateAgentPassword(Message message, String chatId) throws InterruptedException {
+    private BotApiMethod<?> updateAgentPassword(Message message, String chatId) {
         AgentMSG agentMSG = new AgentMSG();
         agentMSG.setPassword(message.getText());
         return updateAgent(chatId, agentMSG);
     }
 
-    private BotApiMethod<?> updateAgent(String chatId, AgentMSG agentMSG) throws InterruptedException {
+    private BotApiMethod<?> updateAgent(String chatId, AgentMSG agentMSG) {
         Optional<TelegramUser> user = repository.findByChatId(chatId);
         if (user.isPresent()) {
             agentMSG.setId(user.get().getAgentId());
             rabbitService.updateAgent(agentMSG);
             userAwaitingService.removeFromWaitingList(chatId);
-            Thread.sleep(1000);
             rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.AGENT_INFO);
         }
         return null;
     }
 
-    private BotApiMethod<?> updateAgentSchedule(Message message, String chatId) throws InterruptedException {
+    private BotApiMethod<?> updateAgentSchedule(Message message, String chatId) {
         ScheduleMSG scheduleMSG = new ScheduleMSG();
 
         String[] messages = message.getText().split("\n");
@@ -226,14 +224,12 @@ public class TelegramMessageHandler {
         return new SendMessage(chatId, "Введите дату и время в указанном формате");
     }
 
-    private BotApiMethod<?> updateSchedule(String chatId, ScheduleMSG schedule) throws InterruptedException {
+    private BotApiMethod<?> updateSchedule(String chatId, ScheduleMSG schedule) {
         Optional<TelegramUser> user = repository.findByChatId(chatId);
         if (user.isPresent()) {
             schedule.setAgentId(user.get().getAgentId());
             rabbitService.updateSchedule(schedule);
             userAwaitingService.removeFromWaitingList(chatId);
-            Thread.sleep(1000);
-            rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.SCHEDULES);
         }
         return null;
     }
