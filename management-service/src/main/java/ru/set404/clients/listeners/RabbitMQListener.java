@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import ru.set404.clients.dto.AgentDTO;
 import ru.set404.clients.dto.TimeSlotDTO;
 import ru.set404.clients.dto.telegram.AppointmentMSG;
+import ru.set404.clients.dto.telegram.AvailabilityMSG;
 import ru.set404.clients.dto.telegram.ScheduleMSG;
 import ru.set404.clients.dto.telegram.TelegramMessage;
 import ru.set404.clients.exceptions.AgentNotFoundException;
@@ -63,14 +64,14 @@ public class RabbitMQListener {
             }
 
             case SCHEDULES -> {
-                ScheduleMSG scheduleMSG;
+                AvailabilityMSG availabilityMSG;
                 try {
-                    scheduleMSG = managementService.findAvailableTime(message.getAgentId());
+                    availabilityMSG = managementService.findAvailableTime(message.getAgentId());
                 } catch (ServiceNotFoundException ex) {
-                    scheduleMSG = new ScheduleMSG();
-                    scheduleMSG.setAgentId(message.getAgentId());
+                    availabilityMSG = new AvailabilityMSG();
+                    availabilityMSG.setAgentId(message.getAgentId());
                 }
-                template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", scheduleMSG);
+                template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
             }
 
             case APPOINTMENTS -> {
@@ -131,7 +132,10 @@ public class RabbitMQListener {
         timeSlotDTO.setServiceId(agentService.getId());
 
         managementService.addAvailableTime(scheduleMSG.getAgentId(), timeSlotDTO);
-        template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", scheduleMSG);
+
+        AvailabilityMSG availabilityMSG = managementService.findAvailableTime(scheduleMSG.getAgentId());
+
+        template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
 
     }
 }

@@ -10,30 +10,36 @@ import ru.set404.clients.exceptions.AgentNotFoundException;
 import ru.set404.clients.exceptions.AgentServiceNotFoundException;
 import ru.set404.clients.exceptions.TimeNotAvailableException;
 import ru.set404.clients.models.*;
-import ru.set404.clients.repositories.AgentRepository;
-import ru.set404.clients.repositories.AppointmentRepository;
-import ru.set404.clients.repositories.ScheduleRepository;
-import ru.set404.clients.repositories.ServiceRepository;
+import ru.set404.clients.repositories.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ClientService {
-    private final ScheduleRepository scheduleRepository;
     private final AppointmentRepository appointmentRepository;
     private final ServiceRepository serviceRepository;
     private final AgentRepository agentRepository;
+    private final AvailabilityRepository availabilityRepository;
     private final ModelMapper modelMapper;
     private final RabbitService rabbitService;
 
 
     @Transactional
     public void createAppointment(AppointmentDTO appointmentDTO) {
+        if (!availabilityRepository.existsByAgentIdAndDateAndStartTime(
+                appointmentDTO.getAgentId(),
+                appointmentDTO.getStartTime().toLocalDate(),
+                appointmentDTO.getStartTime().toLocalTime())) {
+            throw new TimeNotAvailableException();
+        }
+
         AgentService agentService = serviceRepository.findById(appointmentDTO.getServiceId())
                 .orElseThrow(() -> new IllegalArgumentException("Service with id " + appointmentDTO.getServiceId() + " does not exist"));
 
@@ -55,62 +61,28 @@ public class ClientService {
     }
 
     private void updateSchedule(String agentId, LocalDate date, TimeSlot timeSlot) {
-        Schedule updatedSchedule = scheduleRepository.findByAgentIdAndDate(agentId, date).orElseThrow(TimeNotAvailableException::new);
-        if (updatedSchedule.getAvailableSlots().contains(timeSlot)) {
-            updatedSchedule.getAvailableSlots().remove(timeSlot);
-            if (updatedSchedule.getAvailableSlots().isEmpty()) {
-                scheduleRepository.delete(updatedSchedule);
-            } else {
-                scheduleRepository.save(updatedSchedule);
-            }
-        } else {
-            throw new TimeNotAvailableException();
-        }
-
+        availabilityRepository.deleteByAgentIdAndDateAndStartTime(agentId, date, timeSlot.getStartTime());
     }
 
-    public List<LocalDate> findAvailableDates(String agentId, LocalDate date) {
-        List<Schedule> schedules = scheduleRepository
-                .findByAgentIdAndDateAfter(agentId, date);
-
-        List<LocalDate> dates = schedules
+    public Set<LocalDate> findAvailableDates(String agentId, LocalDate date) {
+        Set<LocalDate> dates = availabilityRepository
+                .findByAgentIdAndDateAfter(agentId, date.minusDays(1))
                 .stream()
-                .map(Schedule::getDate)
-                .collect(Collectors.toList());
-
-        for (Schedule schedule : schedules) {
-            if (schedule.getAvailableSlots().isEmpty()) {
-                dates.remove(schedule.getDate());
-                continue;
-            }
-            if (schedule.getDate().equals(LocalDate.now())) {
-                int count = 0;
-                for (TimeSlot timeSlot : schedule.getAvailableSlots()) {
-                    if (timeSlot.getStartTime().isAfter(LocalTime.now())) {
-                        count++;
-                        break;
-                    }
-                }
-                if (count == 0) {
-                    dates.remove(schedule.getDate());
-                }
-            }
-        }
-
+                .map(Availability::getDate)
+                .collect(Collectors.toCollection(TreeSet::new));
         if (dates.isEmpty()) {
             throw new TimeNotAvailableException();
         }
         return dates;
     }
 
-    public List<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
-        List<LocalTime> times = scheduleRepository.findByAgentIdAndDate(agentId, date)
-                .map(schedule -> schedule.getAvailableSlots()
-                        .stream()
-                        .map(TimeSlot::getStartTime)
-                        .filter(startTime -> date.isAfter(LocalDate.now()) || (date.isEqual(LocalDate.now()) && startTime.isAfter(LocalTime.now())))
-                        .collect(Collectors.toList()))
-                .orElseThrow(TimeNotAvailableException::new);
+    public Set<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
+        Set<LocalTime> times = availabilityRepository
+                .findByAgentIdAndDate(agentId, date)
+                .stream()
+                .map(Availability::getStartTime)
+                .filter(localTime -> localTime.isAfter(LocalTime.now()))
+                .collect(Collectors.toCollection(TreeSet::new));
         if (times.isEmpty()) {
             throw new TimeNotAvailableException();
         }

@@ -13,7 +13,7 @@ import ru.set404.clients.services.ClientService;
 import javax.management.ServiceNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ private final ClientService clientService;
     @CrossOrigin
     @GetMapping("/availableTimes")
     public ResponseEntity<?> availableTimes(@RequestParam String agentId, @RequestParam LocalDate date) {
-        List<LocalTime> availableTimes = clientService.findAvailableTimes(agentId, date);
+        Set<LocalTime> availableTimes = clientService.findAvailableTimes(agentId, date);
         return new ResponseEntity<>(availableTimes, HttpStatus.OK);
     }
 
@@ -42,7 +42,7 @@ private final ClientService clientService;
     @GetMapping("/availableDates")
     public ResponseEntity<?> availableDates(@RequestParam String agentId, @RequestParam LocalDate date) {
 
-        List<LocalDate> availableDates = clientService.findAvailableDates(agentId, date);
+        Set<LocalDate> availableDates = clientService.findAvailableDates(agentId, date);
         return new ResponseEntity<>(availableDates, HttpStatus.OK);
     }
 

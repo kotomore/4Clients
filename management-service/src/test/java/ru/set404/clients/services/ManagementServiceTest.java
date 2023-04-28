@@ -86,7 +86,7 @@ class ManagementServiceTest {
         Mockito.when(scheduleRepository.findByAgentIdAndDateGreaterThanEqual(agentId, date)).thenReturn(
                 Arrays.asList(new Schedule("1", agentId, date, timeSlots), new Schedule("id", agentId, date.plusDays(1), timeSlots)));
 
-        List<LocalDate> actualDates = managementService.findAvailableDates(agentId, date);
+        Set<LocalDate> actualDates = managementService.findAvailableDates(agentId, date);
 
         Assert.assertEquals(expectedDates, actualDates);
     }
@@ -106,7 +106,7 @@ class ManagementServiceTest {
 
         Mockito.when(scheduleRepository.findByAgentIdAndDate(agentId, date)).thenReturn(Optional.of(schedule));
 
-        List<LocalTime> actualTimes = managementService.findAvailableTimes(agentId, date);
+        Set<LocalTime> actualTimes = managementService.findAvailableTimes(agentId, date);
 
         Assert.assertEquals(expectedTimes, actualTimes);
     }

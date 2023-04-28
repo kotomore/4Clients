@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.set404.telegramservice.dto.telegram.AgentMSG;
-import ru.set404.telegramservice.dto.telegram.AgentServiceMSG;
-import ru.set404.telegramservice.dto.telegram.AppointmentMSG;
-import ru.set404.telegramservice.dto.telegram.ScheduleMSG;
+import ru.set404.telegramservice.dto.telegram.*;
 import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.telegram.WriteReadBot;
 import ru.set404.telegramservice.telegram.keyboards.InlineKeyboardMaker;
@@ -88,15 +85,16 @@ public class TelegramMessageService {
         }
     }
 
-    public void sendAgentSchedule(TelegramUser user, ScheduleMSG scheduleMSG) {
+    public void sendAgentSchedule(TelegramUser user, AvailabilityMSG availabilityMSG) {
         if (user.getChatId() != null) {
-            String answer = "*Период работы:* " + (scheduleMSG.getDateStart() == null ?
-                    "Не задано" :
-                    (scheduleMSG.getDateStart() + " - " + scheduleMSG.getDateEnd())) + "\n" +
 
-                    "*Часы работы:* " + (scheduleMSG.getTimeStart() == null ?
-                    "Не задано" :
-                    (scheduleMSG.getTimeStart() + " - " + scheduleMSG.getTimeEnd())) + "\n";
+            String answer = availabilityMSG.getAvailability();
+
+            if (answer == null) answer = "";
+
+            if (answer.isEmpty()) {
+                answer = "Расписание не задано";
+            }
 
             SendMessage sendMessage = new SendMessage(user.getChatId(), answer);
             sendMessage.enableMarkdown(true);

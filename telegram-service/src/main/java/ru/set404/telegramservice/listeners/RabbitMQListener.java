@@ -6,10 +6,7 @@ import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import ru.set404.telegramservice.dto.telegram.AgentMSG;
-import ru.set404.telegramservice.dto.telegram.AgentServiceMSG;
-import ru.set404.telegramservice.dto.telegram.AppointmentMSG;
-import ru.set404.telegramservice.dto.telegram.ScheduleMSG;
+import ru.set404.telegramservice.dto.telegram.*;
 import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.repositories.TelegramUserRepository;
 import ru.set404.telegramservice.services.TelegramMessageService;
@@ -67,10 +64,10 @@ public class RabbitMQListener {
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.schedule"
     ))
-    public void receiveScheduleMSG(@Payload ScheduleMSG scheduleMSG) {
-        log.info("Message to telegram schedule for agent - " + scheduleMSG.getAgentId());
-        TelegramUser user = repository.findByAgentId(scheduleMSG.getAgentId()).orElse(new TelegramUser());
-        telegramMessageService.sendAgentSchedule(user, scheduleMSG);
+    public void receiveScheduleMSG(@Payload AvailabilityMSG availabilityMSG) {
+        log.info("Message to telegram schedule for agent - " + availabilityMSG.getAgentId());
+        TelegramUser user = repository.findByAgentId(availabilityMSG.getAgentId()).orElse(new TelegramUser());
+        telegramMessageService.sendAgentSchedule(user, availabilityMSG);
     }
 
     @RabbitListener(bindings = @QueueBinding(

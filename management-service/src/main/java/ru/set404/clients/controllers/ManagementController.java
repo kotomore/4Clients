@@ -28,6 +28,7 @@ import ru.set404.clients.util.ClientModelAssembler;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -95,7 +96,7 @@ public class ManagementController {
     @GetMapping("/availabilities")
     public ResponseEntity<?> availableTimes(@RequestParam LocalDate date) {
         String agentId = getAuthUserId();
-        List<LocalTime> availableTimes = managementService.findAvailableTimes(agentId, date);
+        Set<LocalTime> availableTimes = managementService.findAvailableTimes(agentId, date);
         if (availableTimes.isEmpty())
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
