@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 @Getter
 public class UserAwaitingService {
-    private final List<UserAwaitingResponse> users = new ArrayList<>();
+    private static final List<UserAwaitingResponse> users = new ArrayList<>();
 
     public void addToWaitingList(
             String chatId,

@@ -13,7 +13,6 @@ public class RabbitConfiguration {
         return new Jackson2JsonMessageConverter();
     }
 
-
     @Bean
     public TopicExchange telegramExchange() {
         return ExchangeBuilder.topicExchange("telegram_exchange").durable(true).build();
