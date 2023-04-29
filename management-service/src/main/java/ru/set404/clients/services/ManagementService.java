@@ -117,22 +117,29 @@ public class ManagementService {
         availabilityRepository.saveAll(availabilityList);
     }
 
-    public AvailabilityMSG findAvailableTime(String agentId) {
-       List<Availability> availabilityList = availabilityRepository
-               .findByAgentIdAndDateAfter(agentId, LocalDate.now().minusDays(1));
+    public Set<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
+        Set<LocalTime> times = availabilityRepository
+                .findByAgentIdAndDate(agentId, date)
+                .stream()
+                .map(Availability::getStartTime)
+                .filter(localTime -> localTime.isAfter(LocalTime.now()))
+                .collect(Collectors.toCollection(TreeSet::new));
+        if (times.isEmpty()) {
+            throw new TimeNotAvailableException();
+        }
+        return times;
+    }
 
-       StringBuilder availabilities = new StringBuilder();
-       LocalDate date = LocalDate.now().minusDays(1);
-       for (Availability availability : availabilityList) {
-           if (!date.equals(availability.getDate())) {
-               availabilities.append("\n*").append("Дата: ").append(availability.getDate()).append("*\n\n");
-               date = availability.getDate();
-           }
-           availabilities.append(availability.getStartTime()).append(" - ").append(availability.getEndTime()).append("\n");
-       }
+    public AvailabilityMSG findAvailableTimeForTelegram(String agentId) {
+       List<ru.set404.clients.dto.telegram.Availability> telegramAvailability = availabilityRepository
+               .findByAgentIdAndDateAfter(agentId, LocalDate.now().minusDays(1))
+               .stream()
+               .map(availability -> modelMapper.map(availability, ru.set404.clients.dto.telegram.Availability.class))
+               .collect(Collectors.toList());
+
        AvailabilityMSG availabilityMSG = new AvailabilityMSG();
        availabilityMSG.setAgentId(agentId);
-       availabilityMSG.setAvailability(availabilities.toString());
+       availabilityMSG.setAvailabilities(telegramAvailability);
        return availabilityMSG;
     }
 
@@ -191,8 +198,8 @@ public class ManagementService {
 
         newAgentService.setAgentId(agentId);
 
-        Optional<AgentService> updatedAgentService = serviceRepository.findByAgentId(agentId);
-        updatedAgentService.ifPresent(agentService -> newAgentService.setId(agentService.getId()));
+        serviceRepository.findByAgentId(agentId)
+                .ifPresent(agentService -> newAgentService.setId(agentService.getId()));
         serviceRepository.save(newAgentService);
     }
 }

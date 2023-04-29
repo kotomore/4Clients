@@ -11,6 +11,8 @@ import ru.set404.telegramservice.telegram.WriteReadBot;
 import ru.set404.telegramservice.telegram.keyboards.InlineKeyboardMaker;
 import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
 
+import java.time.LocalDate;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -88,9 +90,17 @@ public class TelegramMessageService {
     public void sendAgentSchedule(TelegramUser user, AvailabilityMSG availabilityMSG) {
         if (user.getChatId() != null) {
 
-            String answer = availabilityMSG.getAvailability();
+            StringBuilder availabilities = new StringBuilder();
+            LocalDate date = LocalDate.now().minusDays(1);
+            for (Availability availability : availabilityMSG.getAvailabilities()) {
+                if (!date.equals(availability.getDate())) {
+                    availabilities.append("\n*").append("Дата: ").append(availability.getDate()).append("*\n\n");
+                    date = availability.getDate();
+                }
+                availabilities.append(availability.getStartTime()).append(" - ").append(availability.getEndTime()).append("\n");
+            }
 
-            if (answer == null) answer = "";
+            String answer = availabilities.toString();
 
             if (answer.isEmpty()) {
                 answer = "Расписание не задано";

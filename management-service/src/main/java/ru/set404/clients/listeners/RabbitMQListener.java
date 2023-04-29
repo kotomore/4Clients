@@ -66,7 +66,7 @@ public class RabbitMQListener {
             case SCHEDULES -> {
                 AvailabilityMSG availabilityMSG;
                 try {
-                    availabilityMSG = managementService.findAvailableTime(message.getAgentId());
+                    availabilityMSG = managementService.findAvailableTimeForTelegram(message.getAgentId());
                 } catch (ServiceNotFoundException ex) {
                     availabilityMSG = new AvailabilityMSG();
                     availabilityMSG.setAgentId(message.getAgentId());
@@ -133,7 +133,7 @@ public class RabbitMQListener {
 
         managementService.addAvailableTime(scheduleMSG.getAgentId(), timeSlotDTO);
 
-        AvailabilityMSG availabilityMSG = managementService.findAvailableTime(scheduleMSG.getAgentId());
+        AvailabilityMSG availabilityMSG = managementService.findAvailableTimeForTelegram(scheduleMSG.getAgentId());
 
         template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
 
