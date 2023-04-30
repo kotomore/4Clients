@@ -10,12 +10,14 @@ import ru.set404.clients.exceptions.AgentNotFoundException;
 import ru.set404.clients.exceptions.AgentServiceNotFoundException;
 import ru.set404.clients.exceptions.TimeNotAvailableException;
 import ru.set404.clients.models.*;
-import ru.set404.clients.repositories.*;
+import ru.set404.clients.repositories.AgentRepository;
+import ru.set404.clients.repositories.AppointmentRepository;
+import ru.set404.clients.repositories.AvailabilityRepository;
+import ru.set404.clients.repositories.ServiceRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -68,6 +70,13 @@ public class ClientService {
         Set<LocalDate> dates = availabilityRepository
                 .findByAgentIdAndDateAfter(agentId, date.minusDays(1))
                 .stream()
+                .filter(availability -> {
+                    if (availability.getDate().equals(LocalDate.now())) {
+                        return !availability.getStartTime().isBefore(LocalTime.now());
+                    } else {
+                        return true;
+                    }
+                })
                 .map(Availability::getDate)
                 .collect(Collectors.toCollection(TreeSet::new));
         if (dates.isEmpty()) {

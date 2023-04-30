@@ -41,7 +41,9 @@ private final ClientService clientService;
     @CrossOrigin
     @GetMapping("/availableDates")
     public ResponseEntity<?> availableDates(@RequestParam String agentId, @RequestParam LocalDate date) {
-
+        if (date.isBefore(LocalDate.now())) {
+            date = LocalDate.now();
+        }
         Set<LocalDate> availableDates = clientService.findAvailableDates(agentId, date);
         return new ResponseEntity<>(availableDates, HttpStatus.OK);
     }
