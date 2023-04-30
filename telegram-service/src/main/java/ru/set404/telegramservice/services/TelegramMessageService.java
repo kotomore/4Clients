@@ -91,7 +91,7 @@ public class TelegramMessageService {
         if (user.getChatId() != null) {
 
             StringBuilder availabilities = new StringBuilder();
-            LocalDate date = LocalDate.now().minusDays(1);
+            String date = LocalDate.now().minusDays(1).toString();
             for (Availability availability : availabilityMSG.getAvailabilities()) {
                 if (!date.equals(availability.getDate())) {
                     availabilities.append("\n*").append("Дата: ").append(availability.getDate()).append("*\n\n");
