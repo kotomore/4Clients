@@ -16,7 +16,7 @@ http://45.159.249.5:8091/swagger-ui/index.html
 
 ## Sample
 ### Clients side
-http://a90527jl.beget.tech/dist/
+http://a90527jl.beget.tech/dist/appointment.html
 <br>
 
 <img src="github-images/site_image.jpg">
