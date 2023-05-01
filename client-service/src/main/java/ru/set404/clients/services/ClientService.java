@@ -87,8 +87,15 @@ public class ClientService {
 
     public Set<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
         Set<LocalTime> times = availabilityRepository
-                .findByAgentIdAndDate(agentId, date)
+                .findByAgentIdAndDateBetween(agentId, date, date.plusDays(1))
                 .stream()
+                .filter(availability -> {
+                    if (availability.getDate().equals(LocalDate.now())) {
+                        return availability.getStartTime().isAfter(LocalTime.now());
+                    } else {
+                        return true;
+                    }
+                })
                 .map(Availability::getStartTime)
                 .filter(localTime -> localTime.isAfter(LocalTime.now()))
                 .collect(Collectors.toCollection(TreeSet::new));

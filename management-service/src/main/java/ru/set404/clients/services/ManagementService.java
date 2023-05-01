@@ -86,13 +86,20 @@ public class ManagementService {
 
     public void addAvailableTime(String agentId, TimeSlotDTO timeSlotDTO) {
 
-        List<Appointment> appointments = appointmentRepository.findByAgentIdAndDateAfter(agentId, timeSlotDTO.getDateStart());
+        List<Appointment> appointments = appointmentRepository
+                .findByAgentIdAndDateAfter(agentId, timeSlotDTO.getDateStart());
         List<LocalDateTime> appointedTime = appointments
                 .stream()
-                .map(appointment -> LocalDateTime.of(appointment.getDate(), appointment.getTimeSlot().getStartTime())).toList();
+                .map(appointment -> LocalDateTime.of(appointment.getDate(), appointment.getTimeSlot().getStartTime()))
+                .toList();
 
         AgentService service = serviceRepository.findByAgentId(agentId)
                 .orElseThrow(() -> new ServiceNotFoundException(agentId));
+
+        List<LocalDateTime> oldAvailabilities = availabilityRepository
+                .findByAgentIdAndDateAfter(agentId, timeSlotDTO.getDateStart())
+                .stream()
+                .map(availability -> LocalDateTime.of(availability.getDate(), availability.getStartTime())).toList();
 
         List<Availability> availabilityList = new ArrayList<>();
         for (LocalDate date = timeSlotDTO.getDateStart();
@@ -103,7 +110,9 @@ public class ManagementService {
                  time.isBefore(timeSlotDTO.getTimeEnd());
                  time = time.plusMinutes(service.getDuration())) {
 
-                if (!appointedTime.contains(LocalDateTime.of(date, time))) {
+                if (!appointedTime.contains(LocalDateTime.of(date, time)) &&
+                        !oldAvailabilities.contains(LocalDateTime.of(date, time))) {
+
                     Availability availability = new Availability();
                     availability.setDate(date);
                     availability.setStartTime(time);

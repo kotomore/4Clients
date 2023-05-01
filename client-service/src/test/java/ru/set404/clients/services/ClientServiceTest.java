@@ -101,7 +101,7 @@ public class ClientServiceTest {
         availability.setEndTime(LocalTime.of(23, 0));
         availability.setAgentId("agent1");
 
-        when(availabilityRepository.findByAgentIdAndDate("agent1", LocalDate.now())).thenReturn(
+        when(availabilityRepository.findByAgentIdAndDateBetween("agent1", LocalDate.now(), LocalDate.now().plusDays(1))).thenReturn(
                 List.of(availability));
 
         Set<LocalTime> times = clientService.findAvailableTimes("agent1", LocalDate.now());
