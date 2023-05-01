@@ -23,6 +23,7 @@ import ru.set404.clients.models.Appointment;
 import ru.set404.clients.services.ManagementService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -79,11 +80,11 @@ public class RabbitMQListener {
                 try {
                     appointments = managementService.findAllAppointments(message.getAgentId());
                     for (Appointment appointment : appointments) {
-                        if (appointment.getDate().isAfter(LocalDate.now().minusDays(1))) {
+                        if (appointment.getStartTime().isAfter(LocalDateTime.now().minusDays(1))) {
                             AppointmentMSG appointmentMSG = new AppointmentMSG();
-                            appointmentMSG.setStartTime(appointment.getTimeSlot().getStartTime().toString());
-                            appointmentMSG.setEndTime(appointment.getTimeSlot().getEndTime().toString());
-                            appointmentMSG.setDate(appointment.getDate().toString());
+                            appointmentMSG.setDate(appointment.getStartTime().toLocalDate().toString());
+                            appointmentMSG.setStartTime(appointment.getStartTime().toLocalTime().toString());
+                            appointmentMSG.setEndTime(appointment.getEndTime().toLocalTime().toString());
                             appointmentMSG.setAgentId(message.getAgentId());
                             appointmentMSG.setClientName(appointment.getClient().getName());
                             appointmentMSG.setClientPhone(appointment.getClient().getPhone());

@@ -35,10 +35,9 @@ public class ClientService {
 
     @Transactional
     public void createAppointment(AppointmentDTO appointmentDTO) {
-        if (!availabilityRepository.existsByAgentIdAndDateAndStartTime(
+        if (!availabilityRepository.existsByAgentIdAndStartTime(
                 appointmentDTO.getAgentId(),
-                appointmentDTO.getStartTime().toLocalDate(),
-                appointmentDTO.getStartTime().toLocalTime())) {
+                appointmentDTO.getStartTime())) {
             throw new TimeNotAvailableException();
         }
 
@@ -48,36 +47,34 @@ public class ClientService {
         LocalDateTime startTime = appointmentDTO.getStartTime();
         LocalDateTime endTime = startTime.plusMinutes(agentService.getDuration());
 
-        TimeSlot timeSlot = new TimeSlot(startTime.toLocalTime(), endTime.toLocalTime());
-
         Appointment appointment = new Appointment();
         appointment.setServiceId(appointmentDTO.getServiceId());
         appointment.setAgentId(appointmentDTO.getAgentId());
-        appointment.setDate(appointmentDTO.getStartTime().toLocalDate());
-        appointment.setTimeSlot(timeSlot);
+        appointment.setStartTime(startTime);
+        appointment.setEndTime(endTime);
         appointment.setClient(modelMapper.map(appointmentDTO.getClient(), Client.class));
 
-        updateSchedule(appointmentDTO.getAgentId(), appointmentDTO.getStartTime().toLocalDate(), timeSlot);
+        updateSchedule(appointmentDTO.getAgentId(), startTime);
         appointmentRepository.save(appointment);
         rabbitService.sendTelegramNotification(appointment);
     }
 
-    private void updateSchedule(String agentId, LocalDate date, TimeSlot timeSlot) {
-        availabilityRepository.deleteByAgentIdAndDateAndStartTime(agentId, date, timeSlot.getStartTime());
+    private void updateSchedule(String agentId, LocalDateTime startTime) {
+        availabilityRepository.deleteByAgentIdAndStartTime(agentId, startTime);
     }
 
     public Set<LocalDate> findAvailableDates(String agentId, LocalDate date) {
         Set<LocalDate> dates = availabilityRepository
-                .findByAgentIdAndDateAfter(agentId, date.minusDays(1))
+                .findByAgentIdAndStartTimeAfter(agentId, LocalDateTime.of(date, LocalTime.MIN))
                 .stream()
                 .filter(availability -> {
-                    if (availability.getDate().equals(LocalDate.now())) {
-                        return !availability.getStartTime().isBefore(LocalTime.now());
+                    if (availability.getStartTime().toLocalDate().equals(LocalDate.now())) {
+                        return !availability.getStartTime().isBefore(LocalDateTime.now());
                     } else {
                         return true;
                     }
                 })
-                .map(Availability::getDate)
+                .map(availability -> availability.getStartTime().toLocalDate())
                 .collect(Collectors.toCollection(TreeSet::new));
         if (dates.isEmpty()) {
             throw new TimeNotAvailableException();
@@ -86,18 +83,20 @@ public class ClientService {
     }
 
     public Set<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
+        LocalDateTime startTime = LocalDateTime.of(date, LocalTime.MIN);
+        LocalDateTime endTime = LocalDateTime.of(date.plusDays(1), LocalTime.MIN);
+
         Set<LocalTime> times = availabilityRepository
-                .findByAgentIdAndDateBetween(agentId, date, date.plusDays(1))
+                .findByAgentIdAndStartTimeBetween(agentId, startTime, endTime)
                 .stream()
                 .filter(availability -> {
-                    if (availability.getDate().equals(LocalDate.now())) {
-                        return availability.getStartTime().isAfter(LocalTime.now());
+                    if (availability.getStartTime().toLocalDate().equals(LocalDate.now())) {
+                        return availability.getStartTime().isAfter(LocalDateTime.now());
                     } else {
                         return true;
                     }
                 })
-                .map(Availability::getStartTime)
-                .filter(localTime -> localTime.isAfter(LocalTime.now()))
+                .map(availability -> availability.getStartTime().toLocalTime())
                 .collect(Collectors.toCollection(TreeSet::new));
         if (times.isEmpty()) {
             throw new TimeNotAvailableException();

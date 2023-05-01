@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,8 +18,8 @@ import java.time.LocalDate;
 public class Appointment {
     @Id
     private String id;
-    private LocalDate date;
-    private TimeSlot timeSlot;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private String agentId;
     private Client client;
     private String serviceId;
