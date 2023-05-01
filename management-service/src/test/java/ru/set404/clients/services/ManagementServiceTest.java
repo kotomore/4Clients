@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.set404.clients.dto.AgentDTO;
 import ru.set404.clients.exceptions.AgentNotFoundException;
@@ -18,6 +19,7 @@ import ru.set404.clients.repositories.AppointmentRepository;
 import ru.set404.clients.repositories.AvailabilityRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +64,6 @@ public class ManagementServiceTest {
         appointment.setServiceId("appointment-123");
         appointment.setAgentId("agent-123");
         appointment.setClient(new Client());
-        appointment.setTimeSlot(new TimeSlot());
 
         Mockito.when(appointmentRepository.findByIdAndAgentId("appointment-123", "agent-123"))
                 .thenReturn(Optional.of(appointment));
@@ -85,31 +86,27 @@ public class ManagementServiceTest {
     void deleteAppointment() {
 
         //Add appointment
-        TimeSlot timeSlot = new TimeSlot();
-        timeSlot.setStartTime(LocalTime.of(22, 0));
-        timeSlot.setEndTime(LocalTime.of(23, 0));
+        LocalDateTime startTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(22, 0));
+        LocalDateTime endTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(22, 0));
 
         Appointment appointment = new Appointment();
         appointment.setServiceId("appointment-123");
         appointment.setAgentId("agent-123");
         appointment.setClient(new Client());
-        appointment.setTimeSlot(timeSlot);
+        appointment.setStartTime(startTime);
+        appointment.setEndTime(endTime);
 
         //Add availability
         Availability availability = new Availability();
-        availability.setDate(LocalDate.now());
-        availability.setStartTime(LocalTime.of(22, 0));
-        availability.setEndTime(LocalTime.of(23, 0));
+        availability.setStartTime(startTime);
+        availability.setEndTime(endTime);
         availability.setAgentId("agent-123");
-
-
 
         Mockito.when(appointmentRepository.findByIdAndAgentId("appointment-123", "agent-123"))
                 .thenReturn(Optional.of(appointment));
-        Mockito.when(availabilityRepository.findByAgentIdAndDateAndStartTime(
+        Mockito.when(availabilityRepository.findByAgentIdAndStartTime(
                 appointment.getAgentId(),
-                appointment.getDate(),
-                appointment.getTimeSlot().getStartTime())).thenReturn(Optional.of(availability));
+                appointment.getStartTime())).thenReturn(Optional.of(availability));
 
 
         managementService.deleteAppointment("agent-123", "appointment-123");
@@ -170,20 +167,24 @@ public class ManagementServiceTest {
 
     @Test
     void findAvailableTimes() {
+        LocalDateTime startTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(22, 0));
+        LocalDateTime endTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(22, 0));
+
         Availability availability = new Availability();
-        availability.setDate(LocalDate.now());
-        availability.setStartTime(LocalTime.of(22, 0));
-        availability.setEndTime(LocalTime.of(23, 0));
+        availability.setStartTime(startTime);
+        availability.setEndTime(endTime);
         availability.setAgentId("agent-123");
 
-        Mockito.when(availabilityRepository.findByAgentIdAndDate("agent-123", LocalDate.now())).thenReturn(List.of(availability));
+        Mockito.when(availabilityRepository.findByAgentIdAndStartTimeBetween("agent-123",
+                LocalDateTime.of(LocalDate.now(), LocalTime.MIN), LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIN))).thenReturn(List.of(availability));
         Set<LocalTime> times = managementService.findAvailableTimes("agent-123", LocalDate.now());
         Assertions.assertEquals(1, times.size());
     }
 
     @Test
     void findAvailableTimesThrowsException() {
-        Mockito.when(availabilityRepository.findByAgentIdAndDate("agent-123", LocalDate.now())).thenReturn(List.of());
+        Mockito.when(availabilityRepository.findByAgentIdAndStartTimeBetween("agent-123",
+                LocalDateTime.of(LocalDate.now(), LocalTime.MIN), LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIN))).thenReturn(List.of());
 
         Assertions.assertThrows(TimeNotAvailableException.class,
                 () -> managementService.findAvailableTimes("agent-123", LocalDate.now()));

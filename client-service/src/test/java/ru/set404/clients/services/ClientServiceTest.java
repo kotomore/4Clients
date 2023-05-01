@@ -54,12 +54,12 @@ public class ClientServiceTest {
         AgentService agentService = new AgentService();
         agentService.setDuration(30);
         when(serviceRepository.findById("1")).thenReturn(Optional.of(agentService));
-        when(availabilityRepository.existsByAgentIdAndDateAndStartTime("agent1", LocalDate.of(2020, 1, 1), LocalTime.of(10, 0))).thenReturn(true);
+        when(availabilityRepository.existsByAgentIdAndStartTime("agent1", LocalDateTime.of(2020, 1, 1, 10, 0))).thenReturn(true);
 
         clientService.createAppointment(appointmentDTO);
 
         verify(appointmentRepository).save(any(Appointment.class));
-        verify(availabilityRepository).deleteByAgentIdAndDateAndStartTime("agent1", LocalDate.of(2020, 1, 1), LocalTime.of(10, 0));
+        verify(availabilityRepository).deleteByAgentIdAndStartTime("agent1", LocalDateTime.of(2020, 1, 1, 10, 0));
     }
 
     @Test
@@ -69,8 +69,7 @@ public class ClientServiceTest {
         appointmentDTO.setServiceId("1");
         appointmentDTO.setStartTime(LocalDateTime.of(2020, 1, 1, 10, 0));
 
-        when(availabilityRepository.existsByAgentIdAndDateAndStartTime("agent1", LocalDate.of(2020, 1, 1),
-                LocalTime.of(10, 0)))
+        when(availabilityRepository.existsByAgentIdAndStartTime("agent1", LocalDateTime.of(2020, 1, 1, 10, 0)))
                 .thenReturn(false);
 
         assertThatThrownBy(() -> clientService.createAppointment(appointmentDTO))
@@ -80,12 +79,11 @@ public class ClientServiceTest {
     @Test
     public void shouldFindAvailableDates() {
         Availability availability = new Availability();
-        availability.setDate(LocalDate.now());
-        availability.setStartTime(LocalTime.of(22, 0));
-        availability.setEndTime(LocalTime.of(23, 0));
+        availability.setStartTime(LocalDateTime.of(LocalDate.now(), LocalTime.of(22, 0)));
+        availability.setEndTime(LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 0)));
         availability.setAgentId("agent1");
 
-        when(availabilityRepository.findByAgentIdAndDateAfter("agent1", LocalDate.now().minusDays(1))).thenReturn(
+        when(availabilityRepository.findByAgentIdAndStartTimeAfter("agent1", LocalDateTime.of(LocalDate.now(), LocalTime.MIN))).thenReturn(
                 List.of(availability));
 
         Set<LocalDate> dates = clientService.findAvailableDates("agent1", LocalDate.now());
@@ -96,12 +94,12 @@ public class ClientServiceTest {
     @Test
     public void shouldFindAvailableTimes() {
         Availability availability = new Availability();
-        availability.setDate(LocalDate.now());
-        availability.setStartTime(LocalTime.of(22, 0));
-        availability.setEndTime(LocalTime.of(23, 0));
+        availability.setStartTime(LocalDateTime.of(LocalDate.now(), LocalTime.of(22, 0)));
+        availability.setEndTime(LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 0)));
         availability.setAgentId("agent1");
 
-        when(availabilityRepository.findByAgentIdAndDateBetween("agent1", LocalDate.now(), LocalDate.now().plusDays(1))).thenReturn(
+        when(availabilityRepository.findByAgentIdAndStartTimeBetween("agent1", LocalDateTime.of(LocalDate.now(), LocalTime.MIN),
+                LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIN))).thenReturn(
                 List.of(availability));
 
         Set<LocalTime> times = clientService.findAvailableTimes("agent1", LocalDate.now());

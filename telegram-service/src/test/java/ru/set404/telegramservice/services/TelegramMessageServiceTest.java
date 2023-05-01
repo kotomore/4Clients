@@ -140,14 +140,14 @@ public class TelegramMessageServiceTest {
 
         AvailabilityMSG availabilityMSG = new AvailabilityMSG();
         Availability availability1 = new Availability();
-        availability1.setDate(LocalDate.now());
-        availability1.setStartTime(LocalTime.of(10, 0));
-        availability1.setEndTime(LocalTime.of(12, 0));
+        availability1.setDate(LocalDate.now().toString());
+        availability1.setStartTime(LocalTime.of(10, 0).toString());
+        availability1.setEndTime(LocalTime.of(12, 0).toString());
 
         Availability availability2 = new Availability();
-        availability2.setDate(LocalDate.now().plusDays(1));
-        availability2.setStartTime(LocalTime.of(9, 0));
-        availability2.setEndTime(LocalTime.of(11, 0));
+        availability2.setDate(LocalDate.now().plusDays(1).toString());
+        availability2.setStartTime(LocalTime.of(9, 0).toString());
+        availability2.setEndTime(LocalTime.of(11, 0).toString());
 
         availabilityMSG.setAvailabilities(Arrays.asList(availability1, availability2));
 
