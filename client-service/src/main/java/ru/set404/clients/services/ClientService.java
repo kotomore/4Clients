@@ -69,7 +69,7 @@ public class ClientService {
                 .stream()
                 .filter(availability -> {
                     if (availability.getStartTime().toLocalDate().equals(LocalDate.now())) {
-                        return !availability.getStartTime().isBefore(LocalDateTime.now());
+                        return availability.getStartTime().isAfter(LocalDateTime.now().plusHours(3));
                     } else {
                         return true;
                     }
@@ -91,7 +91,7 @@ public class ClientService {
                 .stream()
                 .filter(availability -> {
                     if (availability.getStartTime().toLocalDate().equals(LocalDate.now())) {
-                        return availability.getStartTime().isAfter(LocalDateTime.now());
+                        return availability.getStartTime().isAfter(LocalDateTime.now().plusHours(3));
                     } else {
                         return true;
                     }
