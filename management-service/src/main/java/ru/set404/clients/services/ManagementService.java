@@ -70,7 +70,7 @@ public class ManagementService {
                 .orElseThrow(() -> new AgentNotFoundException(agentId)), AgentDTO.class);
     }
 
-    public void updateAgent(String agentId, AgentDTO agentDTO) {
+    public Agent updateAgent(String agentId, AgentDTO agentDTO) {
         Agent agent = findAgentById(agentId);
 
         if (agentDTO.getName() != null) agent.setName(agentDTO.getName());
@@ -78,7 +78,7 @@ public class ManagementService {
         if (agentDTO.getPassword() != null) agent.setPassword(passwordEncoder.encode(agentDTO.getPassword()));
 
         try {
-            agentRepository.save(agent);
+           return agentRepository.save(agent);
         } catch (DuplicateKeyException exception) {
             throw new UserAlreadyExistException();
         }
@@ -221,7 +221,7 @@ public class ManagementService {
         return serviceRepository.save(newAgentService);
     }
 
-    public void addOrUpdateService(String agentId, AgentService service) {
+    public AgentService addOrUpdateService(String agentId, AgentService service) {
         AgentService newAgentService = serviceRepository.findByAgentId(service.getAgentId()).orElse(new AgentService());
         if (service.getName() != null) newAgentService.setName(service.getName());
         if (service.getDescription() != null) newAgentService.setDescription(service.getDescription());
@@ -232,6 +232,6 @@ public class ManagementService {
 
         serviceRepository.findByAgentId(agentId)
                 .ifPresent(agentService -> newAgentService.setId(agentService.getId()));
-        serviceRepository.save(newAgentService);
+        return serviceRepository.save(newAgentService);
     }
 }

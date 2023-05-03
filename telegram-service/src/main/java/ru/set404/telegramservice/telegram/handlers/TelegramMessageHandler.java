@@ -158,7 +158,6 @@ public class TelegramMessageHandler {
             service.setAgentId(user.get().getAgentId());
             rabbitService.updateService(service);
             userAwaitingService.removeFromWaitingList(chatId);
-            rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.SERVICE_INFO);
         }
         return null;
     }
@@ -181,7 +180,6 @@ public class TelegramMessageHandler {
             agentMSG.setId(user.get().getAgentId());
             rabbitService.updateAgent(agentMSG);
             userAwaitingService.removeFromWaitingList(chatId);
-            rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.AGENT_INFO);
         }
         return null;
     }

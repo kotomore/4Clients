@@ -54,12 +54,12 @@ public class CallbackQueryHandler {
 
 
                 //Agent info
-            case "INFO_NAME":
+            case "AGENT_NAME":
                 SendMessage agentNameMessage = new SendMessage(chatId, ENTER_USER_NAME);
                 userAwaitingService.addToWaitingList(chatId, ActionPartEnum.AGENT_, ActionDefinitionEnum.NAME);
                 agentNameMessage.setReplyToMessageId(messageId);
                 return agentNameMessage;
-            case "INFO_PASSWORD":
+            case "AGENT_PASSWORD":
                 SendMessage agentPasswordMessage = new SendMessage(chatId, ENTER_USER_PASSWORD);
                 userAwaitingService.addToWaitingList(chatId, ActionPartEnum.AGENT_, ActionDefinitionEnum.PASSWORD);
                 agentPasswordMessage.setReplyToMessageId(messageId);
