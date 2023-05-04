@@ -22,6 +22,7 @@ import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -63,9 +64,13 @@ public class TelegramMessageHandler {
                 user = repository.findByChatId(chatId);
                 if (user.isPresent()) {
                     try {
-                        String fileName = "telegram-service/src/main/resources/frontend.html";
+                        //if run in docker container path = "/root/frontend.html"
+                        Path path = Paths.get("telegram-service/src/main/resources/frontend.html");
+                        if (!Files.exists(path)) {
+                            path = Paths.get("/root/frontend.html");
+                        }
 
-                        String text = String.join("\n", Files.readAllLines(Paths.get(fileName)));
+                        String text = String.join("\n", Files.readString(path));
                         text = "`" + text.replace("${therapistId}", user.get().getAgentId()) + "`";
 
                         String msg = """
@@ -73,8 +78,7 @@ public class TelegramMessageHandler {
                                 Нажмите на код чтобы скопировать:
 
 
-                                """ +
-                                text;
+                                """ + text;
 
                         SendMessage sendMessage = new SendMessage(chatId, msg);
                         sendMessage.enableMarkdown(true);
