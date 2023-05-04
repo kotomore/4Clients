@@ -6,7 +6,7 @@ import org.mockito.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.set404.telegramservice.dto.telegram.*;
+import telegram.*;
 import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.telegram.WriteReadBot;
 import ru.set404.telegramservice.telegram.keyboards.InlineKeyboardMaker;

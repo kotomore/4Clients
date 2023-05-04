@@ -1,13 +1,10 @@
 package ru.set404.telegramservice.services;
 
 import org.springframework.amqp.core.Queue;
-import ru.set404.telegramservice.dto.telegram.ScheduleMSG;
-import ru.set404.telegramservice.dto.telegram.TelegramMessage;
+import telegram.*;
 import lombok.AllArgsConstructor;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Component;
-import ru.set404.telegramservice.dto.telegram.AgentMSG;
-import ru.set404.telegramservice.dto.telegram.AgentServiceMSG;
 
 @Component
 @AllArgsConstructor

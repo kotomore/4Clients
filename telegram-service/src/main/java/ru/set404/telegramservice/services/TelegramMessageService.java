@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.set404.telegramservice.dto.telegram.*;
 import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.telegram.WriteReadBot;
 import ru.set404.telegramservice.telegram.keyboards.InlineKeyboardMaker;
 import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
+import telegram.*;
 
 import java.time.LocalDate;
 

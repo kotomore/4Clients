@@ -16,7 +16,7 @@ import ru.set404.clients.exceptions.ServiceNotFoundException;
 import ru.set404.clients.models.AgentService;
 import ru.set404.clients.models.Appointment;
 import ru.set404.clients.services.ManagementService;
-import ru.set404.telegramservice.dto.telegram.*;
+import telegram.*;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -5,7 +5,7 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.stereotype.Component;
 import ru.set404.clients.models.Appointment;
-import ru.set404.telegramservice.dto.telegram.AppointmentMSG;
+import telegram.AppointmentMSG;
 
 @Component
 @AllArgsConstructor

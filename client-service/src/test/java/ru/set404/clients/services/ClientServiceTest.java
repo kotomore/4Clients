@@ -79,23 +79,23 @@ public class ClientServiceTest {
     @Test
     public void shouldFindAvailableDates() {
         Availability availability = new Availability();
-        availability.setStartTime(LocalDateTime.of(LocalDate.now(), LocalTime.of(22, 0)));
-        availability.setEndTime(LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 0)));
+        availability.setStartTime(LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(22, 0)));
+        availability.setEndTime(LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(23, 0)));
         availability.setAgentId("agent1");
 
-        when(availabilityRepository.findByAgentIdAndStartTimeAfter("agent1", LocalDateTime.of(LocalDate.now(), LocalTime.MIN))).thenReturn(
+        when(availabilityRepository.findByAgentIdAndStartTimeAfter("agent1", LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIN))).thenReturn(
                 List.of(availability));
 
-        Set<LocalDate> dates = clientService.findAvailableDates("agent1", LocalDate.now());
+        Set<LocalDate> dates = clientService.findAvailableDates("agent1", LocalDate.now().plusDays(1));
 
-        assertThat(dates).containsExactly(LocalDate.now());
+        assertThat(dates).containsExactly(LocalDate.now().plusDays(1));
     }
 
     @Test
     public void shouldFindAvailableTimes() {
         Availability availability = new Availability();
-        availability.setStartTime(LocalDateTime.of(LocalDate.now(), LocalTime.of(22, 0)));
-        availability.setEndTime(LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 0)));
+        availability.setStartTime(LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(22, 0)));
+        availability.setEndTime(LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(23, 0)));
         availability.setAgentId("agent1");
 
         when(availabilityRepository.findByAgentIdAndStartTimeBetween("agent1", LocalDateTime.of(LocalDate.now(), LocalTime.MIN),

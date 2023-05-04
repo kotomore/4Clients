@@ -6,7 +6,7 @@ import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import ru.set404.telegramservice.dto.telegram.*;
+import telegram.*;
 import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.repositories.TelegramUserRepository;
 import ru.set404.telegramservice.services.TelegramMessageService;

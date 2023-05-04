@@ -30,13 +30,14 @@ https://t.me/clientsmanagement_bot
 <img  src="github-images/tg_image.jpg">
 
 ## Install
->git clone, rename and fill application.properties.origin to <b>application.properties</b> file, choose project root dir
 
-then
 ```
-mvn package -f auth-service/pom.xml
-mvn package -f client-service/pom.xml
-mvn package -f management-service/pom.xml
-mvn package -f telegram-service/pom.xml
+git clone https://github.com/kotomore/4Clients.git
+```
+>Rename and fill application.properties.origin files (in resource folder every microservice) to <b>application.properties</b> file
+>Change root dir
+
+```
+mvn package -f pom.xml
 docker-compose up
 ```
