@@ -9,7 +9,10 @@ import ru.set404.clients.dto.AppointmentDTO;
 import ru.set404.clients.exceptions.AgentNotFoundException;
 import ru.set404.clients.exceptions.AgentServiceNotFoundException;
 import ru.set404.clients.exceptions.TimeNotAvailableException;
-import ru.set404.clients.models.*;
+import ru.set404.clients.models.Agent;
+import ru.set404.clients.models.AgentService;
+import ru.set404.clients.models.Appointment;
+import ru.set404.clients.models.Client;
 import ru.set404.clients.repositories.AgentRepository;
 import ru.set404.clients.repositories.AppointmentRepository;
 import ru.set404.clients.repositories.AvailabilityRepository;
@@ -18,6 +21,7 @@ import ru.set404.clients.repositories.ServiceRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -31,6 +35,7 @@ public class ClientService {
     private final AvailabilityRepository availabilityRepository;
     private final ModelMapper modelMapper;
     private final RabbitService rabbitService;
+    private static final ZoneOffset TIMEZONE_OFFSET = ZoneOffset.of("+3");
 
 
     @Transactional
@@ -64,12 +69,15 @@ public class ClientService {
     }
 
     public Set<LocalDate> findAvailableDates(String agentId, LocalDate date) {
+        LocalDateTime currentTimeWithOffset = LocalDateTime.now().atOffset(ZoneOffset.UTC)
+                .withOffsetSameInstant(TIMEZONE_OFFSET).toLocalDateTime();
+
         Set<LocalDate> dates = availabilityRepository
                 .findByAgentIdAndStartTimeAfter(agentId, LocalDateTime.of(date, LocalTime.MIN))
                 .stream()
                 .filter(availability -> {
                     if (availability.getStartTime().toLocalDate().equals(LocalDate.now())) {
-                        return availability.getStartTime().isAfter(LocalDateTime.now().plusHours(3));
+                        return availability.getStartTime().isAfter(currentTimeWithOffset);
                     } else {
                         return true;
                     }
@@ -83,6 +91,9 @@ public class ClientService {
     }
 
     public Set<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
+        LocalDateTime currentTimeWithOffset = LocalDateTime.now().atOffset(ZoneOffset.UTC)
+                .withOffsetSameInstant(TIMEZONE_OFFSET).toLocalDateTime();
+
         LocalDateTime startTime = LocalDateTime.of(date, LocalTime.MIN);
         LocalDateTime endTime = LocalDateTime.of(date.plusDays(1), LocalTime.MIN);
 
@@ -91,7 +102,7 @@ public class ClientService {
                 .stream()
                 .filter(availability -> {
                     if (availability.getStartTime().toLocalDate().equals(LocalDate.now())) {
-                        return availability.getStartTime().isAfter(LocalDateTime.now().plusHours(3));
+                        return availability.getStartTime().isAfter(currentTimeWithOffset);
                     } else {
                         return true;
                     }
