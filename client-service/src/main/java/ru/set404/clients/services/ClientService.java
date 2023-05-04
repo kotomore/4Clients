@@ -35,7 +35,7 @@ public class ClientService {
     private final AvailabilityRepository availabilityRepository;
     private final ModelMapper modelMapper;
     private final RabbitService rabbitService;
-    private static final ZoneOffset TIMEZONE_OFFSET = ZoneOffset.of("+3");
+    private static final ZoneOffset TIMEZONE_OFFSET = ZoneOffset.of("+03:00");
 
 
     @Transactional
@@ -69,8 +69,7 @@ public class ClientService {
     }
 
     public Set<LocalDate> findAvailableDates(String agentId, LocalDate date) {
-        LocalDateTime currentTimeWithOffset = LocalDateTime.now().atOffset(ZoneOffset.UTC)
-                .withOffsetSameInstant(TIMEZONE_OFFSET).toLocalDateTime();
+        LocalDateTime currentTimeWithOffset = getCurrentDateTimeWithOffset();
 
         Set<LocalDate> dates = availabilityRepository
                 .findByAgentIdAndStartTimeAfter(agentId, LocalDateTime.of(date, LocalTime.MIN))
@@ -91,8 +90,7 @@ public class ClientService {
     }
 
     public Set<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
-        LocalDateTime currentTimeWithOffset = LocalDateTime.now().atOffset(ZoneOffset.UTC)
-                .withOffsetSameInstant(TIMEZONE_OFFSET).toLocalDateTime();
+        LocalDateTime currentTimeWithOffset = getCurrentDateTimeWithOffset();
 
         LocalDateTime startTime = LocalDateTime.of(date, LocalTime.MIN);
         LocalDateTime endTime = LocalDateTime.of(date.plusDays(1), LocalTime.MIN);
@@ -113,6 +111,11 @@ public class ClientService {
             throw new TimeNotAvailableException();
         }
         return times;
+    }
+
+    private static LocalDateTime getCurrentDateTimeWithOffset() {
+        return LocalDateTime.now().atOffset(ZoneOffset.UTC)
+                .withOffsetSameInstant(TIMEZONE_OFFSET).toLocalDateTime();
     }
 
     public AgentServiceDTO findService(String agentId) {
