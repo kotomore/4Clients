@@ -113,9 +113,9 @@ public class TelegramMessageServiceTest {
 
         AppointmentMSG appointmentMSG = new AppointmentMSG();
         appointmentMSG.setType(AppointmentMSG.Type.NEW);
-        appointmentMSG.setDate(LocalDate.now().toString());
-        appointmentMSG.setStartTime(LocalTime.of(10, 0).toString());
-        appointmentMSG.setEndTime(LocalTime.of(11, 0).toString());
+        appointmentMSG.setDate(LocalDate.now());
+        appointmentMSG.setStartTime(LocalTime.of(10, 0));
+        appointmentMSG.setEndTime(LocalTime.of(11, 0));
         appointmentMSG.setClientName("John Doe");
         appointmentMSG.setClientPhone("1234567890");
 
@@ -140,14 +140,14 @@ public class TelegramMessageServiceTest {
 
         AvailabilityMSG availabilityMSG = new AvailabilityMSG();
         Availability availability1 = new Availability();
-        availability1.setDate(LocalDate.now().toString());
-        availability1.setStartTime(LocalTime.of(10, 0).toString());
-        availability1.setEndTime(LocalTime.of(12, 0).toString());
+        availability1.setDate(LocalDate.now());
+        availability1.setStartTime(LocalTime.of(10, 0));
+        availability1.setEndTime(LocalTime.of(12, 0));
 
         Availability availability2 = new Availability();
-        availability2.setDate(LocalDate.now().plusDays(1).toString());
-        availability2.setStartTime(LocalTime.of(9, 0).toString());
-        availability2.setEndTime(LocalTime.of(11, 0).toString());
+        availability2.setDate(LocalDate.now().plusDays(1));
+        availability2.setStartTime(LocalTime.of(9, 0));
+        availability2.setEndTime(LocalTime.of(11, 0));
 
         availabilityMSG.setAvailabilities(Arrays.asList(availability1, availability2));
 
