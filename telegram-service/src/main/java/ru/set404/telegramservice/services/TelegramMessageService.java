@@ -11,6 +11,8 @@ import ru.set404.telegramservice.telegram.WriteReadBot;
 import ru.set404.telegramservice.telegram.keyboards.InlineKeyboardMaker;
 import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
 
+import java.time.LocalDate;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -89,7 +91,7 @@ public class TelegramMessageService {
         if (user.getChatId() != null) {
 
             StringBuilder availabilities = new StringBuilder();
-            String date = "";
+            LocalDate date = LocalDate.MIN;
             for (Availability availability : availabilityMSG.getAvailabilities()) {
                 if (!date.equals(availability.getDate())) {
                     availabilities.append("\n*").append("Дата: ").append(availability.getDate()).append("*\n\n");

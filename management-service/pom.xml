@@ -126,6 +126,11 @@
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
             <version>3.0.5</version>
         </dependency>
+        <dependency>
+            <groupId>ru.set404</groupId>
+            <artifactId>telegram-service</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
     </dependencies>
 

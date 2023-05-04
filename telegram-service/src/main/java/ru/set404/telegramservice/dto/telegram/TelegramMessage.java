@@ -1,11 +1,17 @@
 package ru.set404.telegramservice.dto.telegram;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 @Getter
 @Setter
-public class TelegramMessage {
+@NoArgsConstructor
+@AllArgsConstructor
+public class TelegramMessage implements Serializable {
     private String agentId;
     private Action action;
 

@@ -10,22 +10,17 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import ru.set404.clients.dto.AgentDTO;
 import ru.set404.clients.dto.TimeSlotDTO;
-import ru.set404.clients.dto.telegram.AppointmentMSG;
-import ru.set404.clients.dto.telegram.AvailabilityMSG;
-import ru.set404.clients.dto.telegram.ScheduleMSG;
-import ru.set404.clients.dto.telegram.TelegramMessage;
 import ru.set404.clients.exceptions.AgentNotFoundException;
 import ru.set404.clients.exceptions.AppointmentNotFoundException;
 import ru.set404.clients.exceptions.ServiceNotFoundException;
-import ru.set404.clients.models.Agent;
 import ru.set404.clients.models.AgentService;
 import ru.set404.clients.models.Appointment;
 import ru.set404.clients.services.ManagementService;
+import ru.set404.telegramservice.dto.telegram.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @EnableRabbit
 @Slf4j
@@ -43,31 +38,32 @@ public class RabbitMQListener {
         log.info("Message from telegram - " + message.getAction());
         switch (message.getAction()) {
             case AGENT_INFO -> {
-                Agent agent;
+                AgentMSG agent;
                 try {
-                    agent = managementService.findAgentById(message.getAgentId());
+                    agent = modelMapper.map(managementService.findAgentById(message.getAgentId()), AgentMSG.class);
                 } catch (AgentNotFoundException ex) {
-                    agent = new Agent();
+                    agent = new AgentMSG();
                     agent.setPhone(message.getAgentId());
                 }
                 template.convertAndSend(telegramExchange.getName(), "telegram_key.agent", agent);
             }
 
             case SERVICE_INFO -> {
-                AgentService service;
+                AgentServiceMSG serviceMSG;
                 try {
-                    service = managementService.findService(message.getAgentId());
+                    serviceMSG = modelMapper.map(managementService.findService(message.getAgentId()),
+                            AgentServiceMSG.class);
                 } catch (ServiceNotFoundException ex) {
-                    service = new AgentService();
-                    service.setAgentId(message.getAgentId());
+                    serviceMSG = new AgentServiceMSG();
+                    serviceMSG.setAgentId(message.getAgentId());
                 }
-                template.convertAndSend(telegramExchange.getName(), "telegram_key.service", service);
+                template.convertAndSend(telegramExchange.getName(), "telegram_key.service", serviceMSG);
             }
 
             case SCHEDULES -> {
                 AvailabilityMSG availabilityMSG;
                 try {
-                    availabilityMSG = managementService.findAvailableTimeForTelegram(message.getAgentId());
+                    availabilityMSG = getTelegramAvailabilityMSG(message.getAgentId());
                 } catch (ServiceNotFoundException ex) {
                     availabilityMSG = new AvailabilityMSG();
                     availabilityMSG.setAgentId(message.getAgentId());
@@ -82,9 +78,9 @@ public class RabbitMQListener {
                     for (Appointment appointment : appointments) {
                         if (appointment.getStartTime().isAfter(LocalDateTime.now().minusDays(1))) {
                             AppointmentMSG appointmentMSG = new AppointmentMSG();
-                            appointmentMSG.setDate(appointment.getStartTime().toLocalDate().toString());
-                            appointmentMSG.setStartTime(appointment.getStartTime().toLocalTime().toString());
-                            appointmentMSG.setEndTime(appointment.getEndTime().toLocalTime().toString());
+                            appointmentMSG.setDate(appointment.getStartTime().toLocalDate());
+                            appointmentMSG.setStartTime(appointment.getStartTime().toLocalTime());
+                            appointmentMSG.setEndTime(appointment.getEndTime().toLocalTime());
                             appointmentMSG.setAgentId(message.getAgentId());
                             appointmentMSG.setClientName(appointment.getClient().getName());
                             appointmentMSG.setClientPhone(appointment.getClient().getPhone());
@@ -101,22 +97,25 @@ public class RabbitMQListener {
             }
 
             case REGISTER_BOT -> {
-                Agent agent = managementService.findOrCreateAgentByPhone(message.getAgentId());
+                AgentMSG agent = modelMapper.map(managementService.findOrCreateAgentByPhone(message.getAgentId()),
+                        AgentMSG.class);
                 template.convertAndSend(telegramExchange.getName(), "telegram_key.register", agent);
             }
         }
     }
 
     @RabbitListener(queues = "telegram_update_service", returnExceptions = "false")
-    public void receiveServiceUpdate(AgentService service) {
+    public void receiveServiceUpdate(AgentServiceMSG serviceMessage) {
+        AgentService service = modelMapper.map(serviceMessage, AgentService.class);
         service = managementService.addOrUpdateService(service.getAgentId(), service);
-        template.convertAndSend(telegramExchange.getName(), "telegram_key.service", service);
+        serviceMessage = modelMapper.map(service, AgentServiceMSG.class);
+        template.convertAndSend(telegramExchange.getName(), "telegram_key.service", serviceMessage);
     }
 
     @RabbitListener(queues = "telegram_update_agent", returnExceptions = "false")
-    public void receiveAgentUpdate(Agent agent) {
+    public void receiveAgentUpdate(AgentMSG agent) {
         AgentDTO agentDTO = modelMapper.map(agent, AgentDTO.class);
-        agent = managementService.updateAgent(agent.getId(), agentDTO);
+        agent = modelMapper.map(managementService.updateAgent(agent.getId(), agentDTO), AgentMSG.class);
         template.convertAndSend(telegramExchange.getName(), "telegram_key.agent", agent);
     }
 
@@ -126,17 +125,34 @@ public class RabbitMQListener {
 
         TimeSlotDTO timeSlotDTO = new TimeSlotDTO();
         timeSlotDTO.setServiceId(scheduleMSG.getServiceId());
-        timeSlotDTO.setDateStart(LocalDate.parse(scheduleMSG.getDateStart()));
-        timeSlotDTO.setDateEnd(LocalDate.parse(scheduleMSG.getDateEnd()));
-        timeSlotDTO.setTimeStart(LocalTime.parse(scheduleMSG.getTimeStart()));
-        timeSlotDTO.setTimeEnd(LocalTime.parse(scheduleMSG.getTimeEnd()));
+        timeSlotDTO.setDateStart(scheduleMSG.getDateStart());
+        timeSlotDTO.setDateEnd(scheduleMSG.getDateEnd());
+        timeSlotDTO.setTimeStart(scheduleMSG.getTimeStart());
+        timeSlotDTO.setTimeEnd(scheduleMSG.getTimeEnd());
         timeSlotDTO.setServiceId(agentService.getId());
 
         managementService.addAvailableTime(scheduleMSG.getAgentId(), timeSlotDTO);
 
-        AvailabilityMSG availabilityMSG = managementService.findAvailableTimeForTelegram(scheduleMSG.getAgentId());
+        AvailabilityMSG availabilityMSG = getTelegramAvailabilityMSG(scheduleMSG.getAgentId());
 
         template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
+    }
 
+    private AvailabilityMSG getTelegramAvailabilityMSG(String agentId) {
+        AvailabilityMSG availabilityMSG = new AvailabilityMSG();
+
+        List<Availability> availabilities = managementService.findAvailableTimeForTelegram(agentId)
+                .stream()
+                .map(availability -> {
+                    Availability telegramAvailability = new Availability();
+                    telegramAvailability.setDate(availability.getStartTime().toLocalDate());
+                    telegramAvailability.setStartTime(availability.getStartTime().toLocalTime());
+                    telegramAvailability.setEndTime(availability.getEndTime().toLocalTime());
+                    return telegramAvailability;
+                })
+                .collect(Collectors.toList());
+        availabilityMSG.setAgentId(agentId);
+        availabilityMSG.setAvailabilities(availabilities);
+        return availabilityMSG;
     }
 }

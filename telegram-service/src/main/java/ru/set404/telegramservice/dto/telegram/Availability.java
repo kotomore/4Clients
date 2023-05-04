@@ -3,10 +3,14 @@ package ru.set404.telegramservice.dto.telegram;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 @Getter
 @Setter
-public class Availability {
-    private String date;
-    private String startTime;
-    private String endTime;
+public class Availability implements Serializable {
+    private LocalDate date;
+    private LocalTime startTime;
+    private LocalTime endTime;
 }

@@ -190,34 +190,17 @@ public class TelegramMessageHandler {
         String[] messages = message.getText().split("\n");
         if (messages.length == 4) {
             try {
-                for (int i = 0; i < messages.length; i++) {
-                    scheduleMSG.setAgentId(message.getText());
-
-                    switch (i) {
-                        case 0 -> {
-                            LocalDate date = LocalDate.parse(messages[i]);
-                            scheduleMSG.setDateStart(date.toString());
-                        }
-                        case 1 -> {
-                            LocalDate date = LocalDate.parse(messages[i]);
-                            scheduleMSG.setDateEnd(date.toString());
-                        }
-                        case 2 -> {
-                            LocalTime time = LocalTime.parse(messages[i]);
-                            scheduleMSG.setTimeStart(time.toString());
-                        }
-                        case 3 -> {
-                            LocalTime time = LocalTime.parse(messages[i]);
-                            scheduleMSG.setTimeEnd(time.toString());
-                        }
-                    }
-                }
-
-                return updateSchedule(chatId, scheduleMSG);
+                scheduleMSG.setAgentId(message.getText());
+                scheduleMSG.setDateStart(LocalDate.parse(messages[0]));
+                scheduleMSG.setDateEnd(LocalDate.parse(messages[1]));
+                scheduleMSG.setTimeStart(LocalTime.parse(messages[2]));
+                scheduleMSG.setTimeEnd(LocalTime.parse(messages[3]));
 
             } catch (DateTimeParseException ex) {
                 return new SendMessage(chatId, "Введите дату и время в указанном формате");
             }
+
+            return updateSchedule(chatId, scheduleMSG);
         }
         return new SendMessage(chatId, "Введите дату и время в указанном формате");
     }

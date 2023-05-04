@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import ru.set404.clients.dto.AgentDTO;
 import ru.set404.clients.dto.AgentServiceDTO;
 import ru.set404.clients.dto.TimeSlotDTO;
-import ru.set404.clients.dto.telegram.AvailabilityMSG;
 import ru.set404.clients.exceptions.*;
 import ru.set404.clients.models.*;
 import ru.set404.clients.repositories.AgentRepository;
@@ -154,23 +153,9 @@ public class ManagementService {
         return times;
     }
 
-    public AvailabilityMSG findAvailableTimeForTelegram(String agentId) {
-       List<ru.set404.clients.dto.telegram.Availability> telegramAvailabilities = availabilityRepository
-               .findByAgentIdAndStartTimeAfter(agentId, LocalDateTime.now().minusDays(1), Sort.by("startTime"))
-               .stream()
-               .map(availability -> {
-                   ru.set404.clients.dto.telegram.Availability telegramAvailability = new ru.set404.clients.dto.telegram.Availability();
-                   telegramAvailability.setDate(availability.getStartTime().toLocalDate().toString());
-                   telegramAvailability.setStartTime(availability.getStartTime().toLocalTime().toString());
-                   telegramAvailability.setEndTime(availability.getEndTime().toLocalTime().toString());
-                   return telegramAvailability;
-               })
-               .collect(Collectors.toList());
-
-       AvailabilityMSG availabilityMSG = new AvailabilityMSG();
-       availabilityMSG.setAgentId(agentId);
-       availabilityMSG.setAvailabilities(telegramAvailabilities);
-       return availabilityMSG;
+    public List<Availability> findAvailableTimeForTelegram(String agentId) {
+       return availabilityRepository
+               .findByAgentIdAndStartTimeAfter(agentId, LocalDateTime.now().minusDays(1), Sort.by("startTime"));
     }
 
     public void deleteAvailableTime(String agentId, LocalDate date) {
