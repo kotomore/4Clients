@@ -69,14 +69,17 @@ public class TelegramMessageServiceTest {
     public void testSendAgentServiceMessage() throws TelegramApiException {
         TelegramUser user = new TelegramUser();
         user.setChatId("123");
+        user.setAgentId("agentId");
 
         AgentServiceMSG service = new AgentServiceMSG();
+        service.setAgentId(user.getAgentId());
         service.setName("Test Service");
         service.setDescription("This is a test service");
         service.setDuration(30);
         service.setPrice(10.99);
 
         Mockito.when(inlineKeyboardMaker.getServiceInlineButton()).thenReturn(new InlineKeyboardMarkup());
+        Mockito.when(repository.findByAgentId(user.getAgentId())).thenReturn(Optional.of(user));
 
         telegramMessageService.sendAgentServiceMessage(service);
 

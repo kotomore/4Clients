@@ -55,7 +55,7 @@ public class TelegramMessageService {
 
     public void sendAgentServiceMessage(AgentServiceMSG service) {
         String chatId = getChatId(service.getAgentId());
-        if (getChatId(service.getAgentId()) != null) {
+        if (chatId != null) {
             String answer = "*Название:* " + (service.getName() == null ? "" : service.getName()) + "\n" +
                     "*Описание:* " + (service.getDescription() == null ? "" : service.getDescription()) + "\n" +
                     "*Длительность:* " + (service.getDuration() == 0 ? "" : service.getDuration()) + " мин.\n" +
