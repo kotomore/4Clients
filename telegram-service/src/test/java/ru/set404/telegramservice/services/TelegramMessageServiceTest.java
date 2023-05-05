@@ -6,6 +6,7 @@ import org.mockito.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.set404.telegramservice.repositories.TelegramUserRepository;
 import telegram.*;
 import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.telegram.WriteReadBot;
@@ -15,6 +16,7 @@ import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,6 +33,9 @@ public class TelegramMessageServiceTest {
     @Mock
     private WriteReadBot writeReadBot;
 
+    @Mock
+    private TelegramUserRepository repository;
+
     @InjectMocks
     private TelegramMessageService telegramMessageService;
 
@@ -46,12 +51,16 @@ public class TelegramMessageServiceTest {
         TelegramUser user = new TelegramUser();
         user.setChatId("123");
 
+        AgentMSG agentMSG = new AgentMSG();
+        agentMSG.setPhone("123");
+        when(repository.findByPhone(agentMSG.getPhone())).thenReturn(Optional.of(user));
+
         SendMessage sendMessage = new SendMessage(user.getChatId(), "Регистрация завершена\n*Выберите пункт меню*");
         sendMessage.enableMarkdown(true);
 
         when(replyKeyboardMaker.getMainMenuKeyboard()).thenReturn(null);
 
-        telegramMessageService.sendSuccessRegMessage(user);
+        telegramMessageService.registerUser(agentMSG);
 
         verify(writeReadBot, times(1)).execute(sendMessage);
     }
@@ -69,7 +78,7 @@ public class TelegramMessageServiceTest {
 
         Mockito.when(inlineKeyboardMaker.getServiceInlineButton()).thenReturn(new InlineKeyboardMarkup());
 
-        telegramMessageService.sendAgentServiceMessage(user, service);
+        telegramMessageService.sendAgentServiceMessage(service);
 
         ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
         Mockito.verify(writeReadBot).execute(captor.capture());
@@ -91,10 +100,12 @@ public class TelegramMessageServiceTest {
 
         AgentMSG agentMSG = new AgentMSG();
         agentMSG.setName("John Doe");
+        agentMSG.setId("123");
 
         Mockito.when(inlineKeyboardMaker.getAgentInlineButton()).thenReturn(new InlineKeyboardMarkup());
+        Mockito.when(repository.findByAgentId(agentMSG.getId())).thenReturn(Optional.of(user));
 
-        telegramMessageService.sendAgentInfoMessage(user, agentMSG);
+        telegramMessageService.sendAgentInfoMessage(agentMSG);
 
         ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
         Mockito.verify(writeReadBot).execute(captor.capture());
@@ -119,7 +130,9 @@ public class TelegramMessageServiceTest {
         appointmentMSG.setClientName("John Doe");
         appointmentMSG.setClientPhone("1234567890");
 
-        telegramMessageService.sendAgentAppointmentsMessage(user, appointmentMSG);
+        Mockito.when(repository.findByAgentId(appointmentMSG.getAgentId())).thenReturn(Optional.of(user));
+
+        telegramMessageService.sendAgentAppointmentsMessage(appointmentMSG);
 
         ArgumentCaptor<SendMessage> sendMessageCaptor = ArgumentCaptor.forClass(SendMessage.class);
         verify(writeReadBot).execute(sendMessageCaptor.capture());
@@ -151,7 +164,9 @@ public class TelegramMessageServiceTest {
 
         availabilityMSG.setAvailabilities(Arrays.asList(availability1, availability2));
 
-        telegramMessageService.sendAgentSchedule(user, availabilityMSG);
+        Mockito.when(repository.findByAgentId(availabilityMSG.getAgentId())).thenReturn(Optional.of(user));
+
+        telegramMessageService.sendAgentSchedule(availabilityMSG);
 
         ArgumentCaptor<SendMessage> sendMessageCaptor = ArgumentCaptor.forClass(SendMessage.class);
         verify(writeReadBot).execute(sendMessageCaptor.capture());

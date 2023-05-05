@@ -11,17 +11,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TelegramMessage implements Serializable {
+public class ErrorMSG implements Serializable {
     private String agentId;
-    private Action action;
-
-    public enum Action {
-        REGISTER_BOT,
-        AGENT_INFO,
-        SERVICE_INFO,
-        SCHEDULES,
-        SCHEDULE_DELETE,
-        APPOINTMENTS
-    }
+    private String message;
 }
-

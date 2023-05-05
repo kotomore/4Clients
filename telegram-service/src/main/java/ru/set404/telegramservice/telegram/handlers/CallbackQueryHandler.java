@@ -9,7 +9,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import ru.set404.telegramservice.constants.ActionDefinitionEnum;
 import ru.set404.telegramservice.constants.ActionPartEnum;
+import ru.set404.telegramservice.repositories.TelegramUserRepository;
+import ru.set404.telegramservice.services.RabbitService;
 import ru.set404.telegramservice.services.UserAwaitingService;
+import telegram.TelegramMessage;
 
 @Component
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -23,6 +26,8 @@ public class CallbackQueryHandler {
     private static final String ENTER_USER_PASSWORD = "Введите пароль";
 
     private final UserAwaitingService userAwaitingService;
+    private final TelegramUserRepository repository;
+    private final RabbitService rabbitService;
 
     public BotApiMethod<?> processCallbackQuery(CallbackQuery buttonQuery) {
         final String chatId = buttonQuery.getMessage().getChatId().toString();
@@ -53,7 +58,7 @@ public class CallbackQueryHandler {
                 return durationMessage;
 
 
-                //Agent info
+            //Agent info
             case "AGENT_NAME":
                 SendMessage agentNameMessage = new SendMessage(chatId, ENTER_USER_NAME);
                 userAwaitingService.addToWaitingList(chatId, ActionPartEnum.AGENT_, ActionDefinitionEnum.NAME);
@@ -65,7 +70,7 @@ public class CallbackQueryHandler {
                 agentPasswordMessage.setReplyToMessageId(messageId);
                 return agentPasswordMessage;
 
-                //Schedule
+            //Schedule
             case "SCHEDULE_TIME":
                 String message = """
                         Введите дату и время одним сообщением в формате:
@@ -86,8 +91,17 @@ public class CallbackQueryHandler {
                 userAwaitingService.addToWaitingList(chatId, ActionPartEnum.SCHEDULE_, ActionDefinitionEnum.TIME);
                 agentSchedule.setReplyToMessageId(messageId);
                 return agentSchedule;
+
+            case "SCHEDULE_DELETE":
+                deleteSchedule(chatId);
+                return null;
+
             default:
                 return null;
         }
+    }
+    private void deleteSchedule(String chatId) {
+        String agentId = repository.findByChatId(chatId).orElseThrow().getAgentId();
+        rabbitService.sendTelegramMessage(agentId, TelegramMessage.Action.SCHEDULE_DELETE);
     }
 }

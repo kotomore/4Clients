@@ -113,7 +113,9 @@ public class TelegramMessageHandler {
             }
 
             if (actionPart == ActionPartEnum.SCHEDULE_) {
-                return updateAgentSchedule(message, chatId);
+                if (definition == ActionDefinitionEnum.TIME) {
+                    return updateAgentSchedule(message, chatId);
+                }
             }
         }
         return null;
@@ -201,6 +203,9 @@ public class TelegramMessageHandler {
                 return new SendMessage(chatId, "Введите дату и время в указанном формате");
             }
 
+            if (scheduleMSG.getDateEnd().toEpochDay() - scheduleMSG.getDateStart().toEpochDay() > 30) {
+                return new SendMessage(chatId, "Разница между датами должна быть менее 30 дней");
+            }
             return updateSchedule(chatId, scheduleMSG);
         }
         return new SendMessage(chatId, "Введите дату и время в указанном формате");

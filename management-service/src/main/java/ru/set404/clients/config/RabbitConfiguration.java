@@ -43,5 +43,4 @@ public class RabbitConfiguration {
     public Queue telegramQueueToAppointment() {
         return QueueBuilder.durable("telegram_queue_to_appointment").build();
     }
-
 }

@@ -18,6 +18,7 @@ import ru.set404.clients.models.Appointment;
 import ru.set404.clients.services.ManagementService;
 import telegram.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,6 +72,13 @@ public class RabbitMQListener {
                 template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
             }
 
+            case SCHEDULE_DELETE -> {
+                managementService.deleteAllAvailableTime(message.getAgentId());
+                AvailabilityMSG availabilityMSG = new AvailabilityMSG();
+                availabilityMSG.setAgentId(message.getAgentId());
+                template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
+            }
+
             case APPOINTMENTS -> {
                 List<Appointment> appointments;
                 try {
@@ -92,7 +100,11 @@ public class RabbitMQListener {
                             template.convertAndSend(telegramExchange.getName(), "telegram_key.appointment", appointmentMSG);
                         }
                     }
-                } catch (AppointmentNotFoundException ignore) {
+                } catch (AppointmentNotFoundException | ServiceNotFoundException exception) {
+                    ErrorMSG errorMSG = new ErrorMSG();
+                    errorMSG.setAgentId(message.getAgentId());
+                    errorMSG.setMessage(exception.getMessage());
+                    template.convertAndSend(telegramExchange.getName(), "telegram_key.error", errorMSG);
                 }
             }
 
@@ -106,10 +118,12 @@ public class RabbitMQListener {
 
     @RabbitListener(queues = "telegram_update_service", returnExceptions = "false")
     public void receiveServiceUpdate(AgentServiceMSG serviceMessage) {
-        AgentService service = modelMapper.map(serviceMessage, AgentService.class);
-        service = managementService.addOrUpdateService(service.getAgentId(), service);
-        serviceMessage = modelMapper.map(service, AgentServiceMSG.class);
-        template.convertAndSend(telegramExchange.getName(), "telegram_key.service", serviceMessage);
+        if (isValidServiceMessage(serviceMessage)) {
+            AgentService service = modelMapper.map(serviceMessage, AgentService.class);
+            service = managementService.addOrUpdateService(service.getAgentId(), service);
+            serviceMessage = modelMapper.map(service, AgentServiceMSG.class);
+            template.convertAndSend(telegramExchange.getName(), "telegram_key.service", serviceMessage);
+        }
     }
 
     @RabbitListener(queues = "telegram_update_agent", returnExceptions = "false")
@@ -121,21 +135,30 @@ public class RabbitMQListener {
 
     @RabbitListener(queues = "telegram_update_schedule", returnExceptions = "false")
     public void receiveScheduleUpdate(ScheduleMSG scheduleMSG) {
-        AgentService agentService = managementService.findService(scheduleMSG.getAgentId());
+        if (isValidScheduleMessage(scheduleMSG)) {
+            try {
+                AgentService agentService = managementService.findService(scheduleMSG.getAgentId());
 
-        TimeSlotDTO timeSlotDTO = new TimeSlotDTO();
-        timeSlotDTO.setServiceId(scheduleMSG.getServiceId());
-        timeSlotDTO.setDateStart(scheduleMSG.getDateStart());
-        timeSlotDTO.setDateEnd(scheduleMSG.getDateEnd());
-        timeSlotDTO.setTimeStart(scheduleMSG.getTimeStart());
-        timeSlotDTO.setTimeEnd(scheduleMSG.getTimeEnd());
-        timeSlotDTO.setServiceId(agentService.getId());
+                TimeSlotDTO timeSlotDTO = new TimeSlotDTO();
+                timeSlotDTO.setServiceId(scheduleMSG.getServiceId());
+                timeSlotDTO.setDateStart(scheduleMSG.getDateStart());
+                timeSlotDTO.setDateEnd(scheduleMSG.getDateEnd());
+                timeSlotDTO.setTimeStart(scheduleMSG.getTimeStart());
+                timeSlotDTO.setTimeEnd(scheduleMSG.getTimeEnd());
+                timeSlotDTO.setServiceId(agentService.getId());
 
-        managementService.addAvailableTime(scheduleMSG.getAgentId(), timeSlotDTO);
+                managementService.addAvailableTime(scheduleMSG.getAgentId(), timeSlotDTO);
 
-        AvailabilityMSG availabilityMSG = getTelegramAvailabilityMSG(scheduleMSG.getAgentId());
+                AvailabilityMSG availabilityMSG = getTelegramAvailabilityMSG(scheduleMSG.getAgentId());
 
-        template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
+                template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
+            } catch (ServiceNotFoundException exception) {
+                ErrorMSG errorMSG = new ErrorMSG();
+                errorMSG.setAgentId(scheduleMSG.getAgentId());
+                errorMSG.setMessage(exception.getMessage());
+                template.convertAndSend(telegramExchange.getName(), "telegram_key.error", errorMSG);
+            }
+        }
     }
 
     private AvailabilityMSG getTelegramAvailabilityMSG(String agentId) {
@@ -154,5 +177,31 @@ public class RabbitMQListener {
         availabilityMSG.setAgentId(agentId);
         availabilityMSG.setAvailabilities(availabilities);
         return availabilityMSG;
+    }
+
+    private boolean isValidServiceMessage(AgentServiceMSG agentServiceMSG) {
+        final int MIN_SERVICE_DURATION = 15;
+        if (agentServiceMSG.getDuration() != 0 && agentServiceMSG.getDuration() < MIN_SERVICE_DURATION) {
+            sendErrorMessage(agentServiceMSG.getAgentId(), "Длительность услуги не может быть менее 15 минут");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isValidScheduleMessage(ScheduleMSG scheduleMSG) {
+        if (scheduleMSG.getTimeStart().isAfter(scheduleMSG.getTimeEnd()) ||
+                scheduleMSG.getDateStart().isAfter(scheduleMSG.getDateEnd()) ||
+                scheduleMSG.getDateStart().isBefore(LocalDate.now())) {
+            sendErrorMessage(scheduleMSG.getAgentId(), "Время или дата указаны неверно");
+            return false;
+        }
+        return true;
+    }
+
+    private void sendErrorMessage(String agentId, String text) {
+        ErrorMSG errorMSG = new ErrorMSG();
+        errorMSG.setAgentId(agentId);
+        errorMSG.setMessage(text);
+        template.convertAndSend(telegramExchange.getName(), "telegram_key.error", errorMSG);
     }
 }

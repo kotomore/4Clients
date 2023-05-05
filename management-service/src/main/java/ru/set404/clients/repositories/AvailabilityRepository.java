@@ -13,4 +13,5 @@ public interface AvailabilityRepository extends MongoRepository<Availability, St
     Optional<Availability> findByAgentIdAndStartTime(String agentId, LocalDateTime startTime);
     List<Availability> findByAgentIdAndStartTimeBetween(String agentId, LocalDateTime startTime, LocalDateTime endTime);
     void deleteByAgentIdAndStartTimeBetween(String agentId, LocalDateTime startTime, LocalDateTime endTime);
+    void deleteAllByAgentId(String agentId);
 }

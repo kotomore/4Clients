@@ -6,5 +6,6 @@ public enum ActionDefinitionEnum {
     DURATION,
     PRICE,
     PASSWORD,
-    TIME
+    TIME,
+    DELETE
 }

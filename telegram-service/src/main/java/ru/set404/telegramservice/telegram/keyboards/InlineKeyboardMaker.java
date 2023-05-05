@@ -54,6 +54,10 @@ public class InlineKeyboardMaker {
                 "Изменить",
                 ActionPartEnum.SCHEDULE_.name() + ActionDefinitionEnum.TIME.name()
         ));
+        rowList.add(getButton(
+                "Очистить",
+                ActionPartEnum.SCHEDULE_.name() + ActionDefinitionEnum.DELETE.name()
+        ));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowList);

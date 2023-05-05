@@ -32,7 +32,7 @@ public class ManagementService {
     private final AgentRepository agentRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<Appointment> findAllAppointments(String agentId) {
+    public List<Appointment> findAllAppointments(String agentId) throws AppointmentNotFoundException {
 
         List<Appointment> appointments = appointmentRepository.findByAgentId(agentId);
         if (!appointments.isEmpty()) {
@@ -42,12 +42,12 @@ public class ManagementService {
         }
     }
 
-    public Appointment findAppointmentById(String agentId, String appointmentId) {
+    public Appointment findAppointmentById(String agentId, String appointmentId) throws AgentNotFoundException {
         return appointmentRepository.findByIdAndAgentId(appointmentId, agentId)
                 .orElseThrow(() -> new AppointmentNotFoundException(agentId));
     }
 
-    public void deleteAppointment(String agentId, String appointmentId) {
+    public void deleteAppointment(String agentId, String appointmentId) throws RuntimeException {
         Appointment appointment = appointmentRepository.findByIdAndAgentId(appointmentId, agentId)
                 .orElseThrow(() -> new AppointmentNotFoundException(appointmentId));
         Availability availability = availabilityRepository.findByAgentIdAndStartTime(
@@ -59,17 +59,17 @@ public class ManagementService {
         appointmentRepository.deleteByIdAndAgentId(appointmentId, agentId);
     }
 
-    public Agent findAgentById(String agentId) {
+    public Agent findAgentById(String agentId) throws AgentNotFoundException{
         return agentRepository.findById(agentId)
                 .orElseThrow(() -> new AgentNotFoundException(agentId));
     }
 
-    public AgentDTO findAgentDTOById(String agentId) {
+    public AgentDTO findAgentDTOById(String agentId) throws AgentNotFoundException{
         return modelMapper.map(agentRepository.findById(agentId)
                 .orElseThrow(() -> new AgentNotFoundException(agentId)), AgentDTO.class);
     }
 
-    public Agent updateAgent(String agentId, AgentDTO agentDTO) {
+    public Agent updateAgent(String agentId, AgentDTO agentDTO) throws UserAlreadyExistException {
         Agent agent = findAgentById(agentId);
 
         if (agentDTO.getName() != null) agent.setName(agentDTO.getName());
@@ -83,7 +83,7 @@ public class ManagementService {
         }
     }
 
-    public void addAvailableTime(String agentId, TimeSlotDTO timeSlotDTO) {
+    public void addAvailableTime(String agentId, TimeSlotDTO timeSlotDTO) throws ServiceNotFoundException{
         LocalDateTime timeSlotStartDateTime = LocalDateTime.of(timeSlotDTO.getDateStart().minusDays(1),
                 timeSlotDTO.getTimeStart());
 
@@ -114,6 +114,10 @@ public class ManagementService {
         availabilityRepository.saveAll(availabilityList);
     }
 
+    public void deleteAllAvailableTime(String agentId) {
+        availabilityRepository.deleteAllByAgentId(agentId);
+    }
+
     private List<LocalDateTime> getOldAvailabilitiesTime(String agentId, LocalDateTime timeSlotStartDateTime) {
         return availabilityRepository
                 .findByAgentIdAndStartTimeAfter(agentId, timeSlotStartDateTime, Sort.unsorted())
@@ -139,7 +143,7 @@ public class ManagementService {
         return availability;
     }
 
-    public Set<LocalTime> findAvailableTimes(String agentId, LocalDate date) {
+    public Set<LocalTime> findAvailableTimes(String agentId, LocalDate date) throws TimeNotAvailableException{
         LocalDateTime startTime = LocalDateTime.of(date, LocalTime.MIN);
         LocalDateTime endTime = LocalDateTime.of(date.plusDays(1), LocalTime.MIN);
         Set<LocalTime> times = availabilityRepository
@@ -168,7 +172,7 @@ public class ManagementService {
         agentRepository.deleteById(agentId);
     }
 
-    public AgentService findService(String agentId) {
+    public AgentService findService(String agentId) throws ServiceNotFoundException{
         return serviceRepository.findByAgentId(agentId).orElseThrow(() -> new ServiceNotFoundException(agentId));
     }
 
@@ -181,7 +185,7 @@ public class ManagementService {
                 });
     }
 
-    public List<Client> findClients(String agentId) {
+    public List<Client> findClients(String agentId) throws ClientNotFoundException{
         List<Client> clients = appointmentRepository.findByAgentId(agentId)
                 .stream()
                 .distinct()
@@ -198,7 +202,6 @@ public class ManagementService {
     public AgentService addOrUpdateService(String agentId, AgentServiceDTO service) {
         AgentService newAgentService = modelMapper.map(service, AgentService.class);
 
-
         newAgentService.setAgentId(agentId);
 
         Optional<AgentService> updatedAgentService = serviceRepository.findByAgentId(agentId);
@@ -211,7 +214,7 @@ public class ManagementService {
         if (service.getName() != null) newAgentService.setName(service.getName());
         if (service.getDescription() != null) newAgentService.setDescription(service.getDescription());
         if (service.getPrice() != 0d) newAgentService.setPrice(service.getPrice());
-        if (service.getDuration() != 0) newAgentService.setDuration(service.getDuration());
+        if (service.getDuration() >= 15) newAgentService.setDuration(service.getDuration());
 
         newAgentService.setAgentId(agentId);
 
