@@ -3,6 +3,7 @@ package ru.set404.telegramservice.telegram.handlers;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -33,6 +34,7 @@ public class TelegramMessageHandler {
     RabbitService rabbitService;
     TelegramUserRepository repository;
     UserAwaitingService userAwaitingService;
+    @Value("${site.url}") String siteUrl;
 
     public BotApiMethod<?> answerMessage(Message message) {
         String chatId = message.getChatId().toString();
@@ -69,6 +71,7 @@ public class TelegramMessageHandler {
 
                         String text = String.join("\n", Files.readString(path));
                         text = "`" + text.replace("${therapistId}", user.get().getAgentId()) + "`";
+                        text = text.replace("${siteUrl}", siteUrl);
 
                         String msg = """
                                 *Для добавления формы записи на сайт вставьте следующий код в нужный раздел вашего сайта.*

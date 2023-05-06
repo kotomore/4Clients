@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Запись на услуги</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/assets/css/preloader.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+
+    <div class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</head>
+<body>
+<div class="wrap" style="margin-top: -100px;">
+    <div class="instructions">
+        <div class="first" style="padding:45px"><span id="agent-name-field">Специалист</span><br>
+            <p style="font-size:25px;" id="name-field">Название услуги</p>
+            <p style="font-size:20px; padding-top: 40px;" id="description-field">Описание услуги</p>
+            <p style="font-size: 33px; padding-top: 40px;"><strong id="duration-field"></strong> минут -
+                <strong id="price-field"></strong> руб.</p>
+        </div>
+    </div>
+    <div class="staff">
+        <div class="member" style="margin-top:370px;">
+            <div class="avatar" style="background-image: url(../../assets/images/profile.webp)"></div>
+            <div class="name" style="font-size: 5vh">Записаться</div>
+            <div class="deselect-member" style="font-size:3.2vh; margin-top: 17px; margin-left:60%; left:0px;">Закрыть
+            </div>
+            <div class="deselect-date" style="font-size:3.2vh; margin-left:60%; left:0px;">Изменить</div>
+            <div class="deselect-slot" style="font-size:3.2vh; margin-left:60%; margin-top: 5px;left:0px;">Изменить
+            </div>
+            <div class="deselect-slot" id="visibleTime" style="font-size: 35px; width: 100%;
+      color: green; border-bottom: 1px solid rgba(221, 221, 221, 0.8); margin-left:28px; padding-bottom: 20px;left:0px;">
+                Time
+            </div>
+            <div class="calendar" style="font-size: 3vh"></div>
+            <ul class="slots"></ul>
+            <input type="text" hidden name="serviceId" id="serviceId" required="required"/>
+            <input type="text" hidden name="time" class="date2" id="time" value="">
+            <input type="text" hidden name="date" class="date2" id="date" value="">
+
+            <form class="form" id="myForm">
+                <label>Имя</label>
+                <input type="text" name="name" id="name" required="required"/>
+                <label>Телефон</label>
+                <input type="tel" name="phone" id="phone" required="required"/>
+                <input type="submit" value="Записаться"/>
+            </form>
+            <div class="confirm-message">Запись завершена!<span class="restart">Записаться повторно?</span></div>
+        </div>
+    </div>
+</div>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+<script src="/assets/js/init.js"></script>
+<script src="/assets/js/script.js"></script>
+<script src="/assets/js/jquery.maskedinput.min.js"></script>
+
+<script>
+    $(function () {
+        $("#phone").mask("8 (999) 999-99-99");
+    });
+</script>
+</body>
+
+</html>
