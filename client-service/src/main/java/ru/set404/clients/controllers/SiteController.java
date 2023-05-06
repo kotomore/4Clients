@@ -10,12 +10,12 @@ public class SiteController {
 
     @GetMapping("/")
     public String openLandingSite() {
-        return "/landing/index";
+        return "landing/index";
     }
 
     @GetMapping("/{id}")
     public String openAgentSite(@PathVariable(required = false) String id, Model model) {
         model.addAttribute("agentId", id);
-        return "/frontend/appointment";
+        return "frontend/appointment";
     }
 }
