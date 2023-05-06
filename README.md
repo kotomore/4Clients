@@ -16,7 +16,7 @@ http://45.159.249.5:8091/swagger-ui/index.html
 
 ## Sample
 ### Clients side
-http://a90527jl.beget.tech/dist/appointment.html
+https://taptimes.ru/6441a64b008d0c1864da7227
 <br>
 
 <img src="github-images/site_image.jpg">
