@@ -70,7 +70,7 @@ public class TelegramMessageHandler {
                         }
 
                         String text = String.join("\n", Files.readString(path));
-                        text = "`" + text.replace("${therapistId}", user.get().getAgentId()) + "`";
+                        text = "`" + text.replace("${agentId}", user.get().getAgentId()) + "`";
                         text = text.replace("${siteUrl}", siteUrl);
 
                         String msg = """
