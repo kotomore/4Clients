@@ -14,7 +14,7 @@ public class SiteController {
     }
 
     @GetMapping("/{id}")
-    public String openAgentSite(@PathVariable(required = false) String id, Model model) {
+    public String openAgentSite(@PathVariable String id, Model model) {
         model.addAttribute("agentId", id);
         return "frontend/appointment";
     }

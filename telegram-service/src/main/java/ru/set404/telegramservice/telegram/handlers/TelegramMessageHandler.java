@@ -1,7 +1,6 @@
 package ru.set404.telegramservice.telegram.handlers;
 
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,13 +9,16 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.set404.telegramservice.constants.ActionDefinitionEnum;
 import ru.set404.telegramservice.constants.ActionPartEnum;
-import telegram.*;
 import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.models.UserAwaitingResponse;
 import ru.set404.telegramservice.repositories.TelegramUserRepository;
 import ru.set404.telegramservice.services.RabbitService;
 import ru.set404.telegramservice.services.UserAwaitingService;
 import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
+import telegram.AgentMSG;
+import telegram.AgentServiceMSG;
+import telegram.ScheduleMSG;
+import telegram.TelegramMessage;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,12 +31,18 @@ import java.util.Optional;
 
 @Component
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@RequiredArgsConstructor
 public class TelegramMessageHandler {
     RabbitService rabbitService;
     TelegramUserRepository repository;
     UserAwaitingService userAwaitingService;
-    @Value("${site.url}") String siteUrl;
+    String siteUrl;
+
+    public TelegramMessageHandler(RabbitService rabbitService, TelegramUserRepository repository, UserAwaitingService userAwaitingService, @Value("${site.url}") String siteUrl) {
+        this.rabbitService = rabbitService;
+        this.repository = repository;
+        this.userAwaitingService = userAwaitingService;
+        this.siteUrl = siteUrl;
+    }
 
     public BotApiMethod<?> answerMessage(Message message) {
         String chatId = message.getChatId().toString();
@@ -78,7 +86,7 @@ public class TelegramMessageHandler {
                                 Нажмите на код чтобы скопировать:
 
 
-                                """ + text;
+                                """ + text + "\n\n\n\nВаша персональная ссылка: " + siteUrl + "/" + user.get().getAgentId();
 
                         SendMessage sendMessage = new SendMessage(chatId, msg);
                         sendMessage.enableMarkdown(true);
