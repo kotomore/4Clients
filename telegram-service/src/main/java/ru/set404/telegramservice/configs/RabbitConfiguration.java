@@ -1,8 +1,6 @@
 package ru.set404.telegramservice.configs;
 
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -64,6 +62,11 @@ public class RabbitConfiguration {
     }
 
     @Bean
+    public Queue telegramQueueToAllAppointment() {
+        return QueueBuilder.durable("telegram_queue_to_all_appointment").build();
+    }
+
+    @Bean
     public Binding telegramBindingAgent() {
         return BindingBuilder.bind(telegramQueueToAgent()).to(telegramExchange()).with("telegram_key.agent");
     }
@@ -81,6 +84,11 @@ public class RabbitConfiguration {
     @Bean
     public Binding telegramBindingAppointment() {
         return BindingBuilder.bind(telegramQueueToAppointment()).to(telegramExchange()).with("telegram_key.appointment");
+    }
+
+    @Bean
+    public Binding telegramBindingAllAppointment() {
+        return BindingBuilder.bind(telegramQueueToAllAppointment()).to(telegramExchange()).with("telegram_key.all_appointment");
     }
 
     @Bean

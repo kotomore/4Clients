@@ -13,6 +13,7 @@ import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
 import telegram.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -87,21 +88,29 @@ public class TelegramMessageService {
         }
     }
 
-    public void sendAgentAppointmentsMessage(AppointmentMSG appointmentMSG) {
-        String chatId = getChatId(appointmentMSG.getAgentId());
+    public void sendAgentAppointmentsMessage(List<AppointmentMSG> appointmentMSGS) {
+        String chatId = appointmentMSGS.isEmpty() ? null : getChatId(appointmentMSGS.get(0).getAgentId());
         if (chatId != null) {
-            String text = (appointmentMSG.getType() == AppointmentMSG.Type.NEW ?
-                    "*Новая заявка:*\n\n" : "") +
 
-                    "*Дата*: " + appointmentMSG.getDate() + "\n" +
-                    "*Время*:\n" +
-                    "    Начало: " + appointmentMSG.getStartTime() + "\n" +
-                    "    Окончание: " + appointmentMSG.getEndTime() + "\n" +
-                    "*Клиент:*\n" +
-                    "    Имя: " + appointmentMSG.getClientName() + "\n" +
-                    "    Телефон: `" + appointmentMSG.getClientPhone() + "`";
+            StringBuilder messageBuilder = new StringBuilder();
+            LocalDate date = LocalDate.MIN;
 
-            SendMessage sendMessage = new SendMessage(chatId, text);
+            for (AppointmentMSG appointmentMSG : appointmentMSGS) {
+                messageBuilder.append(appointmentMSG.getType() == AppointmentMSG.Type.NEW ? "*Новая заявка:*\n\n" : "");
+                if (!date.equals(appointmentMSG.getDate())) {
+                    messageBuilder.append("\n\n*____ ").append(appointmentMSG.getDate()).append(" ____*\n\n");
+                    date = appointmentMSG.getDate();
+                }
+
+                messageBuilder
+                        .append("*Время*: ").append(appointmentMSG.getStartTime()).append(" - ")
+                        .append(appointmentMSG.getEndTime()).append("\n")
+                        .append("*Имя*: ").append(appointmentMSG.getClientName()).append("\n")
+                        .append("*Телефон*: `").append(appointmentMSG.getClientPhone()).append("`")
+                        .append("\n\n");
+            }
+
+            SendMessage sendMessage = new SendMessage(chatId, messageBuilder.toString());
             sendMessage.enableMarkdown(true);
             try {
                 writeReadBot.execute(sendMessage);

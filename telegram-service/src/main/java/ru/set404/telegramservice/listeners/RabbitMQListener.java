@@ -6,11 +6,10 @@ import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import telegram.*;
-import ru.set404.telegramservice.models.TelegramUser;
 import ru.set404.telegramservice.services.TelegramMessageService;
+import telegram.*;
 
-import java.util.Optional;
+import java.util.List;
 
 @EnableRabbit
 @Slf4j
@@ -66,7 +65,17 @@ public class RabbitMQListener {
     ))
     public void receiveAppointmentMSG(@Payload AppointmentMSG appointmentMSG) {
         log.info("Message to telegram schedule for agent - " + appointmentMSG.getAgentId());
-        telegramMessageService.sendAgentAppointmentsMessage(appointmentMSG);
+        telegramMessageService.sendAgentAppointmentsMessage(List.of(appointmentMSG));
+    }
+
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = "telegram_queue_to_all_appointment", durable = "true"),
+            exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
+            key = "telegram_key.all_appointment"
+    ))
+    public void receiveAllAppointmentMSG(@Payload List<AppointmentMSG> appointmentMSGS) {
+        log.info("Message to telegram schedule for agent - " + appointmentMSGS.get(0).getAgentId());
+        telegramMessageService.sendAgentAppointmentsMessage(appointmentMSGS);
     }
 
     @RabbitListener(bindings = @QueueBinding(

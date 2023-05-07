@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AvailabilityRepository extends MongoRepository<Availability, String> {
-    List<Availability> findByAgentIdAndStartTimeAfter(String agentId, LocalDateTime startTime, Sort sort);
     Optional<Availability> findByAgentIdAndStartTime(String agentId, LocalDateTime startTime);
     List<Availability> findByAgentIdAndStartTimeBetween(String agentId, LocalDateTime startTime, LocalDateTime endTime);
+    List<Availability> findByAgentIdAndStartTimeBetween(String agentId, LocalDateTime startTime, LocalDateTime endTime, Sort sort);
     void deleteByAgentIdAndStartTimeBetween(String agentId, LocalDateTime startTime, LocalDateTime endTime);
     void deleteAllByAgentId(String agentId);
 }

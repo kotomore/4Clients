@@ -20,6 +20,7 @@ import telegram.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -84,6 +85,9 @@ public class RabbitMQListener {
                 List<Appointment> appointments;
                 try {
                     appointments = managementService.findAllAppointments(message.getAgentId());
+                    AgentService agentService = managementService.findService(message.getAgentId());
+
+                    List<AppointmentMSG> appointmentMSGS = new ArrayList<>();
                     for (Appointment appointment : appointments) {
                         if (appointment.getStartTime().isAfter(LocalDateTime.now().minusDays(1))) {
                             AppointmentMSG appointmentMSG = new AppointmentMSG();
@@ -94,13 +98,14 @@ public class RabbitMQListener {
                             appointmentMSG.setClientName(appointment.getClient().getName());
                             appointmentMSG.setClientPhone(appointment.getClient().getPhone());
                             appointmentMSG.setType(AppointmentMSG.Type.OLD);
-
-                            AgentService agentService = managementService.findService(message.getAgentId());
                             appointmentMSG.setServiceName(agentService.getId());
 
-                            template.convertAndSend(telegramExchange.getName(), "telegram_key.appointment", appointmentMSG);
+                            appointmentMSGS.add(appointmentMSG);
                         }
                     }
+
+                    template.convertAndSend(telegramExchange.getName(), "telegram_key.all_appointment", appointmentMSGS);
+
                 } catch (AppointmentNotFoundException | ServiceNotFoundException exception) {
                     ErrorMSG errorMSG = new ErrorMSG();
                     errorMSG.setAgentId(message.getAgentId());

@@ -31,6 +31,7 @@ public class ManagementService {
     private final ModelMapper modelMapper;
     private final AgentRepository agentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final int SCHEDULE_MAX_DAYS_COUNT = 30;
 
     public List<Appointment> findAllAppointments(String agentId) throws AppointmentNotFoundException {
 
@@ -152,9 +153,10 @@ public class ManagementService {
     }
 
     public List<Availability> findAvailableTimeForTelegram(String agentId) {
+        LocalDateTime startDateTime = LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.MIN);
        return availabilityRepository
-               .findByAgentIdAndStartTimeAfter(agentId, LocalDateTime.of(LocalDate.now().minusDays(1),
-                       LocalTime.MIN), Sort.by("startTime"));
+               .findByAgentIdAndStartTimeBetween(agentId, startDateTime, startDateTime.plusDays(SCHEDULE_MAX_DAYS_COUNT),
+                       Sort.by("startTime"));
     }
 
     public void deleteAvailableTime(String agentId, LocalDate date) {
