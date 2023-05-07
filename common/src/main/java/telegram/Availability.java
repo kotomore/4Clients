@@ -13,4 +13,5 @@ public class Availability implements Serializable {
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;
+    private boolean isBooked;
 }

@@ -20,6 +20,7 @@ import telegram.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -166,6 +167,8 @@ public class RabbitMQListener {
     private AvailabilityMSG getTelegramAvailabilityMSG(String agentId) {
         AvailabilityMSG availabilityMSG = new AvailabilityMSG();
 
+        List<Appointment> appointments = managementService.findAllAppointments(agentId);
+
         List<Availability> availabilities = managementService.findAvailableTimeForTelegram(agentId)
                 .stream()
                 .map(availability -> {
@@ -176,6 +179,17 @@ public class RabbitMQListener {
                     return telegramAvailability;
                 })
                 .collect(Collectors.toList());
+
+        appointments.forEach(appointment -> {
+            Availability telegramAvailability = new Availability();
+            telegramAvailability.setDate(appointment.getStartTime().toLocalDate());
+            telegramAvailability.setStartTime(appointment.getStartTime().toLocalTime());
+            telegramAvailability.setEndTime(appointment.getEndTime().toLocalTime());
+            telegramAvailability.setBooked(true);
+            availabilities.add(telegramAvailability);
+        });
+
+        availabilities.sort(Comparator.comparing(Availability::getDate).thenComparing(Availability::getStartTime));
         availabilityMSG.setAgentId(agentId);
         availabilityMSG.setAvailabilities(availabilities);
         return availabilityMSG;

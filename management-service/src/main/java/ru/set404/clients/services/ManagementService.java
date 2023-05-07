@@ -85,11 +85,10 @@ public class ManagementService {
     }
 
     public void addAvailableTime(String agentId, TimeSlotDTO timeSlotDTO) throws ServiceNotFoundException{
-        LocalDateTime timeSlotStartDateTime = LocalDateTime.of(timeSlotDTO.getDateStart().minusDays(1),
+        LocalDateTime timeSlotStartDateTime = LocalDateTime.of(timeSlotDTO.getDateStart(),
                 timeSlotDTO.getTimeStart());
 
-        List<LocalDateTime> appointedTime = getAppointmentsTime(agentId, timeSlotStartDateTime);
-        List<LocalDateTime> oldAvailabilities = getOldAvailabilitiesTime(agentId, timeSlotStartDateTime);
+        List<LocalDateTime> appointedTime = getAppointmentsTime(agentId, timeSlotStartDateTime.minusDays(1));
 
         AgentService service = serviceRepository.findByAgentId(agentId)
                 .orElseThrow(() -> new ServiceNotFoundException(agentId));
@@ -104,27 +103,21 @@ public class ManagementService {
                  time.isBefore(timeSlotDTO.getTimeEnd());
                  time = time.plusMinutes(service.getDuration())) {
 
-                if (!appointedTime.contains(LocalDateTime.of(date, time)) &&
-                        !oldAvailabilities.contains(LocalDateTime.of(date, time))) {
+                if (!appointedTime.contains(LocalDateTime.of(date, time))) {
 
                     Availability availability = getAvailability(agentId, service, date, time);
                     availabilityList.add(availability);
                 }
             }
         }
+        availabilityRepository.deleteByAgentIdAndStartTimeBetween(agentId,
+                LocalDateTime.of(timeSlotDTO.getDateStart(), LocalTime.MIN),
+                LocalDateTime.of(timeSlotDTO.getDateEnd(), LocalTime.MAX));
         availabilityRepository.saveAll(availabilityList);
     }
 
     public void deleteAllAvailableTime(String agentId) {
         availabilityRepository.deleteAllByAgentId(agentId);
-    }
-
-    private List<LocalDateTime> getOldAvailabilitiesTime(String agentId, LocalDateTime timeSlotStartDateTime) {
-        return availabilityRepository
-                .findByAgentIdAndStartTimeAfter(agentId, timeSlotStartDateTime, Sort.unsorted())
-                .stream()
-                .map(Availability::getStartTime)
-                .toList();
     }
 
     private List<LocalDateTime> getAppointmentsTime(String agentId, LocalDateTime timeSlotStartDateTime) {
@@ -160,7 +153,8 @@ public class ManagementService {
 
     public List<Availability> findAvailableTimeForTelegram(String agentId) {
        return availabilityRepository
-               .findByAgentIdAndStartTimeAfter(agentId, LocalDateTime.now().minusDays(1), Sort.by("startTime"));
+               .findByAgentIdAndStartTimeAfter(agentId, LocalDateTime.of(LocalDate.now().minusDays(1),
+                       LocalTime.MIN), Sort.by("startTime"));
     }
 
     public void deleteAvailableTime(String agentId, LocalDate date) {

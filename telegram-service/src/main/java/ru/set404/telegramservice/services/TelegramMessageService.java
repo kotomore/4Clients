@@ -123,7 +123,7 @@ public class TelegramMessageService {
                         availabilities.append("\n*").append("Дата: ").append(availability.getDate()).append("*\n\n");
                         date = availability.getDate();
                     }
-                    availabilities.append(availability.getStartTime()).append(" - ").append(availability.getEndTime()).append("\n");
+                    availabilities.append(formatAvailabilityTime(availability));
                 }
 
                 answer = availabilities.toString();
@@ -144,6 +144,16 @@ public class TelegramMessageService {
                 log.debug(tAe.getMessage());
             }
         }
+    }
+
+    private String formatAvailabilityTime(Availability availability) {
+        StringBuilder formattedTime = new StringBuilder();
+        if (availability.isBooked()) {
+            formattedTime.append(String.format("*%s - %s* - Запись\n", availability.getStartTime(), availability.getEndTime()));
+        } else {
+            formattedTime.append(String.format("%s - %s\n", availability.getStartTime(), availability.getEndTime()));
+        }
+        return formattedTime.toString();
     }
 
     private String getChatId(String agentId) {
