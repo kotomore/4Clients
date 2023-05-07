@@ -36,7 +36,7 @@ public class ManagementService {
     public List<Appointment> findAllAppointments(String agentId) throws AppointmentNotFoundException {
 
         List<Appointment> appointments = appointmentRepository.findByAgentIdAndStartTimeAfter(agentId,
-                LocalDateTime.now().minusDays(1),Sort.by("startTime"));
+                LocalDateTime.now().minusDays(1), Sort.by("startTime"));
         if (!appointments.isEmpty()) {
             return appointments;
         } else {

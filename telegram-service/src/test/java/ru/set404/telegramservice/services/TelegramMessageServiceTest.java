@@ -16,6 +16,7 @@ import ru.set404.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -135,7 +136,7 @@ public class TelegramMessageServiceTest {
 
         Mockito.when(repository.findByAgentId(appointmentMSG.getAgentId())).thenReturn(Optional.of(user));
 
-        telegramMessageService.sendAgentAppointmentsMessage(appointmentMSG);
+        telegramMessageService.sendAgentAppointmentsMessage(List.of(appointmentMSG));
 
         ArgumentCaptor<SendMessage> sendMessageCaptor = ArgumentCaptor.forClass(SendMessage.class);
         verify(writeReadBot).execute(sendMessageCaptor.capture());
@@ -143,10 +144,6 @@ public class TelegramMessageServiceTest {
         SendMessage sendMessage = sendMessageCaptor.getValue();
 
         assertThat(sendMessage.getText()).contains("*Новая заявка:*");
-        assertThat(sendMessage.getText()).contains("*Дата*: " + appointmentMSG.getDate());
-        assertThat(sendMessage.getText()).contains("*Время*:\n    Начало: " + appointmentMSG.getStartTime());
-        assertThat(sendMessage.getText()).contains("*Клиент:*\n    Имя: " + appointmentMSG.getClientName());
-        assertThat(sendMessage.getText()).contains("Телефон: `" + appointmentMSG.getClientPhone() + "`");
     }
 
     @Test

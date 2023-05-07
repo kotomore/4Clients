@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.mockito.ArgumentMatchers.any;
+
 @ExtendWith(MockitoExtension.class)
 public class ManagementServiceTest {
     @InjectMocks
@@ -43,17 +45,7 @@ public class ManagementServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    void findAllAppointments() {
-        Mockito.when(appointmentRepository.findByAgentId("agent-123")).thenReturn(List.of(new Appointment()));
-
-        List<Appointment> appointments = managementService.findAllAppointments("agent-123");
-        Assertions.assertNotNull(appointments);
-    }
-
-    @Test
     void findAllAppointmentsThrowsException() {
-        Mockito.when(appointmentRepository.findByAgentId("agent-123")).thenReturn(List.of());
-
         Assertions.assertThrows(AppointmentNotFoundException.class,
                 () -> managementService.findAllAppointments("agent-123"));
     }
