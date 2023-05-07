@@ -1,8 +1,11 @@
 package ru.set404.clients.exceptions;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class AppointmentNotFoundException extends RuntimeException {
     public AppointmentNotFoundException(String id) {
-        super("Could not find appointments for id - " + id);
+        super("Записей не обнаружено");
+        log.info("Appointments not found for agentId - " + id);
     }
-
 }

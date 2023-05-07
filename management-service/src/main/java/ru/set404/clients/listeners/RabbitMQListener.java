@@ -139,19 +139,21 @@ public class RabbitMQListener {
             try {
                 AgentService agentService = managementService.findService(scheduleMSG.getAgentId());
 
-                TimeSlotDTO timeSlotDTO = new TimeSlotDTO();
-                timeSlotDTO.setServiceId(scheduleMSG.getServiceId());
-                timeSlotDTO.setDateStart(scheduleMSG.getDateStart());
-                timeSlotDTO.setDateEnd(scheduleMSG.getDateEnd());
-                timeSlotDTO.setTimeStart(scheduleMSG.getTimeStart());
-                timeSlotDTO.setTimeEnd(scheduleMSG.getTimeEnd());
-                timeSlotDTO.setServiceId(agentService.getId());
+                if (isValidAgentService(agentService)) {
+                    TimeSlotDTO timeSlotDTO = new TimeSlotDTO();
+                    timeSlotDTO.setServiceId(scheduleMSG.getServiceId());
+                    timeSlotDTO.setDateStart(scheduleMSG.getDateStart());
+                    timeSlotDTO.setDateEnd(scheduleMSG.getDateEnd());
+                    timeSlotDTO.setTimeStart(scheduleMSG.getTimeStart());
+                    timeSlotDTO.setTimeEnd(scheduleMSG.getTimeEnd());
+                    timeSlotDTO.setServiceId(agentService.getId());
 
-                managementService.addAvailableTime(scheduleMSG.getAgentId(), timeSlotDTO);
+                    managementService.addAvailableTime(scheduleMSG.getAgentId(), timeSlotDTO);
 
-                AvailabilityMSG availabilityMSG = getTelegramAvailabilityMSG(scheduleMSG.getAgentId());
+                    AvailabilityMSG availabilityMSG = getTelegramAvailabilityMSG(scheduleMSG.getAgentId());
 
-                template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
+                    template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
+                }
             } catch (ServiceNotFoundException exception) {
                 ErrorMSG errorMSG = new ErrorMSG();
                 errorMSG.setAgentId(scheduleMSG.getAgentId());
@@ -193,6 +195,15 @@ public class RabbitMQListener {
                 scheduleMSG.getDateStart().isAfter(scheduleMSG.getDateEnd()) ||
                 scheduleMSG.getDateStart().isBefore(LocalDate.now())) {
             sendErrorMessage(scheduleMSG.getAgentId(), "Время или дата указаны неверно");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isValidAgentService(AgentService agentService) {
+        if (agentService.getDuration() < 15 || agentService.getDescription() == null ||
+                agentService.getPrice() == 0 || agentService.getName() == null) {
+            sendErrorMessage(agentService.getAgentId(), "Заполнены не все поля услуги");
             return false;
         }
         return true;

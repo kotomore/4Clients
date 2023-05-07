@@ -34,7 +34,8 @@ public class ManagementService {
 
     public List<Appointment> findAllAppointments(String agentId) throws AppointmentNotFoundException {
 
-        List<Appointment> appointments = appointmentRepository.findByAgentId(agentId);
+        List<Appointment> appointments = appointmentRepository.findByAgentIdAndStartTimeAfter(agentId,
+                LocalDateTime.now().minusDays(1),Sort.by("startTime"));
         if (!appointments.isEmpty()) {
             return appointments;
         } else {
@@ -128,7 +129,7 @@ public class ManagementService {
 
     private List<LocalDateTime> getAppointmentsTime(String agentId, LocalDateTime timeSlotStartDateTime) {
         return appointmentRepository
-                .findByAgentIdAndStartTimeAfter(agentId, timeSlotStartDateTime)
+                .findByAgentIdAndStartTimeAfter(agentId, timeSlotStartDateTime, Sort.unsorted())
                 .stream()
                 .map(Appointment::getStartTime)
                 .toList();

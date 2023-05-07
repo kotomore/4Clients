@@ -146,32 +146,40 @@ function fetchTimes() {
     }
 }
 
+const currentDate = new Date();
+
+function resetToFirstDayOfMonth() {
+    today.setDate(1);
+}
+
 function nextMonth() {
     today.setMonth(today.getMonth() + 1);
-    today.setDate(1);
+    if (today.getMonth() !== currentDate.getMonth()) {
+        resetToFirstDayOfMonth();
+    }
     $('.member').removeClass('selected');
     $('.wrap').removeClass('member-selected date-selected slot-selected booking-complete');
 }
 
 function prevMonth() {
     today.setMonth(today.getMonth() - 1);
-    today.setDate(1);
+    if (today.getMonth() !== currentDate.getMonth()) {
+        resetToFirstDayOfMonth();
+    }
     $('.member').removeClass('selected');
     $('.wrap').removeClass('member-selected date-selected slot-selected booking-complete');
 }
 
 function addCalendar(container) {
-    //get dates
-
     var date = today.getDate();
     var month = today.getMonth();
     var year = today.getFullYear();
+    var first = new Date(today);
 
+    first.setDate(0);
+    var startDay = first.getDay();
     checkedDate = new Date(today).toISOString().split('T')[0];
-    console.log(checkedDate)
 
-
-    var startDay = 1;
     var dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     var monthLengths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     var monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
@@ -179,8 +187,6 @@ function addCalendar(container) {
 
     var current = 1 - startDay;
 
-
-    //assemble calendar
     const prevMonth = (month + 11) % 12;
     const nextMonth = (month + 1) % 12;
 
@@ -188,7 +194,7 @@ function addCalendar(container) {
         '<label class="month">' +
         '<a class="prevMonth" onclick="prevMonth()"> ' + monthNames[prevMonth] + '</a>' +
         monthNames[month] +
-        '<a class="nextMonth" onclick="nextMonth()">' + monthNames[nextMonth] +'</a></label>';
+        '<a class="nextMonth" onclick="nextMonth()">' + monthNames[nextMonth] + '</a></label>';
 
     calendar += '<table><tr>';
     dayLabels.forEach(function (label) {

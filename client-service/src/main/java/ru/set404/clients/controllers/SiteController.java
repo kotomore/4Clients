@@ -8,11 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class SiteController {
 
-    @GetMapping("/")
-    public String openLandingSite() {
-        return "landing/index";
-    }
-
     @GetMapping("/{id}")
     public String openAgentSite(@PathVariable String id, Model model) {
         model.addAttribute("agentId", id);
