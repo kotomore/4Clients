@@ -67,7 +67,7 @@ public class RabbitMQListener {
                 AvailabilityMSG availabilityMSG;
                 try {
                     availabilityMSG = getTelegramAvailabilityMSG(message.getAgentId());
-                } catch (ServiceNotFoundException ex) {
+                } catch (AppointmentNotFoundException | ServiceNotFoundException ex) {
                     availabilityMSG = new AvailabilityMSG();
                     availabilityMSG.setAgentId(message.getAgentId());
                 }
@@ -160,7 +160,7 @@ public class RabbitMQListener {
 
                     template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
                 }
-            } catch (ServiceNotFoundException exception) {
+            } catch (AppointmentNotFoundException | ServiceNotFoundException exception) {
                 ErrorMSG errorMSG = new ErrorMSG();
                 errorMSG.setAgentId(scheduleMSG.getAgentId());
                 errorMSG.setMessage(exception.getMessage());
@@ -171,8 +171,12 @@ public class RabbitMQListener {
 
     private AvailabilityMSG getTelegramAvailabilityMSG(String agentId) {
         AvailabilityMSG availabilityMSG = new AvailabilityMSG();
+        List<Appointment> appointments = new ArrayList<>();
 
-        List<Appointment> appointments = managementService.findAllAppointments(agentId);
+        try {
+            appointments = managementService.findAllAppointments(agentId);
+        } catch (AppointmentNotFoundException ignore) {
+        }
 
         List<Availability> availabilities = managementService.findAvailableTimeForTelegram(agentId)
                 .stream()

@@ -156,6 +156,8 @@ function nextMonth() {
     today.setMonth(today.getMonth() + 1);
     if (today.getMonth() !== currentDate.getMonth()) {
         resetToFirstDayOfMonth();
+    } else {
+        today.setDate(new Date().getDate())
     }
     $('.member').removeClass('selected');
     $('.wrap').removeClass('member-selected date-selected slot-selected booking-complete');
@@ -165,6 +167,8 @@ function prevMonth() {
     today.setMonth(today.getMonth() - 1);
     if (today.getMonth() !== currentDate.getMonth()) {
         resetToFirstDayOfMonth();
+    } {
+        today.setDate(new Date().getDate())
     }
     $('.member').removeClass('selected');
     $('.wrap').removeClass('member-selected date-selected slot-selected booking-complete');

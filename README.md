@@ -32,7 +32,7 @@ https://t.me/clientsmanagement_bot
 ## Install
 
 ```
-git clone https://github.com/kotomore/4Clients.git
+git clone https://github.com/kotomore/TapTimes.git
 ```
 >Rename and fill application.properties.origin files (in resource folder every microservice) to <b>application.properties</b> file
 >Change root dir
