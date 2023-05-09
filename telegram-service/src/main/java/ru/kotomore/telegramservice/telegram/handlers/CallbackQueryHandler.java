@@ -1,8 +1,6 @@
 package ru.kotomore.telegramservice.telegram.handlers;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -15,13 +13,12 @@ import ru.kotomore.telegramservice.services.UserAwaitingService;
 import telegram.TelegramMessage;
 
 @Component
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class CallbackQueryHandler {
     private static final String ENTER_SERVICE_NAME = "Введите название услуги";
     private static final String ENTER_SERVICE_DESCRIPTION = "Введите описание услуги";
     private static final String ENTER_SERVICE_PRICE = "Введите цену услуги";
-    private static final String ENTER_SERVICE_DURATION = "Введите длительность услуги";
+    private static final String ENTER_SERVICE_DURATION = "Введите длительность услуги в минутах";
     private static final String ENTER_USER_NAME = "Введите Ф.И.О";
     private static final String ENTER_USER_PASSWORD = "Введите пароль";
 
@@ -81,10 +78,10 @@ public class CallbackQueryHandler {
 
 
                         Пример:
-                        *2023-12-30
+                        `2023-12-30
                         2023-12-30
                         09:00
-                        18:00*""";
+                        18:00`""";
 
                 SendMessage agentSchedule = new SendMessage(chatId, message);
                 agentSchedule.enableMarkdown(true);

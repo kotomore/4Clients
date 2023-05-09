@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import ru.kotomore.telegramservice.models.TelegramUser;
-import ru.kotomore.telegramservice.models.UserAwaitingResponse;
 import ru.kotomore.telegramservice.constants.ActionDefinitionEnum;
 import ru.kotomore.telegramservice.constants.ActionPartEnum;
+import ru.kotomore.telegramservice.models.TelegramUser;
+import ru.kotomore.telegramservice.models.UserAwaitingResponse;
 import ru.kotomore.telegramservice.repositories.TelegramUserRepository;
 import ru.kotomore.telegramservice.services.RabbitService;
 import ru.kotomore.telegramservice.services.UserAwaitingService;
@@ -50,24 +50,48 @@ public class TelegramMessageHandler {
 
         switch (inputText) {
             case "/start":
+                userAwaitingService.removeFromWaitingList(chatId);
                 return getRegMessage(chatId);
             case "Редактирование услуг":
+                userAwaitingService.removeFromWaitingList(chatId);
                 Optional<TelegramUser> user = repository.findByChatId(chatId);
-                user.ifPresent(telegramUser -> rabbitService.sendTelegramMessage(telegramUser.getAgentId(), TelegramMessage.Action.SERVICE_INFO));
-                return null;
+                if (user.isPresent()) {
+                    rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.SERVICE_INFO);
+                    break;
+                } else {
+                    return sendNeedAuthMessage(chatId);
+                }
+
             case "Личные данные":
+                userAwaitingService.removeFromWaitingList(chatId);
                 user = repository.findByChatId(chatId);
-                user.ifPresent(telegramUser -> rabbitService.sendTelegramMessage(telegramUser.getAgentId(), TelegramMessage.Action.AGENT_INFO));
-                return null;
+                if (user.isPresent()) {
+                    rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.AGENT_INFO);
+                    break;
+                } else {
+                    return sendNeedAuthMessage(chatId);
+                }
             case "Расписание":
+                userAwaitingService.removeFromWaitingList(chatId);
                 user = repository.findByChatId(chatId);
-                user.ifPresent(telegramUser -> rabbitService.sendTelegramMessage(telegramUser.getAgentId(), TelegramMessage.Action.SCHEDULES));
-                return null;
+                if (user.isPresent()) {
+                    rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.SCHEDULES);
+                    break;
+                } else {
+                    return sendNeedAuthMessage(chatId);
+                }
             case "Записи":
+                userAwaitingService.removeFromWaitingList(chatId);
                 user = repository.findByChatId(chatId);
-                user.ifPresent(telegramUser -> rabbitService.sendTelegramMessage(telegramUser.getAgentId(), TelegramMessage.Action.APPOINTMENTS));
-                return null;
+                if (user.isPresent()) {
+                    rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.APPOINTMENTS);
+                    break;
+                } else {
+                    return sendNeedAuthMessage(chatId);
+                }
+
             case "Код для сайта":
+                userAwaitingService.removeFromWaitingList(chatId);
                 user = repository.findByChatId(chatId);
                 if (user.isPresent()) {
                     try {
@@ -92,10 +116,11 @@ public class TelegramMessageHandler {
                         sendMessage.enableMarkdown(true);
                         return sendMessage;
                     } catch (IOException e) {
-                        return null;
+                        break;
                     }
+                } else {
+                    return sendNeedAuthMessage(chatId);
                 }
-                return null;
         }
 
         if (userAwaitingService.contains(chatId)) {
@@ -132,14 +157,31 @@ public class TelegramMessageHandler {
         return null;
     }
 
+    private SendMessage sendNeedAuthMessage(String chatId) {
+        String text = "*Необходим вход в приложение*";
+        SendMessage sendMessage = new SendMessage(chatId, text);
+        sendMessage.enableMarkdown(true);
+        ReplyKeyboardMaker maker = new ReplyKeyboardMaker();
+
+        sendMessage.setReplyMarkup(maker.getSingleButtonKeyboard("Войти"));
+
+        return sendMessage;
+    }
+
     private BotApiMethod<?> updateAgentServiceName(Message message, String chatId) {
         AgentServiceMSG service = new AgentServiceMSG();
+        if (message.getText().length() > 150) {
+            return new SendMessage(chatId, "Максимальное количество символов - 150");
+        }
         service.setName(message.getText());
         return updateService(chatId, service);
     }
 
     private BotApiMethod<?> updateAgentServiceDescription(Message message, String chatId) {
         AgentServiceMSG service = new AgentServiceMSG();
+        if (message.getText().length() > 150) {
+            return new SendMessage(chatId, "Максимальное количество символов - 150");
+        }
         service.setDescription(message.getText());
         return updateService(chatId, service);
     }
@@ -191,6 +233,12 @@ public class TelegramMessageHandler {
     private BotApiMethod<?> updateAgent(String chatId, AgentMSG agentMSG) {
         Optional<TelegramUser> user = repository.findByChatId(chatId);
         if (user.isPresent()) {
+            if (agentMSG.getName() != null && agentMSG.getName().length() > 20) {
+                return new SendMessage(chatId, "Максимальное количество символов - 20");
+            }
+            if (agentMSG.getPassword() != null && agentMSG.getPassword().length() < 5) {
+                return new SendMessage(chatId, "Минимальное количество символов - 5");
+            }
             agentMSG.setId(user.get().getAgentId());
             rabbitService.updateAgent(agentMSG);
             userAwaitingService.removeFromWaitingList(chatId);
