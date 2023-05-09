@@ -20,6 +20,12 @@ services:
       - "15672:15672"
     networks:
       - mongo-net
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 3
+        window: 60s
 
   auth-service:
     build: ./auth-service
@@ -37,6 +43,12 @@ services:
     depends_on:
       - mongo
       - localRabbitMQ
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 3
+        window: 60s
 
   management-service:
     build: ./management-service
@@ -54,6 +66,12 @@ services:
     depends_on:
       - mongo
       - localRabbitMQ
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 3
+        window: 60s
 
   telegram-service:
     build: ./telegram-service
@@ -68,6 +86,13 @@ services:
       - mongo-net
     depends_on:
       - localRabbitMQ
+      - management-service
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 3
+        window: 60s
 
   client-service:
     build: ./client-service
@@ -85,6 +110,13 @@ services:
     depends_on:
       - mongo
       - localRabbitMQ
+      - telegram-service
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 3
+        window: 60s
 
 networks:
   mongo-net:
