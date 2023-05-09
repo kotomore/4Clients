@@ -35,6 +35,13 @@ public class RabbitService {
         }
     }
 
+    public void deleteAppointment(String agentId, String appointmentId) {
+        AppointmentMSG appointmentMSG = new AppointmentMSG();
+        appointmentMSG.setAgentId(agentId);
+        appointmentMSG.setAppointmentId(appointmentId);
+        template.convertAndSend("telegram_delete_appointment", appointmentMSG);
+    }
+
     public void sendTelegramMessage(String agentId, TelegramMessage.Action action) {
         TelegramMessage message = new TelegramMessage();
         message.setAgentId(agentId);

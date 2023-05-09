@@ -15,6 +15,7 @@ public class RabbitService {
 
     public void sendTelegramNotification(Appointment appointment) {
         AppointmentMSG appointmentMSG = new AppointmentMSG();
+        appointmentMSG.setAppointmentId(appointment.getId());
         appointmentMSG.setAgentId(appointment.getAgentId());
         appointmentMSG.setDate(appointment.getStartTime().toLocalDate());
         appointmentMSG.setStartTime(appointment.getStartTime().toLocalTime());

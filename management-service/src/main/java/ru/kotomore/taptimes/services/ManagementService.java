@@ -49,15 +49,15 @@ public class ManagementService {
                 .orElseThrow(() -> new AppointmentNotFoundException(agentId));
     }
 
-    public void deleteAppointment(String agentId, String appointmentId) throws RuntimeException {
+    public void deleteAppointment(String agentId, String appointmentId) throws AppointmentNotFoundException {
         Appointment appointment = appointmentRepository.findByIdAndAgentId(appointmentId, agentId)
                 .orElseThrow(() -> new AppointmentNotFoundException(appointmentId));
-        Availability availability = availabilityRepository.findByAgentIdAndStartTime(
-                appointment.getAgentId(),
-                appointment.getStartTime())
-                        .orElseThrow(() -> new RuntimeException("Schedule not found"));
+        Availability availability = new Availability();
+        availability.setAgentId(agentId);
+        availability.setStartTime(appointment.getStartTime());
+        availability.setEndTime(appointment.getEndTime());
 
-        availabilityRepository.deleteById(availability.getId());
+        availabilityRepository.save(availability);
         appointmentRepository.deleteByIdAndAgentId(appointmentId, agentId);
     }
 
@@ -105,7 +105,6 @@ public class ManagementService {
                  time = time.plusMinutes(service.getDuration())) {
 
                 if (!appointedTime.contains(LocalDateTime.of(date, time))) {
-
                     Availability availability = getAvailability(agentId, service, date, time);
                     availabilityList.add(availability);
                 }
@@ -115,10 +114,6 @@ public class ManagementService {
                 LocalDateTime.of(timeSlotDTO.getDateStart(), LocalTime.MIN),
                 LocalDateTime.of(timeSlotDTO.getDateEnd(), LocalTime.MAX));
         availabilityRepository.saveAll(availabilityList);
-    }
-
-    public void deleteAllAvailableTime(String agentId) {
-        availabilityRepository.deleteAllByAgentId(agentId);
     }
 
     private List<LocalDateTime> getAppointmentsTime(String agentId, LocalDateTime timeSlotStartDateTime) {
@@ -136,6 +131,10 @@ public class ManagementService {
         availability.setEndTime(startTime.plusMinutes(service.getDuration()));
         availability.setAgentId(agentId);
         return availability;
+    }
+
+    public void deleteAllAvailableTime(String agentId) {
+        availabilityRepository.deleteAllByAgentId(agentId);
     }
 
     public Set<LocalTime> findAvailableTimes(String agentId, LocalDate date) throws TimeNotAvailableException {

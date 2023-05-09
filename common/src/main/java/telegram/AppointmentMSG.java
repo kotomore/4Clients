@@ -10,6 +10,7 @@ import java.time.LocalTime;
 @Getter
 @Setter
 public class AppointmentMSG implements Serializable {
+    private String appointmentId;
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;

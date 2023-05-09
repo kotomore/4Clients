@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import ru.kotomore.telegramservice.constants.ActionDefinitionEnum;
 import ru.kotomore.telegramservice.constants.ActionPartEnum;
+import ru.kotomore.telegramservice.models.TelegramUser;
 import ru.kotomore.telegramservice.repositories.TelegramUserRepository;
 import ru.kotomore.telegramservice.services.RabbitService;
 import ru.kotomore.telegramservice.services.UserAwaitingService;
@@ -31,6 +33,14 @@ public class CallbackQueryHandler {
         final Integer messageId = buttonQuery.getMessage().getMessageId();
 
         String data = buttonQuery.getData();
+
+        if (data.contains("APPOINTMENT_DELETE")) {
+            String appointmentId = data.replace("APPOINTMENT_DELETE", "");
+            TelegramUser telegramUser = repository.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"));
+
+            rabbitService.deleteAppointment(telegramUser.getAgentId(), appointmentId);
+            return new DeleteMessage(chatId, buttonQuery.getMessage().getMessageId());
+        }
 
         switch (data) {
             case "SERVICE_NAME":
@@ -97,6 +107,7 @@ public class CallbackQueryHandler {
                 return null;
         }
     }
+
     private void deleteSchedule(String chatId) {
         String agentId = repository.findByChatId(chatId).orElseThrow().getAgentId();
         rabbitService.sendTelegramMessage(agentId, TelegramMessage.Action.SCHEDULE_DELETE);

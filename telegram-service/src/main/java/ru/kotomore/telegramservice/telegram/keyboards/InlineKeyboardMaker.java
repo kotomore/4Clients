@@ -64,6 +64,19 @@ public class InlineKeyboardMaker {
         return inlineKeyboardMarkup;
     }
 
+    public InlineKeyboardMarkup getAppointmentDeleteInlineButton(String appointmentId) {
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(getButton(
+                "Удалить запись",
+                ActionPartEnum.APPOINTMENT_.name() + ActionDefinitionEnum.DELETE.name() +
+                        appointmentId
+        ));
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
+    }
+
     private List<InlineKeyboardButton> getButton(String buttonName, String buttonCallBackData) {
         InlineKeyboardButton button = new InlineKeyboardButton();
         button.setText(buttonName);

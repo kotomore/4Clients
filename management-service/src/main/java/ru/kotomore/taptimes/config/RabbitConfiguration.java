@@ -35,6 +35,11 @@ public class RabbitConfiguration {
     }
 
     @Bean
+    public Queue telegramDeleteAppointment() {
+        return QueueBuilder.durable("telegram_delete_appointment").build();
+    }
+
+    @Bean
     public Queue telegramQueueToSchedule() {
         return QueueBuilder.durable("telegram_queue_to_schedule").build();
     }

@@ -112,6 +112,10 @@ public class TelegramMessageService {
 
             SendMessage sendMessage = new SendMessage(chatId, messageBuilder.toString());
             sendMessage.enableMarkdown(true);
+            if (!appointmentMSGS.isEmpty() && appointmentMSGS.get(0).getType() == AppointmentMSG.Type.NEW) {
+                sendMessage.setReplyMarkup(inlineKeyboardMaker.getAppointmentDeleteInlineButton(appointmentMSGS.get(0)
+                        .getAppointmentId()));
+            }
             try {
                 writeReadBot.execute(sendMessage);
             } catch (TelegramApiException tAe) {

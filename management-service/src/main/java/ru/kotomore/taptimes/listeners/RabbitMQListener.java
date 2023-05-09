@@ -169,6 +169,15 @@ public class RabbitMQListener {
         }
     }
 
+    @RabbitListener(queues = "telegram_delete_appointment", returnExceptions = "false")
+    public void receiveAppointmentDelete(AppointmentMSG appointmentMSG) {
+        try {
+            managementService.deleteAppointment(appointmentMSG.getAgentId(), appointmentMSG.getAppointmentId());
+        } catch (AppointmentNotFoundException exception) {
+            sendErrorMessage(appointmentMSG.getAgentId(), exception.getMessage());
+        }
+    }
+
     private AvailabilityMSG getTelegramAvailabilityMSG(String agentId) {
         AvailabilityMSG availabilityMSG = new AvailabilityMSG();
         List<Appointment> appointments = new ArrayList<>();
