@@ -34,13 +34,6 @@ $('.deselect-slot').on('click', function (e) {
     e.stopPropagation();
 });
 
-$('.form').on('submit', function (e) {
-    $('.wrap').toggleClass('booking-complete');
-    e.preventDefault();
-    e.stopPropagation();
-})
-
-
 function invokeCalendarListener() {
     $('.calendar td:not(.disabled)').on('click', function (e) {
         var date = $(this).html();

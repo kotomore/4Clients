@@ -41,14 +41,15 @@ form.onsubmit = function(event){
         "    \"phone\": \"" + phone + "\"\n" +
         "  }\n" +
         "}");
-    xhr.open('POST','http://45.159.249.5:8092/api/v1/clients/appointment');
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(JSON.stringify(json));
-
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == XMLHttpRequest.DONE) {
-            form.reset();
-        }
+    try {
+        xhr.open('POST','http://45.159.249.5:8092/api/v1/clients/appointment', false);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify(json));
+        $('.wrap').toggleClass('booking-complete');
+        event.preventDefault();
+        event.stopPropagation();
+    } catch (e) {
+        alert("Ошибка записи. Попробуйте немного позднее")
     }
     return false;
 }
