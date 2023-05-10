@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.kotomore.telegramservice.enums.Command;
 import ru.kotomore.telegramservice.enums.DefinitionEnum;
 import ru.kotomore.telegramservice.enums.EntityEnum;
-import ru.kotomore.telegramservice.messaging.RabbitSender;
+import ru.kotomore.telegramservice.messaging.RabbitMessageSender;
 import ru.kotomore.telegramservice.models.TelegramUser;
 import ru.kotomore.telegramservice.models.UserAwaitingResponse;
 import ru.kotomore.telegramservice.repositories.TelegramUserRepository;
@@ -30,19 +30,19 @@ import java.util.Optional;
 
 @Component
 public class TelegramMessageHandler {
-    private final RabbitSender rabbitSender;
+    private final RabbitMessageSender rabbitMessageSender;
     private final TelegramUserRepository repository;
     private final UserAwaitingService userAwaitingService;
     private final String siteUrl;
     private final String websiteCodePath;
     private final String websiteCodeDockerPath;
 
-    public TelegramMessageHandler(RabbitSender rabbitSender, TelegramUserRepository repository,
+    public TelegramMessageHandler(RabbitMessageSender rabbitMessageSender, TelegramUserRepository repository,
                                   UserAwaitingService userAwaitingService,
                                   @Value("${site.url}") String siteUrl,
                                   @Value("${site.path}") String websiteCodePath,
                                   @Value("${site.docker_path}") String websiteCodeDockerPath) {
-        this.rabbitSender = rabbitSender;
+        this.rabbitMessageSender = rabbitMessageSender;
         this.repository = repository;
         this.userAwaitingService = userAwaitingService;
         this.siteUrl = siteUrl;
@@ -66,19 +66,19 @@ public class TelegramMessageHandler {
             switch (inputCommand) {
                 case EDIT_SERVICES -> {
                     userAwaitingService.removeFromWaitingList(chatId);
-                    rabbitSender.sendTelegramMessage(agentId, TelegramMessage.Action.SERVICE_INFO);
+                    rabbitMessageSender.sendTelegramMessage(agentId, TelegramMessage.Action.SERVICE_INFO);
                 }
                 case PERSONAL_DATA -> {
                     userAwaitingService.removeFromWaitingList(chatId);
-                    rabbitSender.sendTelegramMessage(agentId, TelegramMessage.Action.AGENT_INFO);
+                    rabbitMessageSender.sendTelegramMessage(agentId, TelegramMessage.Action.AGENT_INFO);
                 }
                 case SCHEDULE -> {
                     userAwaitingService.removeFromWaitingList(chatId);
-                    rabbitSender.sendTelegramMessage(agentId, TelegramMessage.Action.SCHEDULES);
+                    rabbitMessageSender.sendTelegramMessage(agentId, TelegramMessage.Action.SCHEDULES);
                 }
                 case APPOINTMENTS -> {
                     userAwaitingService.removeFromWaitingList(chatId);
-                    rabbitSender.sendTelegramMessage(agentId, TelegramMessage.Action.APPOINTMENTS);
+                    rabbitMessageSender.sendTelegramMessage(agentId, TelegramMessage.Action.APPOINTMENTS);
                 }
                 case WEBSITE_CODE -> {
                     userAwaitingService.removeFromWaitingList(chatId);
@@ -214,7 +214,7 @@ public class TelegramMessageHandler {
         Optional<TelegramUser> user = repository.findByChatId(chatId);
         if (user.isPresent()) {
             service.setAgentId(user.get().getAgentId());
-            rabbitSender.updateService(service);
+            rabbitMessageSender.updateService(service);
             userAwaitingService.removeFromWaitingList(chatId);
         }
         return null;
@@ -242,7 +242,7 @@ public class TelegramMessageHandler {
                 return new SendMessage(chatId, "Минимальное количество символов - 5");
             }
             agentMSG.setId(user.get().getAgentId());
-            rabbitSender.updateAgent(agentMSG);
+            rabbitMessageSender.updateAgent(agentMSG);
             userAwaitingService.removeFromWaitingList(chatId);
         }
         return null;
@@ -276,7 +276,7 @@ public class TelegramMessageHandler {
         Optional<TelegramUser> user = repository.findByChatId(chatId);
         if (user.isPresent()) {
             schedule.setAgentId(user.get().getAgentId());
-            rabbitSender.updateSchedule(schedule);
+            rabbitMessageSender.updateSchedule(schedule);
             userAwaitingService.removeFromWaitingList(chatId);
         }
         return null;
@@ -290,7 +290,7 @@ public class TelegramMessageHandler {
         user.setPhone(phone);
         user.setChatId(chatId);
         repository.save(user);
-        rabbitSender.registerAgentByPhone(phone);
+        rabbitMessageSender.registerAgentByPhone(phone);
     }
 
     private SendMessage getRegMessage(String chatId) {

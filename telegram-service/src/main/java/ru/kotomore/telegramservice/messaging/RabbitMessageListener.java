@@ -15,10 +15,10 @@ import java.util.List;
 @Slf4j
 @AllArgsConstructor
 @Component
-public class RabbitListener {
+public class RabbitMessageListener {
     private TelegramMessageService telegramMessageService;
 
-    @org.springframework.amqp.rabbit.annotation.RabbitListener(bindings = @QueueBinding(
+    @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "telegram_queue_to_agent", durable = "true"),
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.agent"
@@ -28,7 +28,7 @@ public class RabbitListener {
         telegramMessageService.sendAgentInfoMessage(agentMSG);
     }
 
-    @org.springframework.amqp.rabbit.annotation.RabbitListener(bindings = @QueueBinding(
+    @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "telegram_queue_to_service", durable = "true"),
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.service"
@@ -38,7 +38,7 @@ public class RabbitListener {
         telegramMessageService.sendAgentServiceMessage(service);
     }
 
-    @org.springframework.amqp.rabbit.annotation.RabbitListener(bindings = @QueueBinding(
+    @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "telegram_queue_to_bot", durable = "true"),
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.register"
@@ -48,7 +48,7 @@ public class RabbitListener {
         telegramMessageService.registerUser(agentMSG);
     }
 
-    @org.springframework.amqp.rabbit.annotation.RabbitListener(bindings = @QueueBinding(
+    @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "telegram_queue_to_schedule", durable = "true"),
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.schedule"
@@ -58,7 +58,7 @@ public class RabbitListener {
         telegramMessageService.sendAgentSchedule(availabilityMSG);
     }
 
-    @org.springframework.amqp.rabbit.annotation.RabbitListener(bindings = @QueueBinding(
+    @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "telegram_queue_to_appointment", durable = "true"),
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.appointment"
@@ -68,7 +68,7 @@ public class RabbitListener {
         telegramMessageService.sendAgentAppointmentsMessage(List.of(appointmentMSG));
     }
 
-    @org.springframework.amqp.rabbit.annotation.RabbitListener(bindings = @QueueBinding(
+    @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "telegram_queue_to_all_appointment", durable = "true"),
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.all_appointment"
@@ -78,7 +78,7 @@ public class RabbitListener {
         telegramMessageService.sendAgentAppointmentsMessage(appointmentMSGS);
     }
 
-    @org.springframework.amqp.rabbit.annotation.RabbitListener(bindings = @QueueBinding(
+    @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "telegram_queue_to_error", durable = "true"),
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.error"

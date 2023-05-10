@@ -10,7 +10,7 @@ import ru.kotomore.telegramservice.enums.DefinitionEnum;
 import ru.kotomore.telegramservice.enums.EntityEnum;
 import ru.kotomore.telegramservice.models.TelegramUser;
 import ru.kotomore.telegramservice.repositories.TelegramUserRepository;
-import ru.kotomore.telegramservice.messaging.RabbitSender;
+import ru.kotomore.telegramservice.messaging.RabbitMessageSender;
 import ru.kotomore.telegramservice.services.UserAwaitingService;
 import telegram.TelegramMessage;
 
@@ -26,7 +26,7 @@ public class CallbackQueryHandler {
 
     private final UserAwaitingService userAwaitingService;
     private final TelegramUserRepository repository;
-    private final RabbitSender rabbitSender;
+    private final RabbitMessageSender rabbitMessageSender;
 
     public BotApiMethod<?> processCallbackQuery(CallbackQuery buttonQuery) {
         final String chatId = buttonQuery.getMessage().getChatId().toString();
@@ -38,7 +38,7 @@ public class CallbackQueryHandler {
             String appointmentId = data.replace("APPOINTMENT_DELETE", "");
             TelegramUser telegramUser = repository.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"));
 
-            rabbitSender.deleteAppointment(telegramUser.getAgentId(), appointmentId);
+            rabbitMessageSender.deleteAppointment(telegramUser.getAgentId(), appointmentId);
             return new DeleteMessage(chatId, buttonQuery.getMessage().getMessageId());
         }
 
@@ -110,6 +110,6 @@ public class CallbackQueryHandler {
 
     private void deleteSchedule(String chatId) {
         String agentId = repository.findByChatId(chatId).orElseThrow().getAgentId();
-        rabbitSender.sendTelegramMessage(agentId, TelegramMessage.Action.SCHEDULE_DELETE);
+        rabbitMessageSender.sendTelegramMessage(agentId, TelegramMessage.Action.SCHEDULE_DELETE);
     }
 }

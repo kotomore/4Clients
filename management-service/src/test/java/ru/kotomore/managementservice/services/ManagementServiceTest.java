@@ -90,20 +90,16 @@ public class ManagementServiceTest {
 
         //Add availability
         Availability availability = new Availability();
-        availability.setStartTime(startTime);
-        availability.setEndTime(endTime);
+        availability.setStartTime(appointment.getStartTime());
+        availability.setEndTime(appointment.getEndTime());
         availability.setAgentId("agent-123");
 
         Mockito.when(appointmentRepository.findByIdAndAgentId("appointment-123", "agent-123"))
                 .thenReturn(Optional.of(appointment));
-        Mockito.when(availabilityRepository.findByAgentIdAndStartTime(
-                appointment.getAgentId(),
-                appointment.getStartTime())).thenReturn(Optional.of(availability));
-
 
         managementService.deleteAppointment("agent-123", "appointment-123");
 
-        Mockito.verify(appointmentRepository).deleteByIdAndAgentId("appointment-123", "agent-123");
+        Mockito.verify(appointmentRepository).delete(appointment);
     }
 
     @Test

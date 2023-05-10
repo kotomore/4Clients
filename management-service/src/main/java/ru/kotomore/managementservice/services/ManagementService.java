@@ -58,7 +58,7 @@ public class ManagementService {
         availability.setEndTime(appointment.getEndTime());
 
         availabilityRepository.save(availability);
-        appointmentRepository.deleteByIdAndAgentId(appointmentId, agentId);
+        appointmentRepository.delete(appointment);
     }
 
     public Agent findAgentById(String agentId) throws AgentNotFoundException{

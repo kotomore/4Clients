@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public class RabbitSender {
+public class RabbitMessageSender {
     private final AmqpTemplate template;
     private final Queue telegramQueueFrom;
 
