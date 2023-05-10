@@ -12,11 +12,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import ru.kotomore.taptimes.dto.security.JwtRequest;
-import ru.kotomore.taptimes.dto.security.JwtResponse;
-import ru.kotomore.taptimes.dto.security.RefreshJwtRequest;
-import ru.kotomore.taptimes.listeners.RabbitMQListener;
-import ru.kotomore.taptimes.services.AuthService;
+import ru.kotomore.authservice.dto.security.JwtRequest;
+import ru.kotomore.authservice.dto.security.JwtResponse;
+import ru.kotomore.authservice.dto.security.RefreshJwtRequest;
+import ru.kotomore.authservice.services.AuthService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

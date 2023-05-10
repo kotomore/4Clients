@@ -1,18 +1,17 @@
 package ru.kotomore.telegramservice.telegram.handlers;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import ru.kotomore.telegramservice.constants.ActionDefinitionEnum;
-import ru.kotomore.telegramservice.constants.ActionPartEnum;
+import ru.kotomore.telegramservice.enums.Command;
+import ru.kotomore.telegramservice.enums.DefinitionEnum;
+import ru.kotomore.telegramservice.enums.EntityEnum;
+import ru.kotomore.telegramservice.messaging.RabbitSender;
 import ru.kotomore.telegramservice.models.TelegramUser;
 import ru.kotomore.telegramservice.models.UserAwaitingResponse;
 import ru.kotomore.telegramservice.repositories.TelegramUserRepository;
-import ru.kotomore.telegramservice.services.RabbitService;
 import ru.kotomore.telegramservice.services.UserAwaitingService;
 import ru.kotomore.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
 import telegram.AgentMSG;
@@ -30,131 +29,134 @@ import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
 @Component
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class TelegramMessageHandler {
-    RabbitService rabbitService;
-    TelegramUserRepository repository;
-    UserAwaitingService userAwaitingService;
-    String siteUrl;
+    private final RabbitSender rabbitSender;
+    private final TelegramUserRepository repository;
+    private final UserAwaitingService userAwaitingService;
+    private final String siteUrl;
+    private final String websiteCodePath;
+    private final String websiteCodeDockerPath;
 
-    public TelegramMessageHandler(RabbitService rabbitService, TelegramUserRepository repository, UserAwaitingService userAwaitingService, @Value("${site.url}") String siteUrl) {
-        this.rabbitService = rabbitService;
+    public TelegramMessageHandler(RabbitSender rabbitSender, TelegramUserRepository repository,
+                                  UserAwaitingService userAwaitingService,
+                                  @Value("${site.url}") String siteUrl,
+                                  @Value("${site.path}") String websiteCodePath,
+                                  @Value("${site.docker_path}") String websiteCodeDockerPath) {
+        this.rabbitSender = rabbitSender;
         this.repository = repository;
         this.userAwaitingService = userAwaitingService;
         this.siteUrl = siteUrl;
+        this.websiteCodePath = websiteCodePath;
+        this.websiteCodeDockerPath = websiteCodeDockerPath;
     }
 
     public BotApiMethod<?> answerMessage(Message message) {
         String chatId = message.getChatId().toString();
         String inputText = message.getText();
 
-        switch (inputText) {
-            case "/start":
-                userAwaitingService.removeFromWaitingList(chatId);
-                return getRegMessage(chatId);
-            case "Редактирование услуг":
-                userAwaitingService.removeFromWaitingList(chatId);
-                Optional<TelegramUser> user = repository.findByChatId(chatId);
-                if (user.isPresent()) {
-                    rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.SERVICE_INFO);
-                    break;
-                } else {
-                    return sendNeedAuthMessage(chatId);
-                }
-
-            case "Личные данные":
-                userAwaitingService.removeFromWaitingList(chatId);
-                user = repository.findByChatId(chatId);
-                if (user.isPresent()) {
-                    rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.AGENT_INFO);
-                    break;
-                } else {
-                    return sendNeedAuthMessage(chatId);
-                }
-            case "Расписание":
-                userAwaitingService.removeFromWaitingList(chatId);
-                user = repository.findByChatId(chatId);
-                if (user.isPresent()) {
-                    rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.SCHEDULES);
-                    break;
-                } else {
-                    return sendNeedAuthMessage(chatId);
-                }
-            case "Записи":
-                userAwaitingService.removeFromWaitingList(chatId);
-                user = repository.findByChatId(chatId);
-                if (user.isPresent()) {
-                    rabbitService.sendTelegramMessage(user.get().getAgentId(), TelegramMessage.Action.APPOINTMENTS);
-                    break;
-                } else {
-                    return sendNeedAuthMessage(chatId);
-                }
-
-            case "Код для сайта":
-                userAwaitingService.removeFromWaitingList(chatId);
-                user = repository.findByChatId(chatId);
-                if (user.isPresent()) {
-                    try {
-                        //if run in docker container path = "/root/frontend.html"
-                        Path path = Paths.get("telegram-service/src/main/resources/frontend.html");
-                        if (!Files.exists(path)) {
-                            path = Paths.get("/root/frontend.html");
-                        }
-
-                        String text = String.join("\n", Files.readString(path));
-                        text = "`" + text.replace("${agentId}", user.get().getAgentId()) + "`";
-                        text = text.replace("${siteUrl}", siteUrl);
-
-                        String msg = """
-                                *Для добавления формы записи на сайт вставьте следующий код в нужный раздел вашего сайта.*
-                                Нажмите на код чтобы скопировать:
-
-
-                                """ + text + "\n\n\n\nВаша персональная ссылка: " + siteUrl + "/" + user.get().getAgentId();
-
-                        SendMessage sendMessage = new SendMessage(chatId, msg);
-                        sendMessage.enableMarkdown(true);
-                        return sendMessage;
-                    } catch (IOException e) {
-                        break;
-                    }
-                } else {
-                    return sendNeedAuthMessage(chatId);
-                }
+        Optional<TelegramUser> user = repository.findByChatId(chatId);
+        if (inputText != null && inputText.equals(Command.START.getCommandText())) {
+            userAwaitingService.removeFromWaitingList(chatId);
+            return getRegMessage(chatId);
         }
 
-        if (userAwaitingService.contains(chatId)) {
-            UserAwaitingResponse userAwaitingResponse = userAwaitingService.getWaiter(chatId);
-            ActionPartEnum actionPart = userAwaitingResponse.actionPart();
-            ActionDefinitionEnum definition = userAwaitingResponse.definition();
-
-            if (actionPart == ActionPartEnum.SERVICE_) {
-                if (definition == ActionDefinitionEnum.NAME) {
-                    return updateAgentServiceName(message, chatId);
-                } else if (definition == ActionDefinitionEnum.DESCRIPTION) {
-                    return updateAgentServiceDescription(message, chatId);
-                } else if (definition == ActionDefinitionEnum.DURATION) {
-                    return updateAgentServiceDuration(message, chatId);
-                } else if (definition == ActionDefinitionEnum.PRICE) {
-                    return updateAgentServicePrice(message, chatId);
+        Command inputCommand = Command.fromString(inputText);
+        if (inputCommand != null && user.isPresent()) {
+            String agentId = user.get().getAgentId();
+            switch (inputCommand) {
+                case EDIT_SERVICES -> {
+                    userAwaitingService.removeFromWaitingList(chatId);
+                    rabbitSender.sendTelegramMessage(agentId, TelegramMessage.Action.SERVICE_INFO);
+                }
+                case PERSONAL_DATA -> {
+                    userAwaitingService.removeFromWaitingList(chatId);
+                    rabbitSender.sendTelegramMessage(agentId, TelegramMessage.Action.AGENT_INFO);
+                }
+                case SCHEDULE -> {
+                    userAwaitingService.removeFromWaitingList(chatId);
+                    rabbitSender.sendTelegramMessage(agentId, TelegramMessage.Action.SCHEDULES);
+                }
+                case APPOINTMENTS -> {
+                    userAwaitingService.removeFromWaitingList(chatId);
+                    rabbitSender.sendTelegramMessage(agentId, TelegramMessage.Action.APPOINTMENTS);
+                }
+                case WEBSITE_CODE -> {
+                    userAwaitingService.removeFromWaitingList(chatId);
+                    return getWebsiteCodeMessage(chatId, agentId);
                 }
             }
-
-            if (actionPart == ActionPartEnum.AGENT_) {
-                if (definition == ActionDefinitionEnum.NAME) {
-                    return updateAgentName(message, chatId);
-                } else if (definition == ActionDefinitionEnum.PASSWORD) {
-                    return updateAgentPassword(message, chatId);
-                }
-            }
-
-            if (actionPart == ActionPartEnum.SCHEDULE_) {
-                if (definition == ActionDefinitionEnum.TIME) {
-                    return updateAgentSchedule(message, chatId);
-                }
-            }
+        } else if (user.isEmpty()) {
+            return sendNeedAuthMessage(chatId);
+        } else if (userAwaitingService.contains(chatId)) {
+            return handleAwaitingRequest(message);
         }
         return null;
+    }
+
+    private BotApiMethod<?> handleAwaitingRequest(Message message) {
+        String chatId = message.getChatId().toString();
+        UserAwaitingResponse userAwaitingResponse = userAwaitingService.getWaiter(chatId);
+        EntityEnum actionPart = userAwaitingResponse.entity();
+        DefinitionEnum definition = userAwaitingResponse.definition();
+
+        return switch (actionPart) {
+            case SERVICE_ -> handleServiceDefinition(definition, message, chatId);
+            case AGENT_ -> handleAgentDefinition(definition, message, chatId);
+            case SCHEDULE_ -> handleScheduleDefinition(definition, message, chatId);
+            default -> null;
+        };
+    }
+
+    private BotApiMethod<?> handleServiceDefinition(DefinitionEnum definition, Message message, String chatId) {
+        return switch (definition) {
+            case NAME -> updateAgentServiceName(message, chatId);
+            case DESCRIPTION -> updateAgentServiceDescription(message, chatId);
+            case DURATION -> updateAgentServiceDuration(message, chatId);
+            case PRICE -> updateAgentServicePrice(message, chatId);
+            default -> null;
+        };
+    }
+
+    private BotApiMethod<?> handleAgentDefinition(DefinitionEnum definition, Message message, String chatId) {
+        return switch (definition) {
+            case NAME -> updateAgentName(message, chatId);
+            case PASSWORD -> updateAgentPassword(message, chatId);
+            default -> null;
+        };
+    }
+
+    private BotApiMethod<?> handleScheduleDefinition(DefinitionEnum definition, Message message, String chatId) {
+        if (definition == DefinitionEnum.TIME) {
+            return updateAgentSchedule(message, chatId);
+        }
+        return null;
+    }
+
+    private SendMessage getWebsiteCodeMessage(String chatId, String agentId) {
+        try {
+            //if run in docker container path = "/root/frontend.html"
+            Path path = Paths.get(websiteCodePath);
+            if (!Files.exists(path)) {
+                path = Paths.get(websiteCodeDockerPath);
+            }
+
+            String text = String.join("\n", Files.readString(path));
+            text = "`" + text.replace("${agentId}", agentId) + "`";
+            text = text.replace("${siteUrl}", siteUrl);
+
+            String msg = """
+                    *Для добавления формы записи на сайт вставьте следующий код в нужный раздел вашего сайта.*
+                    Нажмите на код чтобы скопировать:
+
+
+                    """ + text + "\n\n\n\nВаша персональная ссылка: " + siteUrl + "/" + agentId;
+
+            SendMessage sendMessage = new SendMessage(chatId, msg);
+            sendMessage.enableMarkdown(true);
+            return sendMessage;
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     private SendMessage sendNeedAuthMessage(String chatId) {
@@ -212,7 +214,7 @@ public class TelegramMessageHandler {
         Optional<TelegramUser> user = repository.findByChatId(chatId);
         if (user.isPresent()) {
             service.setAgentId(user.get().getAgentId());
-            rabbitService.updateService(service);
+            rabbitSender.updateService(service);
             userAwaitingService.removeFromWaitingList(chatId);
         }
         return null;
@@ -240,7 +242,7 @@ public class TelegramMessageHandler {
                 return new SendMessage(chatId, "Минимальное количество символов - 5");
             }
             agentMSG.setId(user.get().getAgentId());
-            rabbitService.updateAgent(agentMSG);
+            rabbitSender.updateAgent(agentMSG);
             userAwaitingService.removeFromWaitingList(chatId);
         }
         return null;
@@ -274,7 +276,7 @@ public class TelegramMessageHandler {
         Optional<TelegramUser> user = repository.findByChatId(chatId);
         if (user.isPresent()) {
             schedule.setAgentId(user.get().getAgentId());
-            rabbitService.updateSchedule(schedule);
+            rabbitSender.updateSchedule(schedule);
             userAwaitingService.removeFromWaitingList(chatId);
         }
         return null;
@@ -288,7 +290,7 @@ public class TelegramMessageHandler {
         user.setPhone(phone);
         user.setChatId(chatId);
         repository.save(user);
-        rabbitService.registerAgentByPhone(phone);
+        rabbitSender.registerAgentByPhone(phone);
     }
 
     private SendMessage getRegMessage(String chatId) {
@@ -304,4 +306,6 @@ public class TelegramMessageHandler {
 
         return sendMessage;
     }
+
+
 }

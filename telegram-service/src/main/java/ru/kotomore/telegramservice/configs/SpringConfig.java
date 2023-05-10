@@ -24,13 +24,10 @@ public class SpringConfig {
                                          TelegramMessageHandler telegramMessageHandler,
                                          CallbackQueryHandler callbackQueryHandler) {
         String botToken = telegramConfig.getBotToken();
-
         WriteReadBot bot = new WriteReadBot(setWebhook, botToken, telegramMessageHandler, callbackQueryHandler);
-
         bot.setBotPath(telegramConfig.getWebhookPath());
         bot.setBotUsername(telegramConfig.getBotName());
         bot.setBotToken(telegramConfig.getBotToken());
-
         return bot;
     }
 }

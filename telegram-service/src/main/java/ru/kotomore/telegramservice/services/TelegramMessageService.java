@@ -106,7 +106,7 @@ public class TelegramMessageService {
                         .append("*Время*: ").append(appointmentMSG.getStartTime()).append(" - ")
                         .append(appointmentMSG.getEndTime()).append("\n")
                         .append("*Имя*: ").append(appointmentMSG.getClientName()).append("\n")
-                        .append("*Телефон*: `").append(appointmentMSG.getClientPhone()).append("`")
+                        .append("*Телефон*: ").append(appointmentMSG.getClientPhone())
                         .append("\n\n");
             }
 

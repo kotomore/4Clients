@@ -2,8 +2,8 @@ package ru.kotomore.telegramservice.services;
 
 import lombok.Getter;
 import org.springframework.stereotype.Service;
-import ru.kotomore.telegramservice.constants.ActionDefinitionEnum;
-import ru.kotomore.telegramservice.constants.ActionPartEnum;
+import ru.kotomore.telegramservice.enums.DefinitionEnum;
+import ru.kotomore.telegramservice.enums.EntityEnum;
 import ru.kotomore.telegramservice.models.UserAwaitingResponse;
 
 import java.util.ArrayList;
@@ -16,9 +16,9 @@ public class UserAwaitingService {
 
     public void addToWaitingList(
             String chatId,
-            ActionPartEnum actionPartEnum,
-            ActionDefinitionEnum actionDefinitionEnum) {
-        UserAwaitingResponse userAwaitingResponse = new UserAwaitingResponse(chatId, actionPartEnum, actionDefinitionEnum);
+            EntityEnum entityEnum,
+            DefinitionEnum definitionEnum) {
+        UserAwaitingResponse userAwaitingResponse = new UserAwaitingResponse(chatId, entityEnum, definitionEnum);
         users.add(userAwaitingResponse);
     }
 

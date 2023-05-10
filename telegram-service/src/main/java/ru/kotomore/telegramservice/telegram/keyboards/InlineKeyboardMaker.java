@@ -3,8 +3,8 @@ package ru.kotomore.telegramservice.telegram.keyboards;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.kotomore.telegramservice.constants.ActionDefinitionEnum;
-import ru.kotomore.telegramservice.constants.ActionPartEnum;
+import ru.kotomore.telegramservice.enums.DefinitionEnum;
+import ru.kotomore.telegramservice.enums.EntityEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,17 +16,17 @@ public class InlineKeyboardMaker {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(getButton(
                 "Название",
-                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.NAME.name()
+                EntityEnum.SERVICE_.name() + DefinitionEnum.NAME.name()
         ));
         rowList.add(getButton(
                 "Описание",
-                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.DESCRIPTION.name()));
+                EntityEnum.SERVICE_.name() + DefinitionEnum.DESCRIPTION.name()));
         rowList.add(getButton(
                 "Длительность",
-                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.DURATION.name()));
+                EntityEnum.SERVICE_.name() + DefinitionEnum.DURATION.name()));
         rowList.add(getButton(
                 "Цена",
-                ActionPartEnum.SERVICE_.name() + ActionDefinitionEnum.PRICE.name()));
+                EntityEnum.SERVICE_.name() + DefinitionEnum.PRICE.name()));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowList);
@@ -37,11 +37,11 @@ public class InlineKeyboardMaker {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(getButton(
                 "Ф.И.О.",
-                ActionPartEnum.AGENT_.name() + ActionDefinitionEnum.NAME.name()
+                EntityEnum.AGENT_.name() + DefinitionEnum.NAME.name()
         ));
         rowList.add(getButton(
                 "Пароль",
-                ActionPartEnum.AGENT_.name() + ActionDefinitionEnum.PASSWORD.name()
+                EntityEnum.AGENT_.name() + DefinitionEnum.PASSWORD.name()
         ));
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowList);
@@ -52,11 +52,11 @@ public class InlineKeyboardMaker {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(getButton(
                 "Изменить",
-                ActionPartEnum.SCHEDULE_.name() + ActionDefinitionEnum.TIME.name()
+                EntityEnum.SCHEDULE_.name() + DefinitionEnum.TIME.name()
         ));
         rowList.add(getButton(
                 "Очистить",
-                ActionPartEnum.SCHEDULE_.name() + ActionDefinitionEnum.DELETE.name()
+                EntityEnum.SCHEDULE_.name() + DefinitionEnum.DELETE.name()
         ));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -68,7 +68,7 @@ public class InlineKeyboardMaker {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(getButton(
                 "Удалить запись",
-                ActionPartEnum.APPOINTMENT_.name() + ActionDefinitionEnum.DELETE.name() +
+                EntityEnum.APPOINTMENT_.name() + DefinitionEnum.DELETE.name() +
                         appointmentId
         ));
 

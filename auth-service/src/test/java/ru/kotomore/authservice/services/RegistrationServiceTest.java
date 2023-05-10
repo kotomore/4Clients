@@ -8,9 +8,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.kotomore.taptimes.models.Agent;
-import ru.kotomore.taptimes.repositories.AgentRepository;
-import ru.kotomore.taptimes.services.RegistrationService;
+import ru.kotomore.authservice.models.Agent;
+import ru.kotomore.authservice.repositories.AgentRepository;
 
 import java.util.Optional;
 
