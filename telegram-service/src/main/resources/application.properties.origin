@@ -3,6 +3,9 @@ telegram.webhook-path=
 telegram.bot-name=
 telegram.bot-token=
 
+site.url=http://localhost:8092
+site.path=telegram-service/src/main/resources/frontend.html
+site.docker_path=/root/frontend.html
 
 server.port=8093
 
