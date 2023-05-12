@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.kotomore.clientservice.exceptions.AgentNotFoundException;
 import ru.kotomore.clientservice.exceptions.AgentServiceNotFoundException;
 import ru.kotomore.clientservice.exceptions.TimeNotAvailableException;
+import ru.kotomore.clientservice.messaging.RabbitMessageSender;
 import ru.kotomore.clientservice.models.Agent;
 import ru.kotomore.clientservice.models.AgentService;
 import ru.kotomore.clientservice.models.Appointment;
@@ -34,7 +35,7 @@ public class ClientService {
     private final AgentRepository agentRepository;
     private final AvailabilityRepository availabilityRepository;
     private final ModelMapper modelMapper;
-    private final RabbitService rabbitService;
+    private final RabbitMessageSender rabbitMessageSender;
     private static final ZoneOffset TIMEZONE_OFFSET = ZoneOffset.of("+03:00");
 
 
@@ -61,7 +62,7 @@ public class ClientService {
 
         updateSchedule(appointmentDTO.getAgentId(), startTime);
         appointment = appointmentRepository.save(appointment);
-        rabbitService.sendTelegramNotification(appointment);
+        rabbitMessageSender.sendTelegramNotification(appointment);
     }
 
     private void updateSchedule(String agentId, LocalDateTime startTime) {

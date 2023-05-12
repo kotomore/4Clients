@@ -1,4 +1,4 @@
-package ru.kotomore.clientservice.services;
+package ru.kotomore.clientservice.messaging;
 
 import lombok.AllArgsConstructor;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -9,7 +9,7 @@ import telegram.AppointmentMSG;
 
 @Component
 @AllArgsConstructor
-public class RabbitService {
+public class RabbitMessageSender {
     private final AmqpTemplate template;
     private TopicExchange telegramExchange;
 

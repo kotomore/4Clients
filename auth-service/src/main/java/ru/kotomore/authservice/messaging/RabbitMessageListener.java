@@ -1,4 +1,4 @@
-package ru.kotomore.authservice.listeners;
+package ru.kotomore.authservice.messaging;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import ru.kotomore.authservice.services.RegistrationService;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class RabbitMQListener {
+public class RabbitMessageListener {
 
     private final AuthService authService;
     private final RegistrationService registrationService;

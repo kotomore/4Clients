@@ -1,4 +1,4 @@
-package ru.kotomore.authservice.listeners;
+package ru.kotomore.authservice.messaging;
 
 import jakarta.security.auth.message.AuthException;
 import jakarta.validation.Validation;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RabbitMQListenerTest {
+public class RabbitMessageListenerTest {
 
     private Validator validator;
 
@@ -33,7 +33,7 @@ public class RabbitMQListenerTest {
     private AuthenticationManager authenticationManager;
 
     @InjectMocks
-    private RabbitMQListener listener;
+    private RabbitMessageListener listener;
 
     @BeforeEach
     public void setUp() {

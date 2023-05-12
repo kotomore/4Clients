@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import ru.kotomore.clientservice.dto.AppointmentDTO;
 import ru.kotomore.clientservice.exceptions.TimeNotAvailableException;
+import ru.kotomore.clientservice.messaging.RabbitMessageSender;
 import ru.kotomore.clientservice.models.AgentService;
 import ru.kotomore.clientservice.models.Appointment;
 import ru.kotomore.clientservice.models.Availability;
@@ -38,7 +39,7 @@ public class ClientServiceTest {
     @Mock
     private ModelMapper modelMapper;
     @Mock
-    private RabbitService rabbitService;
+    private RabbitMessageSender rabbitMessageSender;
 
     @InjectMocks
     private ClientService clientService;
