@@ -153,6 +153,56 @@ body {
 
 }
 
+
+
+
+
+.wrap.member-selected.date-selected.slot-selected.booking-error .deselect-member, .wrap.member-selected.date-selected.slot-selected.booking-complete .deselect-date, .wrap.member-selected.date-selected.slot-selected.booking-complete .deselect-slot {
+  opacity: 0;
+  pointer: none;
+
+}
+.wrap.member-selected.date-selected.slot-selected.booking-error .form {
+  transition: opacity 500ms cubic-bezier(0.645, 0.045, 0.355, 1), transform 800ms cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+.wrap.member-selected.date-selected.slot-selected.booking-error .form:before, .wrap.member-selected.date-selected.slot-selected.booking-complete .form:after {
+  transform: scalex(0);
+}
+.wrap.member-selected.date-selected.slot-selected.booking-error .form label {
+  opacity: 0;
+  transition: opacity 300ms cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+.wrap.member-selected.date-selected.slot-selected.booking-error .form input {
+  border-bottom: 1px solid rgba(221, 221, 221, 0.8);
+  pointer-events: none;
+}
+.wrap.member-selected.date-selected.slot-selected.booking-error .form input[name=name] {
+  padding: 10rem 70rem;
+  visibility: hidden;
+
+  transform: translatey(-33rem);
+}
+.wrap.member-selected.date-selected.slot-selected.booking-error .form input[name=phone] {
+  padding: 10rem 70rem;
+  visibility: hidden;
+
+  transform: translatey(-60rem);
+}
+.wrap.member-selected.date-selected.slot-selected.booking-error .form input[type=submit] {
+  transform: translatey(-60rem);
+  opacity: 0;
+  transition: transform 500ms cubic-bezier(0.645, 0.045, 0.355, 1), opacity 300ms cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+.wrap.member-selected.date-selected.slot-selected.booking-error .error-message {
+  opacity: 1;
+  transform: translatey(0%);
+  pointer-events: auto;
+
+}
+
+
+
+
 .instructions {
   margin-bottom: 30rem;
   text-align: center;
@@ -468,6 +518,30 @@ body {
   transition-delay: 150ms;
 }
 .confirm-message .restart {
+  display: block;
+  text-align: center;
+  margin-top: 15rem;
+  color: #ddd;
+  font-size: 25rem;
+  cursor: pointer;
+}
+
+.error-message {
+  position: absolute;
+  left: -5rem;
+  width: 100%;
+  text-align: center;
+  height: 320rem;
+  top: 320rem;
+  font-size: 40rem;
+  font-weight: 100;
+  opacity: 0;
+  transform: translatey(35%);
+  pointer-events: none;
+  transition: opacity 300ms cubic-bezier(0.645, 0.045, 0.355, 1), transform 500ms cubic-bezier(0.645, 0.045, 0.355, 1);
+  transition-delay: 150ms;
+}
+.error-message .restart {
   display: block;
   text-align: center;
   margin-top: 15rem;

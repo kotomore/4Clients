@@ -91,7 +91,7 @@ function addSlots(date) {
 
 function fetchDates() {
 
-    var url = "http://45.159.249.5:8092/api/v1/clients/availableDates?agentId=" + therapistId + "&date=" + checkedDate;
+    var url = "http://localhost:8092/api/v1/clients/availableDates?agentId=" + therapistId + "&date=" + checkedDate;
 
     console.log(url)
     var xhr = new XMLHttpRequest();
@@ -119,7 +119,7 @@ function fetchDates() {
 }
 
 function fetchTimes() {
-    var url = "http://45.159.249.5:8092/api/v1/clients/availableTimes?agentId=" + therapistId + "&date=" + checkedDate;
+    var url = "http://localhost:8092/api/v1/clients/availableTimes?agentId=" + therapistId + "&date=" + checkedDate;
     var xhr = new XMLHttpRequest();
 
     var result = [];

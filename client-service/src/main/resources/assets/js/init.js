@@ -1,5 +1,5 @@
 
-var url = "http://45.159.249.5:8092/api/v1/clients/services?agentId=" + therapistId;
+var url = "http://localhost:8092/api/v1/clients/services?agentId=" + therapistId;
 
 var xhr = new XMLHttpRequest();
 
@@ -15,9 +15,10 @@ if (xhr.status != 200) {
     document.getElementById("price-field").innerText = data.price;
     document.getElementById("duration-field").innerText = data.duration;
     document.getElementById("agent-name-field").innerText = data.agentName;
+    document.getElementById("agent-phone").innerText = "+" + data.agentPhone;
+    document.getElementById("agent-phone").href = "tel:+" + data.agentPhone;
 
     document.querySelector(".lds-ellipsis").remove();
-    //document.getElementById("agent-phone-field").value = data.agentPhone;
 }
 
 
@@ -42,14 +43,25 @@ form.onsubmit = function(event){
         "  }\n" +
         "}");
     try {
-        xhr.open('POST','http://45.159.249.5:8092/api/v1/clients/appointment', false);
+        xhr.open('POST','http://localhost:8092/api/v1/clients/appointment');
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send(JSON.stringify(json));
-        $('.wrap').toggleClass('booking-complete');
+
+        xhr.onerror = function() {
+            $('.wrap').toggleClass('booking-error');
+        };
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                $('.wrap').toggleClass('booking-complete');
+            } else {
+                $('.wrap').toggleClass('booking-error');
+            }
+        };
         event.preventDefault();
         event.stopPropagation();
     } catch (e) {
-        alert("Ошибка записи. Попробуйте немного позднее")
+        $('.wrap').toggleClass('booking-error');
     }
     return false;
 }
