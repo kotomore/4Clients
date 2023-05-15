@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.kotomore.clientservice.dto.AgentServiceDTO;
 import ru.kotomore.clientservice.dto.AppointmentDTO;
+import ru.kotomore.clientservice.exceptions.TelegramServiceNotAvailableException;
 import ru.kotomore.clientservice.services.ClientService;
 
 import javax.management.ServiceNotFoundException;
@@ -20,15 +21,19 @@ import java.util.Set;
 @RequestMapping("/api/v1/clients")
 public class ClientController {
 
-private final ClientService clientService;
+    private final ClientService clientService;
 
     @PostMapping("/appointment")
     public ResponseEntity<?> newAppointment(@Valid @RequestBody AppointmentDTO newAppointment) {
-        clientService.createAppointment(newAppointment);
-        EntityModel<AppointmentDTO> entityModel = EntityModel.of(newAppointment);
-        return ResponseEntity
-                .ok()
-                .body(entityModel);
+        try {
+            clientService.createAppointment(newAppointment);
+            EntityModel<AppointmentDTO> entityModel = EntityModel.of(newAppointment);
+            return ResponseEntity
+                    .ok()
+                    .body(entityModel);
+        } catch (TelegramServiceNotAvailableException e) {
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @CrossOrigin

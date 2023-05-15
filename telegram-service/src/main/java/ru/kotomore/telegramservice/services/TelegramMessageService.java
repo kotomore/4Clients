@@ -88,7 +88,7 @@ public class TelegramMessageService {
         }
     }
 
-    public void sendAgentAppointmentsMessage(List<AppointmentMSG> appointmentMSGS) {
+    public boolean sendAgentAppointmentsMessage(List<AppointmentMSG> appointmentMSGS) {
         String chatId = appointmentMSGS.isEmpty() ? null : getChatId(appointmentMSGS.get(0).getAgentId());
         if (chatId != null) {
 
@@ -106,7 +106,7 @@ public class TelegramMessageService {
                         .append("*Время*: ").append(appointmentMSG.getStartTime()).append(" - ")
                         .append(appointmentMSG.getEndTime()).append("\n")
                         .append("*Имя*: ").append(appointmentMSG.getClientName()).append("\n")
-                        .append("*Телефон*: ").append(appointmentMSG.getClientPhone())
+                        .append("*Телефон*: `").append(appointmentMSG.getClientPhone()).append("`")
                         .append("\n\n");
             }
 
@@ -118,9 +118,13 @@ public class TelegramMessageService {
             }
             try {
                 writeReadBot.execute(sendMessage);
+                return true;
             } catch (TelegramApiException tAe) {
                 log.debug(tAe.getMessage());
+                return false;
             }
+        } else {
+            return false;
         }
     }
 

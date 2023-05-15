@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kotomore.clientservice.dto.AgentServiceDTO;
+import ru.kotomore.clientservice.dto.AppointmentDTO;
 import ru.kotomore.clientservice.exceptions.AgentNotFoundException;
 import ru.kotomore.clientservice.exceptions.AgentServiceNotFoundException;
 import ru.kotomore.clientservice.exceptions.TimeNotAvailableException;
@@ -16,8 +18,6 @@ import ru.kotomore.clientservice.repositories.AgentRepository;
 import ru.kotomore.clientservice.repositories.AppointmentRepository;
 import ru.kotomore.clientservice.repositories.AvailabilityRepository;
 import ru.kotomore.clientservice.repositories.ServiceRepository;
-import ru.kotomore.clientservice.dto.AgentServiceDTO;
-import ru.kotomore.clientservice.dto.AppointmentDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

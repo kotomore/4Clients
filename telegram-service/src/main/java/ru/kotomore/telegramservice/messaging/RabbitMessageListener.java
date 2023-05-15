@@ -63,9 +63,9 @@ public class RabbitMessageListener {
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.appointment"
     ))
-    public void receiveAppointmentMSG(@Payload AppointmentMSG appointmentMSG) {
+    public Boolean receiveAppointmentMSG(@Payload AppointmentMSG appointmentMSG) {
         log.info("Message to telegram schedule for agent - " + appointmentMSG.getAgentId());
-        telegramMessageService.sendAgentAppointmentsMessage(List.of(appointmentMSG));
+        return telegramMessageService.sendAgentAppointmentsMessage(List.of(appointmentMSG));
     }
 
     @RabbitListener(bindings = @QueueBinding(
