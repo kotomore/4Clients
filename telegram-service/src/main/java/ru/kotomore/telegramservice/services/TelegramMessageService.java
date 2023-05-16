@@ -164,13 +164,11 @@ public class TelegramMessageService {
     }
 
     private String formatAvailabilityTime(Availability availability) {
-        StringBuilder formattedTime = new StringBuilder();
         if (availability.isBooked()) {
-            formattedTime.append(String.format("*%s - %s* - Запись\n", availability.getStartTime(), availability.getEndTime()));
+            return String.format("*%s - %s* - Запись\n", availability.getStartTime(), availability.getEndTime());
         } else {
-            formattedTime.append(String.format("%s - %s\n", availability.getStartTime(), availability.getEndTime()));
+            return String.format("%s - %s\n", availability.getStartTime(), availability.getEndTime());
         }
-        return formattedTime.toString();
     }
 
     private String getChatId(String agentId) {
