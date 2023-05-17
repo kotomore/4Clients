@@ -1,6 +1,7 @@
 package ru.kotomore.managementservice.services;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Sort;
@@ -173,10 +174,13 @@ public class ManagementService {
     }
 
     public Agent findOrCreateAgentByPhone(String phone) {
+        String rawPassword = RandomStringUtils.random(6, true, true);
+        String encodedPassword = passwordEncoder.encode(rawPassword);
         return agentRepository.findAgentByPhone(phone)
                 .orElseGet(() -> {
                     Agent newAgent = new Agent();
                     newAgent.setPhone(phone);
+                    newAgent.setPassword(encodedPassword);
                     return agentRepository.save(newAgent);
                 });
     }
