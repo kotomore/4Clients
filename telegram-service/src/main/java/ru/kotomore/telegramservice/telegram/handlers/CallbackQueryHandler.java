@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import ru.kotomore.telegramservice.enums.DefinitionEnum;
 import ru.kotomore.telegramservice.enums.EntityEnum;
@@ -12,6 +13,7 @@ import ru.kotomore.telegramservice.models.TelegramUser;
 import ru.kotomore.telegramservice.repositories.TelegramUserRepository;
 import ru.kotomore.telegramservice.messaging.RabbitMessageSender;
 import ru.kotomore.telegramservice.services.UserAwaitingService;
+import ru.kotomore.telegramservice.telegram.keyboards.InlineKeyboardMaker;
 import telegram.TelegramMessage;
 
 @Component
@@ -27,6 +29,7 @@ public class CallbackQueryHandler {
     private final UserAwaitingService userAwaitingService;
     private final TelegramUserRepository repository;
     private final RabbitMessageSender rabbitMessageSender;
+    private final InlineKeyboardMaker inlineKeyboardMaker;
 
     public BotApiMethod<?> processCallbackQuery(CallbackQuery buttonQuery) {
         final String chatId = buttonQuery.getMessage().getChatId().toString();
@@ -92,7 +95,6 @@ public class CallbackQueryHandler {
                         2023-12-30
                         09:00
                         18:00`""";
-
                 SendMessage agentSchedule = new SendMessage(chatId, message);
                 agentSchedule.enableMarkdown(true);
                 userAwaitingService.addToWaitingList(chatId, EntityEnum.SCHEDULE_, DefinitionEnum.TIME);
@@ -103,9 +105,27 @@ public class CallbackQueryHandler {
                 deleteSchedule(chatId);
                 return null;
 
+            case "SCHEDULE_NEXT_PAGE":
+                return createScheduleEditMessage(chatId, messageId,
+                        userAwaitingService.getNextMessageFromCache(chatId, EntityEnum.SCHEDULE_));
+
+            case "SCHEDULE_PREV_PAGE":
+                return createScheduleEditMessage(chatId, messageId,
+                        userAwaitingService.getPreviousMessageFromCache(chatId, EntityEnum.SCHEDULE_));
+
             default:
                 return null;
         }
+    }
+
+    private EditMessageText createScheduleEditMessage(String chatId, int messageId, String text) {
+        EditMessageText editMessageText = new EditMessageText();
+        editMessageText.setChatId(chatId);
+        editMessageText.setMessageId(messageId);
+        editMessageText.setText(text);
+        editMessageText.setReplyMarkup(inlineKeyboardMaker.getScheduleInlineButton(true));
+        editMessageText.enableMarkdown(true);
+        return editMessageText;
     }
 
     private void deleteSchedule(String chatId) {
