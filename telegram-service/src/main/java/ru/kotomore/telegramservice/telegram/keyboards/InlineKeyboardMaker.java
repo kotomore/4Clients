@@ -53,7 +53,6 @@ public class InlineKeyboardMaker {
         if (isPageable) {
             rowList.add(List.of(
                     getOneButton("<", EntityEnum.SCHEDULE_.name() + DefinitionEnum.PREV_PAGE.name()),
-                    getOneButton("Изменить", EntityEnum.SCHEDULE_.name() + DefinitionEnum.TIME.name()),
                     getOneButton(">", EntityEnum.SCHEDULE_.name() + DefinitionEnum.NEXT_PAGE.name())
             ));
         }
