@@ -48,6 +48,24 @@ public class InlineKeyboardMaker {
         return inlineKeyboardMarkup;
     }
 
+    public InlineKeyboardMarkup getAppointmentInlineButton(boolean isPageable) {
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        if (isPageable) {
+            rowList.add(List.of(
+                    getOneButton("<", EntityEnum.APPOINTMENT_.name() + DefinitionEnum.PREV_PAGE.name()),
+                    getOneButton(">", EntityEnum.APPOINTMENT_.name() + DefinitionEnum.NEXT_PAGE.name())
+            ));
+        }
+        rowList.add(getButton(
+                "Очистить всё",
+                EntityEnum.APPOINTMENT_.name() + DefinitionEnum.DELETE.name()
+        ));
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
+    }
+
     public InlineKeyboardMarkup getScheduleInlineButton(boolean isPageable) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         if (isPageable) {
@@ -61,7 +79,7 @@ public class InlineKeyboardMaker {
                 EntityEnum.SCHEDULE_.name() + DefinitionEnum.TIME.name()
         ));
         rowList.add(getButton(
-                "Очистить",
+                "Очистить всё",
                 EntityEnum.SCHEDULE_.name() + DefinitionEnum.DELETE.name()
         ));
 

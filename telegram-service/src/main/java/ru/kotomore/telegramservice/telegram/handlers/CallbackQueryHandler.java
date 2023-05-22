@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.kotomore.telegramservice.enums.DefinitionEnum;
 import ru.kotomore.telegramservice.enums.EntityEnum;
 import ru.kotomore.telegramservice.models.TelegramUser;
@@ -106,24 +107,33 @@ public class CallbackQueryHandler {
                 return null;
 
             case "SCHEDULE_NEXT_PAGE":
-                return createScheduleEditMessage(chatId, messageId,
+                return createEditMessage(chatId, messageId, inlineKeyboardMaker.getScheduleInlineButton(true),
                         userAwaitingService.getNextMessageFromCache(chatId, EntityEnum.SCHEDULE_));
 
             case "SCHEDULE_PREV_PAGE":
-                return createScheduleEditMessage(chatId, messageId,
+                return createEditMessage(chatId, messageId, inlineKeyboardMaker.getScheduleInlineButton(true),
                         userAwaitingService.getPreviousMessageFromCache(chatId, EntityEnum.SCHEDULE_));
+
+            case "APPOINTMENT_NEXT_PAGE":
+                return createEditMessage(chatId, messageId, inlineKeyboardMaker.getAppointmentInlineButton(true),
+                        userAwaitingService.getNextMessageFromCache(chatId, EntityEnum.APPOINTMENT_));
+
+            case "APPOINTMENT_PREV_PAGE":
+                return createEditMessage(chatId, messageId, inlineKeyboardMaker.getAppointmentInlineButton(true),
+                        userAwaitingService.getPreviousMessageFromCache(chatId, EntityEnum.APPOINTMENT_));
 
             default:
                 return null;
         }
     }
 
-    private EditMessageText createScheduleEditMessage(String chatId, int messageId, String text) {
+    private EditMessageText createEditMessage(String chatId, int messageId, InlineKeyboardMarkup inlineKeyboardMarkup,
+                                              String text) {
         EditMessageText editMessageText = new EditMessageText();
         editMessageText.setChatId(chatId);
         editMessageText.setMessageId(messageId);
         editMessageText.setText(text);
-        editMessageText.setReplyMarkup(inlineKeyboardMaker.getScheduleInlineButton(true));
+        editMessageText.setReplyMarkup(inlineKeyboardMarkup);
         editMessageText.enableMarkdown(true);
         return editMessageText;
     }
