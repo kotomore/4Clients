@@ -8,6 +8,7 @@ public enum DefinitionEnum {
     PASSWORD,
     TIME,
     DELETE,
+    DELETE_ALL,
     PREV_PAGE,
     NEXT_PAGE
 }
