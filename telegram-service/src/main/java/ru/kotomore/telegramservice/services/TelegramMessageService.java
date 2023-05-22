@@ -93,51 +93,50 @@ public class TelegramMessageService {
 
     public boolean sendAgentAppointmentsMessage(List<AppointmentMSG> appointmentMSGS) {
         String chatId = appointmentMSGS.isEmpty() ? null : getChatId(appointmentMSGS.get(0).getAgentId());
-        if (chatId != null) {
+        if (chatId == null) {
+            return false;
+        }
+        StringBuilder messageBuilder = new StringBuilder();
+        LocalDate date = LocalDate.MIN;
 
-            StringBuilder messageBuilder = new StringBuilder();
-            LocalDate date = LocalDate.MIN;
-
-            for (AppointmentMSG appointmentMSG : appointmentMSGS) {
-                messageBuilder.append(appointmentMSG.getType() == AppointmentMSG.Type.NEW ? "*Новая заявка:*\n\n" : "");
-                if (!date.equals(appointmentMSG.getDate())) {
-                    messageBuilder.append("\n\n*____ ").append(appointmentMSG.getDate()).append(" ____*\n\n");
-                    date = appointmentMSG.getDate();
-                }
-
-                messageBuilder
-                        .append("*Время*: ").append(appointmentMSG.getStartTime()).append(" - ")
-                        .append(appointmentMSG.getEndTime()).append("\n")
-                        .append("*Имя*: ").append(appointmentMSG.getClientName()).append("\n")
-                        .append("*Телефон*: `").append(appointmentMSG.getClientPhone()).append("`")
-                        .append("\n\n");
+        for (AppointmentMSG appointmentMSG : appointmentMSGS) {
+            messageBuilder.append(appointmentMSG.getType() == AppointmentMSG.Type.NEW ? "*Новая заявка:*\n\n" : "");
+            if (!date.equals(appointmentMSG.getDate())) {
+                messageBuilder.append("\n\n*____ ").append(appointmentMSG.getDate()).append(" ____*\n\n");
+                date = appointmentMSG.getDate();
             }
 
-            SendMessage sendMessage = new SendMessage(chatId, messageBuilder.toString());
-            sendMessage.enableMarkdown(true);
-            if (!appointmentMSGS.isEmpty() && appointmentMSGS.get(0).getType() == AppointmentMSG.Type.NEW) {
-                sendMessage.setReplyMarkup(inlineKeyboardMaker.getAppointmentDeleteInlineButton(appointmentMSGS.get(0)
-                        .getAppointmentId()));
-            }
-            try {
-                writeReadBot.execute(sendMessage);
-                return true;
-            } catch (TelegramApiException tAe) {
-                log.debug(tAe.getMessage());
-                return false;
-            }
-        } else {
+            messageBuilder
+                    .append("*Время*: ").append(appointmentMSG.getStartTime()).append(" - ")
+                    .append(appointmentMSG.getEndTime()).append("\n")
+                    .append("*Имя*: ").append(appointmentMSG.getClientName()).append("\n")
+                    .append("*Телефон*: `").append(appointmentMSG.getClientPhone()).append("`")
+                    .append("\n\n");
+        }
+
+        SendMessage sendMessage = new SendMessage(chatId, messageBuilder.toString());
+        sendMessage.enableMarkdown(true);
+        if (!appointmentMSGS.isEmpty() && appointmentMSGS.get(0).getType() == AppointmentMSG.Type.NEW) {
+            sendMessage.setReplyMarkup(inlineKeyboardMaker.getAppointmentDeleteInlineButton(appointmentMSGS.get(0)
+                    .getAppointmentId()));
+        }
+        try {
+            writeReadBot.execute(sendMessage);
+            return true;
+        } catch (TelegramApiException tAe) {
+            log.debug(tAe.getMessage());
             return false;
         }
     }
 
     public void sendAgentSchedule(AvailabilityMSG availabilityMSG) {
         String chatId = getChatId(availabilityMSG.getAgentId());
-        userAwaitingService.clearUserCache(chatId, EntityEnum.SCHEDULE_);
-        List<String> availabilityMSGCache = new ArrayList<>();
         if (chatId == null) {
             return;
         }
+
+        userAwaitingService.clearUserCache(chatId, EntityEnum.SCHEDULE_);
+        List<String> availabilityMSGCache = new ArrayList<>();
 
         StringBuilder answerBuilder = new StringBuilder();
 
@@ -148,7 +147,6 @@ public class TelegramMessageService {
             LocalDate firstDate = availabilities.get(0).getDate();
             LocalDate lastDate = availabilities.get(availabilities.size() - 1).getDate();
             String dates = "\n\n" + firstDate + " - " + lastDate;
-
 
             for (Availability availability : availabilities) {
                 if (date == null || !date.equals(availability.getDate())) {
@@ -166,20 +164,25 @@ public class TelegramMessageService {
             availabilityMSGCache.add(answerBuilder.toString());
         }
 
-        String answer = "";
+        sendScheduleMessage(chatId, availabilityMSGCache);
+    }
+
+    private void sendScheduleMessage(String chatId, List<String> availabilityMSGCache) {
+        String answer;
         if (!availabilityMSGCache.isEmpty()) {
             answer = availabilityMSGCache.get(0);
-        }
-
-        if (answer.isEmpty()) {
+        } else {
             answer = "Расписание не задано";
         }
 
-        userAwaitingService.addMessageToCache(chatId, EntityEnum.SCHEDULE_, availabilityMSGCache);
-
         SendMessage sendMessage = new SendMessage(chatId, answer);
         sendMessage.enableMarkdown(true);
-        sendMessage.setReplyMarkup(inlineKeyboardMaker.getScheduleInlineButton(true));
+        if (availabilityMSGCache.size() > 1) {
+            userAwaitingService.addMessageToCache(chatId, EntityEnum.SCHEDULE_, availabilityMSGCache);
+            sendMessage.setReplyMarkup(inlineKeyboardMaker.getScheduleInlineButton(true));
+        } else {
+            sendMessage.setReplyMarkup(inlineKeyboardMaker.getScheduleInlineButton(false));
+        }
 
         try {
             writeReadBot.execute(sendMessage);
