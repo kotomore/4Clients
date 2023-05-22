@@ -153,7 +153,7 @@ public class ManagementService {
     }
 
     public List<Availability> findAvailableTimeForTelegram(String agentId) {
-        LocalDateTime startDateTime = LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.MIN);
+        LocalDateTime startDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
        return availabilityRepository
                .findByAgentIdAndStartTimeBetween(agentId, startDateTime, startDateTime.plusDays(SCHEDULE_MAX_DAYS_COUNT),
                        Sort.by("startTime"));

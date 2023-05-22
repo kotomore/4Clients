@@ -48,8 +48,14 @@ public class InlineKeyboardMaker {
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup getScheduleInlineButton() {
+    public InlineKeyboardMarkup getScheduleInlineButton(boolean isPageable) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        if (isPageable) {
+            rowList.add(List.of(
+                    getOneButton("<", EntityEnum.SCHEDULE_.name() + DefinitionEnum.PREV_PAGE.name()),
+                    getOneButton(">", EntityEnum.SCHEDULE_.name() + DefinitionEnum.NEXT_PAGE.name())
+            ));
+        }
         rowList.add(getButton(
                 "Изменить",
                 EntityEnum.SCHEDULE_.name() + DefinitionEnum.TIME.name()
@@ -86,4 +92,12 @@ public class InlineKeyboardMaker {
         keyboardButtonsRow.add(button);
         return keyboardButtonsRow;
     }
+
+    private InlineKeyboardButton getOneButton(String buttonName, String buttonCallBackData) {
+        InlineKeyboardButton button = new InlineKeyboardButton();
+        button.setText(buttonName);
+        button.setCallbackData(buttonCallBackData);
+        return button;
+    }
+
 }
