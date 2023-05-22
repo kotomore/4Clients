@@ -62,6 +62,22 @@ public class ManagementService {
         appointmentRepository.delete(appointment);
     }
 
+    public void deleteAllAppointments(String agentId) throws AppointmentNotFoundException {
+        List<Appointment> appointments = appointmentRepository.findByAgentId(agentId);
+        List<Availability> availabilities = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+            Availability availability = new Availability();
+            availability.setAgentId(agentId);
+            availability.setStartTime(appointment.getStartTime());
+            availability.setEndTime(appointment.getEndTime());
+            availabilities.add(availability);
+        }
+
+        availabilityRepository.saveAll(availabilities);
+        appointmentRepository.deleteAllByAgentId(agentId);
+    }
+
     public Agent findAgentById(String agentId) throws AgentNotFoundException{
         return agentRepository.findById(agentId)
                 .orElseThrow(() -> new AgentNotFoundException(agentId));

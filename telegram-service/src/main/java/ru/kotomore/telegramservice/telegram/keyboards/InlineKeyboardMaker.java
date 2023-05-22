@@ -58,7 +58,7 @@ public class InlineKeyboardMaker {
         }
         rowList.add(getButton(
                 "Очистить всё",
-                EntityEnum.APPOINTMENT_.name() + DefinitionEnum.DELETE.name()
+                EntityEnum.APPOINTMENT_.name() + DefinitionEnum.DELETE_ALL.name()
         ));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -80,7 +80,7 @@ public class InlineKeyboardMaker {
         ));
         rowList.add(getButton(
                 "Очистить всё",
-                EntityEnum.SCHEDULE_.name() + DefinitionEnum.DELETE.name()
+                EntityEnum.SCHEDULE_.name() + DefinitionEnum.DELETE_ALL.name()
         ));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();

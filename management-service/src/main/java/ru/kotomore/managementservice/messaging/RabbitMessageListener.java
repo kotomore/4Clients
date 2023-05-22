@@ -33,6 +33,7 @@ public class RabbitMessageListener {
             case SCHEDULES -> rabbitSender.sendAvailability(message);
             case SCHEDULE_DELETE -> rabbitSender.sendScheduleDelete(message);
             case APPOINTMENTS -> rabbitSender.sendAppointments(message);
+            case APPOINTMENTS_DELETE -> rabbitSender.sendAppointmentsDelete(message);
             case REGISTER_BOT -> rabbitSender.sendRegisterMessage(message);
         }
     }

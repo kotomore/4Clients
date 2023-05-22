@@ -73,6 +73,11 @@ public class RabbitMessageSender {
         template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
     }
 
+    public void sendAppointmentsDelete(TelegramMessage message) {
+        managementService.deleteAllAppointments(message.getAgentId());
+        sendErrorMessage(message.getAgentId(), "Записей не обнаружено");
+    }
+
     public void sendAppointments(TelegramMessage message) {
         List<Appointment> appointments;
         try {
@@ -99,10 +104,7 @@ public class RabbitMessageSender {
             template.convertAndSend(telegramExchange.getName(), "telegram_key.all_appointment", appointmentMSGS);
 
         } catch (AppointmentNotFoundException | ServiceNotFoundException exception) {
-            ErrorMSG errorMSG = new ErrorMSG();
-            errorMSG.setAgentId(message.getAgentId());
-            errorMSG.setMessage(exception.getMessage());
-            template.convertAndSend(telegramExchange.getName(), "telegram_key.error", errorMSG);
+            sendErrorMessage(message.getAgentId(), exception.getMessage());
         }
     }
 

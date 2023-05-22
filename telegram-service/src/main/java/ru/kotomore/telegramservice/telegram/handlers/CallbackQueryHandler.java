@@ -38,7 +38,7 @@ public class CallbackQueryHandler {
 
         String data = buttonQuery.getData();
 
-        if (data.contains("APPOINTMENT_DELETE")) {
+        if (data.contains("APPOINTMENT_DELETE") && !data.equals("APPOINTMENT_DELETE_ALL")) {
             String appointmentId = data.replace("APPOINTMENT_DELETE", "");
             TelegramUser telegramUser = repository.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -102,8 +102,8 @@ public class CallbackQueryHandler {
                 agentSchedule.setReplyToMessageId(messageId);
                 return agentSchedule;
 
-            case "SCHEDULE_DELETE":
-                deleteSchedule(chatId);
+            case "SCHEDULE_DELETE_ALL":
+                actionMessage(chatId, TelegramMessage.Action.SCHEDULE_DELETE);
                 return null;
 
             case "SCHEDULE_NEXT_PAGE":
@@ -113,6 +113,10 @@ public class CallbackQueryHandler {
             case "SCHEDULE_PREV_PAGE":
                 return createEditMessage(chatId, messageId, inlineKeyboardMaker.getScheduleInlineButton(true),
                         userAwaitingService.getPreviousMessageFromCache(chatId, EntityEnum.SCHEDULE_));
+
+            case "APPOINTMENT_DELETE_ALL":
+                actionMessage(chatId, TelegramMessage.Action.APPOINTMENTS_DELETE);
+                return null;
 
             case "APPOINTMENT_NEXT_PAGE":
                 return createEditMessage(chatId, messageId, inlineKeyboardMaker.getAppointmentInlineButton(true),
@@ -138,8 +142,8 @@ public class CallbackQueryHandler {
         return editMessageText;
     }
 
-    private void deleteSchedule(String chatId) {
+    private void actionMessage(String chatId, TelegramMessage.Action action) {
         String agentId = repository.findByChatId(chatId).orElseThrow().getAgentId();
-        rabbitMessageSender.sendTelegramMessage(agentId, TelegramMessage.Action.SCHEDULE_DELETE);
+        rabbitMessageSender.sendTelegramMessage(agentId, action);
     }
 }
