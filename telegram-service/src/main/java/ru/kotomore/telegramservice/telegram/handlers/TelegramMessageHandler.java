@@ -252,13 +252,13 @@ public class TelegramMessageHandler {
         ScheduleMSG scheduleMSG = new ScheduleMSG();
 
         String[] messages = message.getText().split("\n");
-        if (messages.length == 4) {
+        if (messages.length == 4 || messages.length == 3) {
             try {
                 scheduleMSG.setAgentId(message.getText());
                 scheduleMSG.setDateStart(LocalDate.parse(messages[0]));
-                scheduleMSG.setDateEnd(LocalDate.parse(messages[1]));
-                scheduleMSG.setTimeStart(LocalTime.parse(messages[2]));
-                scheduleMSG.setTimeEnd(LocalTime.parse(messages[3]));
+                scheduleMSG.setDateEnd(messages.length == 4 ? LocalDate.parse(messages[1]) : scheduleMSG.getDateStart());
+                scheduleMSG.setTimeStart(LocalTime.parse(messages[messages.length - 2]));
+                scheduleMSG.setTimeEnd(LocalTime.parse(messages[messages.length - 1]));
 
             } catch (DateTimeParseException ex) {
                 return new SendMessage(chatId, "Введите дату и время в указанном формате");
@@ -306,6 +306,4 @@ public class TelegramMessageHandler {
 
         return sendMessage;
     }
-
-
 }

@@ -48,15 +48,39 @@ public class InlineKeyboardMaker {
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup getScheduleInlineButton() {
+    public InlineKeyboardMarkup getAppointmentInlineButton(boolean isPageable) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        if (isPageable) {
+            rowList.add(List.of(
+                    getOneButton("<", EntityEnum.APPOINTMENT_.name() + DefinitionEnum.PREV_PAGE.name()),
+                    getOneButton(">", EntityEnum.APPOINTMENT_.name() + DefinitionEnum.NEXT_PAGE.name())
+            ));
+        }
+        rowList.add(getButton(
+                "Очистить всё",
+                EntityEnum.APPOINTMENT_.name() + DefinitionEnum.DELETE_ALL.name()
+        ));
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
+    }
+
+    public InlineKeyboardMarkup getScheduleInlineButton(boolean isPageable) {
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        if (isPageable) {
+            rowList.add(List.of(
+                    getOneButton("<", EntityEnum.SCHEDULE_.name() + DefinitionEnum.PREV_PAGE.name()),
+                    getOneButton(">", EntityEnum.SCHEDULE_.name() + DefinitionEnum.NEXT_PAGE.name())
+            ));
+        }
         rowList.add(getButton(
                 "Изменить",
                 EntityEnum.SCHEDULE_.name() + DefinitionEnum.TIME.name()
         ));
         rowList.add(getButton(
-                "Очистить",
-                EntityEnum.SCHEDULE_.name() + DefinitionEnum.DELETE.name()
+                "Очистить всё",
+                EntityEnum.SCHEDULE_.name() + DefinitionEnum.DELETE_ALL.name()
         ));
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -86,4 +110,12 @@ public class InlineKeyboardMaker {
         keyboardButtonsRow.add(button);
         return keyboardButtonsRow;
     }
+
+    private InlineKeyboardButton getOneButton(String buttonName, String buttonCallBackData) {
+        InlineKeyboardButton button = new InlineKeyboardButton();
+        button.setText(buttonName);
+        button.setCallbackData(buttonCallBackData);
+        return button;
+    }
+
 }
