@@ -19,7 +19,7 @@ http://45.159.249.5:8091/swagger-ui/index.html
 https://taptimes.ru/6441a64b008d0c1864da7227
 <br>
 
-<img src="github-images/site_image.jpg">
+<img src="github-images/site_image.png" alt="site-image" width="60%" height="60%">
 
 <br><br>
 
@@ -27,7 +27,7 @@ https://taptimes.ru/6441a64b008d0c1864da7227
 https://t.me/clientsmanagement_bot
 <br>
 
-<img  src="github-images/tg_image.jpg">
+<img  src="github-images/tg_image.png" alt="tg-image" width="80%" height="80%">
 
 ## Install && launch
 
