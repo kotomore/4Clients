@@ -38,7 +38,8 @@ public class CallbackQueryHandler {
 
         String data = buttonQuery.getData();
 
-        if (data.contains("APPOINTMENT_DELETE") && !data.equals("APPOINTMENT_DELETE_ALL")) {
+        if (data.contains("APPOINTMENT_DELETE") && !data.equals("APPOINTMENT_DELETE_ALL") &&
+                !data.equals("APPOINTMENT_DELETE_ALL_CONFIRMED")) {
             String appointmentId = data.replace("APPOINTMENT_DELETE", "");
             TelegramUser telegramUser = repository.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -103,20 +104,48 @@ public class CallbackQueryHandler {
                 return agentSchedule;
 
             case "SCHEDULE_DELETE_ALL":
+                EditMessageText editScheduleMessage = new EditMessageText();
+                editScheduleMessage.setChatId(chatId);
+                editScheduleMessage.setMessageId(messageId);
+                editScheduleMessage.setText("Очистить всё расписание?");
+                editScheduleMessage.setReplyMarkup(inlineKeyboardMaker.getConfirmInlineButton(EntityEnum.SCHEDULE_));
+                return editScheduleMessage;
+
+            case "SCHEDULE_DELETE_ALL_CONFIRMED":
                 actionMessage(chatId, TelegramMessage.Action.SCHEDULE_DELETE);
-                return null;
+                DeleteMessage deleteScheduleMessage = new DeleteMessage();
+                deleteScheduleMessage.setChatId(chatId);
+                deleteScheduleMessage.setMessageId(messageId);
+                return deleteScheduleMessage;
 
             case "SCHEDULE_NEXT_PAGE":
-                return createEditMessage(chatId, messageId, inlineKeyboardMaker.getScheduleInlineButton(true),
+                EditMessageText editMessageText = createEditMessage(chatId, messageId,
+                        inlineKeyboardMaker.getScheduleInlineButton(true),
                         userAwaitingService.getNextMessageFromCache(chatId, EntityEnum.SCHEDULE_));
+                editMessageText.enableHtml(true);
+                return editMessageText;
 
             case "SCHEDULE_PREV_PAGE":
-                return createEditMessage(chatId, messageId, inlineKeyboardMaker.getScheduleInlineButton(true),
+                EditMessageText editMessageText1 = createEditMessage(chatId, messageId,
+                        inlineKeyboardMaker.getScheduleInlineButton(true),
                         userAwaitingService.getPreviousMessageFromCache(chatId, EntityEnum.SCHEDULE_));
+                editMessageText1.enableHtml(true);
+                return editMessageText1;
 
             case "APPOINTMENT_DELETE_ALL":
+                EditMessageText editAppointmentMessage = new EditMessageText();
+                editAppointmentMessage.setChatId(chatId);
+                editAppointmentMessage.setMessageId(messageId);
+                editAppointmentMessage.setText("Удалить все записи?");
+                editAppointmentMessage.setReplyMarkup(inlineKeyboardMaker.getConfirmInlineButton(EntityEnum.APPOINTMENT_));
+                return editAppointmentMessage;
+
+            case "APPOINTMENT_DELETE_ALL_CONFIRMED":
                 actionMessage(chatId, TelegramMessage.Action.APPOINTMENTS_DELETE);
-                return null;
+                DeleteMessage deleteMessage = new DeleteMessage();
+                deleteMessage.setChatId(chatId);
+                deleteMessage.setMessageId(messageId);
+                return deleteMessage;
 
             case "APPOINTMENT_NEXT_PAGE":
                 return createEditMessage(chatId, messageId, inlineKeyboardMaker.getAppointmentInlineButton(true),

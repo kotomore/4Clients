@@ -92,7 +92,7 @@ public class TelegramMessageService {
     }
 
     public boolean sendAgentAppointmentsMessage(List<AppointmentMSG> appointmentMSGS) {
-        if(appointmentMSGS.isEmpty()) {
+        if (appointmentMSGS.isEmpty()) {
             return false;
         }
 
@@ -177,16 +177,18 @@ public class TelegramMessageService {
             for (Availability availability : availabilities) {
                 if (date == null || !date.equals(availability.getDate())) {
                     if (date != null) {
-                        answerBuilder.append(dates);
+                        answerBuilder.append(dates).append("</pre>");
                         availabilityMSGCache.add(answerBuilder.toString());
                         answerBuilder = new StringBuilder();
                     }
                     date = availability.getDate();
-                    answerBuilder.append("\n*Дата: ").append(date).append("*\n\n");
+                    answerBuilder.append("<b>Дата: ")
+                            .append(date)
+                            .append("</b><pre>\n\n\n");
                 }
                 answerBuilder.append(formatAvailabilityTime(availability));
             }
-            answerBuilder.append(dates);
+            answerBuilder.append(dates).append("</pre>");
             availabilityMSGCache.add(answerBuilder.toString());
         }
 
@@ -202,7 +204,7 @@ public class TelegramMessageService {
         }
 
         SendMessage sendMessage = new SendMessage(chatId, answer);
-        sendMessage.enableMarkdown(true);
+        sendMessage.enableHtml(true);
         if (availabilityMSGCache.size() > 1) {
             userAwaitingService.addMessageToCache(chatId, EntityEnum.SCHEDULE_, availabilityMSGCache);
             sendMessage.setReplyMarkup(inlineKeyboardMaker.getScheduleInlineButton(true));
@@ -219,7 +221,7 @@ public class TelegramMessageService {
 
     private String formatAvailabilityTime(Availability availability) {
         if (availability.isBooked()) {
-            return String.format("*%s - %s* - Запись\n", availability.getStartTime(), availability.getEndTime());
+            return String.format("%s - %s - Запись\n", availability.getStartTime(), availability.getEndTime());
         } else {
             return String.format("%s - %s\n", availability.getStartTime(), availability.getEndTime());
         }

@@ -66,6 +66,18 @@ public class InlineKeyboardMaker {
         return inlineKeyboardMarkup;
     }
 
+    public InlineKeyboardMarkup getConfirmInlineButton(EntityEnum entityEnum) {
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(getButton(
+                "Удалить",
+                entityEnum.name() + DefinitionEnum.DELETE_ALL.name() + "_CONFIRMED"
+        ));
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
+    }
+
     public InlineKeyboardMarkup getScheduleInlineButton(boolean isPageable) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         if (isPageable) {
