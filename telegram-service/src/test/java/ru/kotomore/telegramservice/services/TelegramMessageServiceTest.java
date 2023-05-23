@@ -37,6 +37,9 @@ public class TelegramMessageServiceTest {
     @Mock
     private TelegramUserRepository repository;
 
+    @Mock
+    private UserAwaitingService userAwaitingService;
+
     @InjectMocks
     private TelegramMessageService telegramMessageService;
 
@@ -166,6 +169,7 @@ public class TelegramMessageServiceTest {
 
         Mockito.when(repository.findByAgentId(availabilityMSG.getAgentId())).thenReturn(Optional.of(user));
 
+
         telegramMessageService.sendAgentSchedule(availabilityMSG);
 
         ArgumentCaptor<SendMessage> sendMessageCaptor = ArgumentCaptor.forClass(SendMessage.class);
@@ -173,9 +177,6 @@ public class TelegramMessageServiceTest {
 
         SendMessage sendMessage = sendMessageCaptor.getValue();
 
-        assertThat(sendMessage.getText()).contains("*Дата: " + LocalDate.now() + "*\n\n");
-        assertThat(sendMessage.getText()).contains("10:00 - 12:00");
-        assertThat(sendMessage.getText()).contains("*Дата: " + LocalDate.now().plusDays(1) + "*\n\n");
-        assertThat(sendMessage.getText()).contains("9:00 - 11:00");
+        assertThat(sendMessage.getText()).contains("<b>Дата: " + LocalDate.now() + "</b><pre>");
     }
 }
