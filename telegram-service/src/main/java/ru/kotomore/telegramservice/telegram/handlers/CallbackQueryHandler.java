@@ -38,52 +38,48 @@ public class CallbackQueryHandler {
 
         String data = buttonQuery.getData();
 
-        if (data.contains("APPOINTMENT_DELETE") && !data.equals("APPOINTMENT_DELETE_ALL") &&
-                !data.equals("APPOINTMENT_DELETE_ALL_CONFIRMED")) {
-            String appointmentId = data.replace("APPOINTMENT_DELETE", "");
-            TelegramUser telegramUser = repository.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"));
-
-            rabbitMessageSender.deleteAppointment(telegramUser.getAgentId(), appointmentId);
-            return new DeleteMessage(chatId, buttonQuery.getMessage().getMessageId());
-        }
-
         switch (data) {
-            case "SERVICE_NAME":
+            case "SERVICE_NAME" -> {
                 SendMessage nameMessage = new SendMessage(chatId, ENTER_SERVICE_NAME);
                 userAwaitingService.addToWaitingList(chatId, EntityEnum.SERVICE_, DefinitionEnum.NAME);
                 nameMessage.setReplyToMessageId(messageId);
                 return nameMessage;
-            case "SERVICE_DESCRIPTION":
+            }
+            case "SERVICE_DESCRIPTION" -> {
                 SendMessage descriptionMessage = new SendMessage(chatId, ENTER_SERVICE_DESCRIPTION);
                 userAwaitingService.addToWaitingList(chatId, EntityEnum.SERVICE_, DefinitionEnum.DESCRIPTION);
                 descriptionMessage.setReplyToMessageId(messageId);
                 return descriptionMessage;
-            case "SERVICE_PRICE":
+            }
+            case "SERVICE_PRICE" -> {
                 SendMessage priceMessage = new SendMessage(chatId, ENTER_SERVICE_PRICE);
                 userAwaitingService.addToWaitingList(chatId, EntityEnum.SERVICE_, DefinitionEnum.PRICE);
                 priceMessage.setReplyToMessageId(messageId);
                 return priceMessage;
-            case "SERVICE_DURATION":
+            }
+            case "SERVICE_DURATION" -> {
                 SendMessage durationMessage = new SendMessage(chatId, ENTER_SERVICE_DURATION);
                 userAwaitingService.addToWaitingList(chatId, EntityEnum.SERVICE_, DefinitionEnum.DURATION);
                 durationMessage.setReplyToMessageId(messageId);
                 return durationMessage;
-
+            }
 
             //Agent info
-            case "AGENT_NAME":
+            case "AGENT_NAME" -> {
                 SendMessage agentNameMessage = new SendMessage(chatId, ENTER_USER_NAME);
                 userAwaitingService.addToWaitingList(chatId, EntityEnum.AGENT_, DefinitionEnum.NAME);
                 agentNameMessage.setReplyToMessageId(messageId);
                 return agentNameMessage;
-            case "AGENT_PASSWORD":
+            }
+            case "AGENT_PASSWORD" -> {
                 SendMessage agentPasswordMessage = new SendMessage(chatId, ENTER_USER_PASSWORD);
                 userAwaitingService.addToWaitingList(chatId, EntityEnum.AGENT_, DefinitionEnum.PASSWORD);
                 agentPasswordMessage.setReplyToMessageId(messageId);
                 return agentPasswordMessage;
+            }
 
             //Schedule
-            case "SCHEDULE_TIME":
+            case "SCHEDULE_TIME" -> {
                 String message = """
                         Введите дату и время одним сообщением в формате:
                         *Дата начала:* 2023-12-30
@@ -102,62 +98,73 @@ public class CallbackQueryHandler {
                 userAwaitingService.addToWaitingList(chatId, EntityEnum.SCHEDULE_, DefinitionEnum.TIME);
                 agentSchedule.setReplyToMessageId(messageId);
                 return agentSchedule;
+            }
 
-            case "SCHEDULE_DELETE_ALL":
+            case "SCHEDULE_DELETE_ALL" -> {
                 EditMessageText editScheduleMessage = new EditMessageText();
                 editScheduleMessage.setChatId(chatId);
                 editScheduleMessage.setMessageId(messageId);
                 editScheduleMessage.setText("Очистить всё расписание?");
                 editScheduleMessage.setReplyMarkup(inlineKeyboardMaker.getConfirmInlineButton(EntityEnum.SCHEDULE_));
                 return editScheduleMessage;
+            }
 
-            case "SCHEDULE_DELETE_ALL_CONFIRMED":
+            case "SCHEDULE_DELETE_ALL_CONFIRMED" -> {
                 actionMessage(chatId, TelegramMessage.Action.SCHEDULE_DELETE);
                 DeleteMessage deleteScheduleMessage = new DeleteMessage();
                 deleteScheduleMessage.setChatId(chatId);
                 deleteScheduleMessage.setMessageId(messageId);
                 return deleteScheduleMessage;
+            }
 
-            case "SCHEDULE_NEXT_PAGE":
+            case "SCHEDULE_NEXT_PAGE" -> {
                 EditMessageText editMessageText = createEditMessage(chatId, messageId,
                         inlineKeyboardMaker.getScheduleInlineButton(true),
                         userAwaitingService.getNextMessageFromCache(chatId, EntityEnum.SCHEDULE_));
                 editMessageText.enableHtml(true);
                 return editMessageText;
+            }
 
-            case "SCHEDULE_PREV_PAGE":
+            case "SCHEDULE_PREV_PAGE" -> {
                 EditMessageText editMessageText1 = createEditMessage(chatId, messageId,
                         inlineKeyboardMaker.getScheduleInlineButton(true),
                         userAwaitingService.getPreviousMessageFromCache(chatId, EntityEnum.SCHEDULE_));
                 editMessageText1.enableHtml(true);
                 return editMessageText1;
+            }
 
-            case "APPOINTMENT_DELETE_ALL":
+            case "APPOINTMENT_DELETE_ALL" -> {
                 EditMessageText editAppointmentMessage = new EditMessageText();
                 editAppointmentMessage.setChatId(chatId);
                 editAppointmentMessage.setMessageId(messageId);
                 editAppointmentMessage.setText("Удалить все записи?");
                 editAppointmentMessage.setReplyMarkup(inlineKeyboardMaker.getConfirmInlineButton(EntityEnum.APPOINTMENT_));
                 return editAppointmentMessage;
+            }
 
-            case "APPOINTMENT_DELETE_ALL_CONFIRMED":
+            case "APPOINTMENT_DELETE_ALL_CONFIRMED" -> {
                 actionMessage(chatId, TelegramMessage.Action.APPOINTMENTS_DELETE);
-                DeleteMessage deleteMessage = new DeleteMessage();
-                deleteMessage.setChatId(chatId);
-                deleteMessage.setMessageId(messageId);
-                return deleteMessage;
+                return new DeleteMessage(chatId, messageId);
+            }
 
-            case "APPOINTMENT_NEXT_PAGE":
+            case "APPOINTMENT_NEXT_PAGE" -> {
                 return createEditMessage(chatId, messageId, inlineKeyboardMaker.getAppointmentInlineButton(true),
                         userAwaitingService.getNextMessageFromCache(chatId, EntityEnum.APPOINTMENT_));
+            }
 
-            case "APPOINTMENT_PREV_PAGE":
+            case "APPOINTMENT_PREV_PAGE" -> {
                 return createEditMessage(chatId, messageId, inlineKeyboardMaker.getAppointmentInlineButton(true),
                         userAwaitingService.getPreviousMessageFromCache(chatId, EntityEnum.APPOINTMENT_));
-
-            default:
-                return null;
+            }
         }
+        if (data.contains("APPOINTMENT_DELETE")) {
+            String appointmentId = data.replace("APPOINTMENT_DELETE", "");
+            TelegramUser telegramUser = repository.findByChatId(chatId).orElseThrow(() -> new RuntimeException("User not found"));
+
+            rabbitMessageSender.deleteAppointment(telegramUser.getAgentId(), appointmentId);
+            return new DeleteMessage(chatId, buttonQuery.getMessage().getMessageId());
+        }
+        return null;
     }
 
     private EditMessageText createEditMessage(String chatId, int messageId, InlineKeyboardMarkup inlineKeyboardMarkup,

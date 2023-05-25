@@ -96,10 +96,10 @@ public class TelegramMessageHandler {
     private BotApiMethod<?> handleAwaitingRequest(Message message) {
         String chatId = message.getChatId().toString();
         UserAwaitingResponse userAwaitingResponse = userAwaitingService.getWaiter(chatId);
-        EntityEnum actionPart = userAwaitingResponse.entity();
+        EntityEnum entityEnum = userAwaitingResponse.entity();
         DefinitionEnum definition = userAwaitingResponse.definition();
 
-        return switch (actionPart) {
+        return switch (entityEnum) {
             case SERVICE_ -> handleServiceDefinition(definition, message, chatId);
             case AGENT_ -> handleAgentDefinition(definition, message, chatId);
             case SCHEDULE_ -> handleScheduleDefinition(definition, message, chatId);

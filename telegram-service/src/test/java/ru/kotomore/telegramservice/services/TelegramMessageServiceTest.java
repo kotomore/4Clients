@@ -8,10 +8,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.kotomore.telegramservice.models.TelegramUser;
 import ru.kotomore.telegramservice.repositories.TelegramUserRepository;
-import telegram.*;
 import ru.kotomore.telegramservice.telegram.WriteReadBot;
 import ru.kotomore.telegramservice.telegram.keyboards.InlineKeyboardMaker;
 import ru.kotomore.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
+import telegram.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
