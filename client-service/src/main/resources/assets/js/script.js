@@ -145,22 +145,20 @@ function resetToFirstDayOfMonth() {
     today.setDate(1);
 }
 
-function nextMonth() {
+function setNextMonth() {
+    today.setDate(1)
     today.setMonth(today.getMonth() + 1);
-    if (today.getMonth() !== currentDate.getMonth()) {
-        resetToFirstDayOfMonth();
-    } else {
+    if (today.getMonth() === currentDate.getMonth()) {
         today.setDate(new Date().getDate())
     }
     $('.member').removeClass('selected');
     $('.wrap').removeClass('member-selected date-selected slot-selected booking-complete');
 }
 
-function prevMonth() {
+function setPrevMonth() {
+    today.setDate(1)
     today.setMonth(today.getMonth() - 1);
-    if (today.getMonth() !== currentDate.getMonth()) {
-        resetToFirstDayOfMonth();
-    } {
+    if (today.getMonth() === currentDate.getMonth()) {
         today.setDate(new Date().getDate())
     }
     $('.member').removeClass('selected');
@@ -189,9 +187,9 @@ function addCalendar(container) {
 
     var calendar = '<label class="date"></label>' +
         '<label class="month">' +
-        '<a class="prevMonth" onclick="prevMonth()"> ' + monthNames[prevMonth] + '</a>' +
+        '<a class="prevMonth" onclick="setPrevMonth()"> ' + monthNames[prevMonth] + '</a>' +
         monthNames[month] +
-        '<a class="nextMonth" onclick="nextMonth()">' + monthNames[nextMonth] + '</a></label>';
+        '<a class="nextMonth" onclick="setNextMonth()">' + monthNames[nextMonth] + '</a></label>';
 
     calendar += '<table><tr>';
     dayLabels.forEach(function (label) {
