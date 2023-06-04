@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.kotomore.managementservice.dto.AgentDTO;
+import ru.kotomore.managementservice.dto.AgentRequestDTO;
 import ru.kotomore.managementservice.exceptions.AgentNotFoundException;
 import ru.kotomore.managementservice.exceptions.AppointmentNotFoundException;
 import ru.kotomore.managementservice.exceptions.TimeNotAvailableException;
@@ -141,7 +141,7 @@ public class ManagementServiceTest {
         Mockito.when(agentRepository.findById("agent-123")).thenReturn(Optional.of(agent));
         Mockito.when(passwordEncoder.encode("password")).thenReturn("encoded password");
 
-        managementService.updateAgent("agent-123", new AgentDTO("Agent updated name", "123", "password"));
+        managementService.updateAgent("agent-123", new AgentRequestDTO("Agent updated name", "123", "password"));
         Mockito.verify(agentRepository).save(agent);
     }
 
@@ -150,7 +150,7 @@ public class ManagementServiceTest {
         Mockito.when(agentRepository.findById("agent-123")).thenReturn(Optional.empty());
 
         Assertions.assertThrows(AgentNotFoundException.class,
-                () -> managementService.updateAgent("agent-123", new AgentDTO()));
+                () -> managementService.updateAgent("agent-123", new AgentRequestDTO()));
     }
 
     @Test

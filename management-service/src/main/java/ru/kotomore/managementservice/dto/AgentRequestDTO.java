@@ -1,4 +1,5 @@
-package ru.kotomore.authservice.dto.security;
+package ru.kotomore.managementservice.dto;
+
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -7,16 +8,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.io.Serializable;
-
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-public class JwtRequest implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class AgentRequestDTO {
     @NotEmpty(message = "Not be empty")
-    @Size(min = 3, max = 20, message = "Login size must be between 3 and 20 characters")
-    private String login;
+    @Size(min = 3, max = 20, message = "Name size must be between 3 and 20 characters")
+    private String name;
+    @NotEmpty(message = "Not be empty")
+    @Size(min = 3, max = 20, message = "Phone size must be between 3 and 20 characters")
+    private String phone;
     @NotEmpty(message = "Not be empty")
     @Size(min = 3, max = 20, message = "Password size must be between 3 and 20 characters")
     private String password;

@@ -1,4 +1,4 @@
-package ru.kotomore.managementservice.dto;
+package ru.kotomore.authservice.dto;
 
 
 import jakarta.validation.constraints.NotEmpty;

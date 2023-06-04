@@ -7,7 +7,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import ru.kotomore.managementservice.dto.AgentDTO;
+import ru.kotomore.managementservice.dto.AgentRequestDTO;
+import ru.kotomore.managementservice.dto.AgentResponseDTO;
 import ru.kotomore.managementservice.dto.AgentServiceDTO;
 import ru.kotomore.managementservice.dto.TimeSlotDTO;
 import ru.kotomore.managementservice.exceptions.*;
@@ -83,17 +84,17 @@ public class ManagementService {
                 .orElseThrow(() -> new AgentNotFoundException(agentId));
     }
 
-    public AgentDTO findAgentDTOById(String agentId) throws AgentNotFoundException{
+    public AgentResponseDTO findAgentDTOById(String agentId) throws AgentNotFoundException{
         return modelMapper.map(agentRepository.findById(agentId)
-                .orElseThrow(() -> new AgentNotFoundException(agentId)), AgentDTO.class);
+                .orElseThrow(() -> new AgentNotFoundException(agentId)), AgentResponseDTO.class);
     }
 
-    public Agent updateAgent(String agentId, AgentDTO agentDTO) throws UserAlreadyExistException {
+    public Agent updateAgent(String agentId, AgentRequestDTO agentRequestDTO) throws UserAlreadyExistException {
         Agent agent = findAgentById(agentId);
 
-        if (agentDTO.getName() != null) agent.setName(agentDTO.getName());
-        if (agentDTO.getPhone() != null) agent.setPhone(agentDTO.getPhone());
-        if (agentDTO.getPassword() != null) agent.setPassword(passwordEncoder.encode(agentDTO.getPassword()));
+        if (agentRequestDTO.getName() != null) agent.setName(agentRequestDTO.getName());
+        if (agentRequestDTO.getPhone() != null) agent.setPhone(agentRequestDTO.getPhone());
+        if (agentRequestDTO.getPassword() != null) agent.setPassword(passwordEncoder.encode(agentRequestDTO.getPassword()));
 
         try {
            return agentRepository.save(agent);

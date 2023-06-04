@@ -14,14 +14,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 public class AuthExceptionAdvice {
 
-    @ResponseBody
-    @ExceptionHandler(AuthException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<Object> authExceptionHandler(AuthException ex) {
-        return new ResponseEntity<>(new ErrorMessage("Authorization error. " + ex.getMessage()), new HttpHeaders(), HttpStatus.FORBIDDEN);
-
-    }
-
     @ExceptionHandler(value = {ExpiredJwtException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException ex) {

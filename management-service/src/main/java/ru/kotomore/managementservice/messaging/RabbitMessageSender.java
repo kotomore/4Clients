@@ -6,7 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.stereotype.Component;
-import ru.kotomore.managementservice.dto.AgentDTO;
+import ru.kotomore.managementservice.dto.AgentRequestDTO;
 import ru.kotomore.managementservice.dto.TimeSlotDTO;
 import ru.kotomore.managementservice.exceptions.AgentNotFoundException;
 import ru.kotomore.managementservice.exceptions.AppointmentNotFoundException;
@@ -157,8 +157,8 @@ public class RabbitMessageSender {
     }
 
     public void sendUpdatedAgent(AgentMSG agent) {
-        AgentDTO agentDTO = modelMapper.map(agent, AgentDTO.class);
-        agent = modelMapper.map(managementService.updateAgent(agent.getId(), agentDTO), AgentMSG.class);
+        AgentRequestDTO agentRequestDTO = modelMapper.map(agent, AgentRequestDTO.class);
+        agent = modelMapper.map(managementService.updateAgent(agent.getId(), agentRequestDTO), AgentMSG.class);
         template.convertAndSend(telegramExchange.getName(), "telegram_key.agent", agent);
     }
 

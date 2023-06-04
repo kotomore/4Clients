@@ -6,16 +6,15 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Component;
 import ru.kotomore.managementservice.controllers.ManagementController;
-import ru.kotomore.managementservice.dto.AgentDTO;
+import ru.kotomore.managementservice.dto.AgentRequestDTO;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class AgentModelAssembler implements RepresentationModelAssembler<AgentDTO, EntityModel<AgentDTO>> {
+public class AgentModelAssembler implements RepresentationModelAssembler<AgentRequestDTO, EntityModel<AgentRequestDTO>> {
 
     @Override
-    public EntityModel<AgentDTO> toModel(AgentDTO entity) {
+    public EntityModel<AgentRequestDTO> toModel(AgentRequestDTO entity) {
         return EntityModel.of(entity,
                 WebMvcLinkBuilder.linkTo(methodOn(ManagementController.class)
                         .getCurrentAgent())
@@ -23,7 +22,7 @@ public class AgentModelAssembler implements RepresentationModelAssembler<AgentDT
     }
 
     @Override
-    public CollectionModel<EntityModel<AgentDTO>> toCollectionModel(Iterable<? extends AgentDTO> entities) {
+    public CollectionModel<EntityModel<AgentRequestDTO>> toCollectionModel(Iterable<? extends AgentRequestDTO> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 }

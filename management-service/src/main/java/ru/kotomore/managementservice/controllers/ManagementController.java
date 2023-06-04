@@ -13,10 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import ru.kotomore.managementservice.dto.AgentResponseDTO;
 import ru.kotomore.managementservice.dto.TimeSlotDTO;
 import ru.kotomore.managementservice.models.Appointment;
 import ru.kotomore.managementservice.security.AgentDetails;
-import ru.kotomore.managementservice.dto.AgentDTO;
+import ru.kotomore.managementservice.dto.AgentRequestDTO;
 import ru.kotomore.managementservice.dto.AgentServiceDTO;
 import ru.kotomore.managementservice.models.AgentService;
 import ru.kotomore.managementservice.models.Client;
@@ -44,11 +45,11 @@ public class ManagementController {
     private final ClientModelAssembler clientModelAssembler;
     private final ManagementService managementService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<?> getCurrentAgent() {
         String agentId = getAuthUserId();
         if (agentId != null) {
-            AgentDTO agent = managementService.findAgentDTOById(agentId);
+            AgentResponseDTO agent = managementService.findAgentDTOById(agentId);
             return ResponseEntity.ok().body(agent);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -56,11 +57,11 @@ public class ManagementController {
     }
 
     @PutMapping
-    ResponseEntity<?> updateAgent(@Valid @RequestBody AgentDTO newAgent) {
+    ResponseEntity<?> updateAgent(@Valid @RequestBody AgentRequestDTO newAgent) {
         String agentId = getAuthUserId();
         managementService.updateAgent(agentId, newAgent);
 
-        EntityModel<AgentDTO> entityModel = agentModelAssembler.toModel(newAgent);
+        EntityModel<AgentRequestDTO> entityModel = agentModelAssembler.toModel(newAgent);
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel);
