@@ -35,6 +35,14 @@ public class RabbitMessageSender {
         }
     }
 
+    public void updateBreak(ScheduleMSG scheduleMSG) {
+        try {
+            template.convertAndSend("telegram_add_break", scheduleMSG);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public void deleteAppointment(String agentId, String appointmentId) {
         AppointmentMSG appointmentMSG = new AppointmentMSG();
         appointmentMSG.setAgentId(agentId);

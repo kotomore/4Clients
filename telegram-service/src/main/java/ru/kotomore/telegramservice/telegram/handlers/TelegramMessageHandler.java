@@ -129,6 +129,9 @@ public class TelegramMessageHandler {
         if (definition == DefinitionEnum.TIME) {
             return updateAgentSchedule(message, chatId);
         }
+        if (definition == DefinitionEnum.BREAK) {
+            return updateAgentBreak(message, chatId);
+        }
         return null;
     }
 
@@ -270,6 +273,40 @@ public class TelegramMessageHandler {
             return updateSchedule(chatId, scheduleMSG);
         }
         return new SendMessage(chatId, "Введите дату и время в указанном формате");
+    }
+
+    private BotApiMethod<?> updateAgentBreak(Message message, String chatId) {
+        ScheduleMSG scheduleMSG = new ScheduleMSG();
+
+        String[] messages = message.getText().split("\n");
+        if (messages.length == 4 || messages.length == 3) {
+            try {
+                scheduleMSG.setAgentId(message.getText());
+                scheduleMSG.setDateStart(LocalDate.parse(messages[0]));
+                scheduleMSG.setDateEnd(messages.length == 4 ? LocalDate.parse(messages[1]) : scheduleMSG.getDateStart());
+                scheduleMSG.setTimeStart(LocalTime.parse(messages[messages.length - 2]));
+                scheduleMSG.setTimeEnd(LocalTime.parse(messages[messages.length - 1]));
+
+            } catch (DateTimeParseException ex) {
+                return new SendMessage(chatId, "Введите дату и время в указанном формате");
+            }
+
+            if (scheduleMSG.getDateEnd().toEpochDay() - scheduleMSG.getDateStart().toEpochDay() > 30) {
+                return new SendMessage(chatId, "Разница между датами должна быть менее 30 дней");
+            }
+            return updateBreak(chatId, scheduleMSG);
+        }
+        return new SendMessage(chatId, "Введите дату и время в указанном формате");
+    }
+
+    private BotApiMethod<?> updateBreak(String chatId, ScheduleMSG schedule) {
+        Optional<TelegramUser> user = repository.findByChatId(chatId);
+        if (user.isPresent()) {
+            schedule.setAgentId(user.get().getAgentId());
+            rabbitMessageSender.updateBreak(schedule);
+            userAwaitingService.removeFromWaitingList(chatId);
+        }
+        return null;
     }
 
     private BotApiMethod<?> updateSchedule(String chatId, ScheduleMSG schedule) {

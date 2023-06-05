@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import ru.kotomore.managementservice.dto.AgentRequestDTO;
 import ru.kotomore.managementservice.dto.TimeSlotDTO;
 import ru.kotomore.managementservice.exceptions.AgentNotFoundException;
+import ru.kotomore.managementservice.exceptions.AlreadyHaveAppointmentException;
 import ru.kotomore.managementservice.exceptions.AppointmentNotFoundException;
 import ru.kotomore.managementservice.exceptions.ServiceNotFoundException;
 import ru.kotomore.managementservice.models.AgentService;
@@ -185,6 +186,22 @@ public class RabbitMessageSender {
             ErrorMSG errorMSG = new ErrorMSG();
             errorMSG.setAgentId(scheduleMSG.getAgentId());
             errorMSG.setMessage(exception.getMessage());
+            template.convertAndSend(telegramExchange.getName(), "telegram_key.error", errorMSG);
+        }
+    }
+
+    public void sendUpdatedBreak(ScheduleMSG scheduleMSG) {
+        try {
+            LocalDateTime timeStart = LocalDateTime.of(scheduleMSG.getDateStart(), scheduleMSG.getTimeStart());
+            LocalDateTime timeEnd = LocalDateTime.of(scheduleMSG.getDateEnd(), scheduleMSG.getTimeEnd());
+            managementService.addBreak(scheduleMSG.getAgentId(), timeStart, timeEnd);
+            AvailabilityMSG availabilityMSG = getTelegramAvailabilityMSG(scheduleMSG.getAgentId());
+            template.convertAndSend(telegramExchange.getName(), "telegram_key.schedule", availabilityMSG);
+
+        } catch (AlreadyHaveAppointmentException exception) {
+            ErrorMSG errorMSG = new ErrorMSG();
+            errorMSG.setAgentId(scheduleMSG.getAgentId());
+            errorMSG.setMessage("Добавление перерыва невозможно. На данное время есть запись клиента.");
             template.convertAndSend(telegramExchange.getName(), "telegram_key.error", errorMSG);
         }
     }

@@ -79,12 +79,12 @@ public class ManagementService {
         appointmentRepository.deleteAllByAgentId(agentId);
     }
 
-    public Agent findAgentById(String agentId) throws AgentNotFoundException{
+    public Agent findAgentById(String agentId) throws AgentNotFoundException {
         return agentRepository.findById(agentId)
                 .orElseThrow(() -> new AgentNotFoundException(agentId));
     }
 
-    public AgentResponseDTO findAgentDTOById(String agentId) throws AgentNotFoundException{
+    public AgentResponseDTO findAgentDTOById(String agentId) throws AgentNotFoundException {
         return modelMapper.map(agentRepository.findById(agentId)
                 .orElseThrow(() -> new AgentNotFoundException(agentId)), AgentResponseDTO.class);
     }
@@ -94,10 +94,11 @@ public class ManagementService {
 
         if (agentRequestDTO.getName() != null) agent.setName(agentRequestDTO.getName());
         if (agentRequestDTO.getPhone() != null) agent.setPhone(agentRequestDTO.getPhone());
-        if (agentRequestDTO.getPassword() != null) agent.setPassword(passwordEncoder.encode(agentRequestDTO.getPassword()));
+        if (agentRequestDTO.getPassword() != null)
+            agent.setPassword(passwordEncoder.encode(agentRequestDTO.getPassword()));
 
         try {
-           return agentRepository.save(agent);
+            return agentRepository.save(agent);
         } catch (DuplicateKeyException exception) {
             throw new UserAlreadyExistException();
         }
@@ -118,7 +119,7 @@ public class ManagementService {
              date = date.plusDays(1)) {
 
             //Make schedule time for every day, exclude appointed time and old current schedules
-            for (LocalTime time  = timeSlotDTO.getTimeStart();
+            for (LocalTime time = timeSlotDTO.getTimeStart();
                  time.isBefore(timeSlotDTO.getTimeEnd());
                  time = time.plusMinutes(service.getDuration())) {
 
@@ -136,7 +137,7 @@ public class ManagementService {
 
     private List<LocalDateTime> getAppointmentsTime(String agentId, LocalDateTime timeSlotStartDateTime) {
         return appointmentRepository
-                .findByAgentIdAndStartTimeAfter(agentId, timeSlotStartDateTime, Sort.unsorted())
+                .findByAgentIdAndStartTimeAfter(agentId, timeSlotStartDateTime.minusMinutes(1), Sort.unsorted())
                 .stream()
                 .map(Appointment::getStartTime)
                 .toList();
@@ -149,6 +150,20 @@ public class ManagementService {
         availability.setEndTime(startTime.plusMinutes(service.getDuration()));
         availability.setAgentId(agentId);
         return availability;
+    }
+
+    public void addBreak(String agentId, LocalDateTime startTime, LocalDateTime endTime) {
+        List<LocalDateTime> appointedTime = getAppointmentsTime(agentId, startTime.minusMinutes(1));
+
+        for (LocalDateTime date = startTime; date.isBefore(endTime);
+             date = date.plusDays(1)) {
+            if (!appointedTime.contains(date)) {
+                availabilityRepository.deleteByAgentIdAndStartTimeBetween(agentId, date.minusMinutes(1),
+                        LocalDateTime.of(date.toLocalDate(), endTime.toLocalTime()));
+            } else {
+                throw new AlreadyHaveAppointmentException();
+            }
+        }
     }
 
     public void deleteAllAvailableTime(String agentId) {
@@ -171,9 +186,9 @@ public class ManagementService {
 
     public List<Availability> findAvailableTimeForTelegram(String agentId) {
         LocalDateTime startDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-       return availabilityRepository
-               .findByAgentIdAndStartTimeBetween(agentId, startDateTime, startDateTime.plusDays(SCHEDULE_MAX_DAYS_COUNT),
-                       Sort.by("startTime"));
+        return availabilityRepository
+                .findByAgentIdAndStartTimeBetween(agentId, startDateTime, startDateTime.plusDays(SCHEDULE_MAX_DAYS_COUNT),
+                        Sort.by("startTime"));
     }
 
     public void deleteAvailableTime(String agentId, LocalDate date) {
@@ -186,7 +201,7 @@ public class ManagementService {
         agentRepository.deleteById(agentId);
     }
 
-    public AgentService findService(String agentId) throws ServiceNotFoundException{
+    public AgentService findService(String agentId) throws ServiceNotFoundException {
         return serviceRepository.findByAgentId(agentId).orElseThrow(() -> new ServiceNotFoundException(agentId));
     }
 
@@ -202,7 +217,7 @@ public class ManagementService {
                 });
     }
 
-    public List<Client> findClients(String agentId) throws ClientNotFoundException{
+    public List<Client> findClients(String agentId) throws ClientNotFoundException {
         List<Client> clients = appointmentRepository.findByAgentId(agentId)
                 .stream()
                 .distinct()

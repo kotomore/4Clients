@@ -7,6 +7,7 @@ public enum DefinitionEnum {
     PRICE,
     PASSWORD,
     TIME,
+    BREAK,
     DELETE,
     DELETE_ALL,
     PREV_PAGE,
