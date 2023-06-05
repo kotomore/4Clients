@@ -1,5 +1,6 @@
 package ru.kotomore.clientservice.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
@@ -24,6 +25,7 @@ public class ClientController {
     private final ClientService clientService;
 
     @PostMapping("/appointment")
+    @Operation(summary = "Создать новую запись на услугу")
     public ResponseEntity<?> newAppointment(@Valid @RequestBody AppointmentDTO newAppointment) {
         try {
             clientService.createAppointment(newAppointment);
@@ -38,6 +40,7 @@ public class ClientController {
 
     @CrossOrigin
     @GetMapping("/availableTimes")
+    @Operation(summary = "Получить доступное для записи время")
     public ResponseEntity<?> availableTimes(@RequestParam String agentId, @RequestParam LocalDate date) {
         Set<LocalTime> availableTimes = clientService.findAvailableTimes(agentId, date);
         return new ResponseEntity<>(availableTimes, HttpStatus.OK);
@@ -45,6 +48,7 @@ public class ClientController {
 
     @CrossOrigin
     @GetMapping("/availableDates")
+    @Operation(summary = "Получить доступные для записи даты")
     public ResponseEntity<?> availableDates(@RequestParam String agentId, @RequestParam LocalDate date) {
         if (date.isBefore(LocalDate.now())) {
             date = LocalDate.now();
@@ -55,6 +59,7 @@ public class ClientController {
 
     @CrossOrigin
     @GetMapping("/services")
+    @Operation(summary = "Получить список доступных услуг")
     public ResponseEntity<?> getService(@RequestParam String agentId) throws ServiceNotFoundException {
         AgentServiceDTO service = clientService.findService(agentId);
         return new ResponseEntity<>(service, HttpStatus.OK);
