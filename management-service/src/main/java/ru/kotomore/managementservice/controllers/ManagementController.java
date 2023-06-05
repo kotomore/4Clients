@@ -1,5 +1,6 @@
 package ru.kotomore.managementservice.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
@@ -46,6 +47,7 @@ public class ManagementController {
     private final ManagementService managementService;
 
     @GetMapping
+    @Operation(summary = "Получить информацию о текущем пользователе")
     public ResponseEntity<?> getCurrentAgent() {
         String agentId = getAuthUserId();
         if (agentId != null) {
@@ -57,6 +59,7 @@ public class ManagementController {
     }
 
     @PutMapping
+    @Operation(summary = "Обновить информацию о текущем пользователе")
     ResponseEntity<?> updateAgent(@Valid @RequestBody AgentRequestDTO newAgent) {
         String agentId = getAuthUserId();
         managementService.updateAgent(agentId, newAgent);
@@ -67,7 +70,8 @@ public class ManagementController {
                 .body(entityModel);
     }
 
-    @DeleteMapping()
+    @DeleteMapping
+    @Operation(summary = "Удалить текущего пользователя")
     public ResponseEntity<?> deleteAgent() {
         String agentId = getAuthUserId();
         managementService.deleteTherapist(agentId);
@@ -75,6 +79,7 @@ public class ManagementController {
     }
 
     @GetMapping("/appointments/{appointmentId}")
+    @Operation(summary = "Получить запись клиента по идентификатору")
     public EntityModel<Appointment> getAppointmentById(@PathVariable String appointmentId) {
         String agentId = getAuthUserId();
         Appointment appointment = managementService.findAppointmentById(agentId, appointmentId);
@@ -82,12 +87,14 @@ public class ManagementController {
     }
 
     @GetMapping("/appointments")
+    @Operation(summary = "Получить все записи", description = "Отображает список всех записей текущего пользователя")
     public CollectionModel<EntityModel<Appointment>> allAppointments() {
         String agentId = getAuthUserId();
         return appointmentModelAssembler.toCollectionModel(managementService.findAllAppointments(agentId));
     }
 
     @DeleteMapping("/appointments/{appointmentId}")
+    @Operation(summary = "Удалить запись по идентификатору")
     public ResponseEntity<?> deleteAppointment(@PathVariable String appointmentId) {
         String agentId = getAuthUserId();
         managementService.deleteAppointment(agentId, appointmentId);
@@ -95,6 +102,7 @@ public class ManagementController {
     }
 
     @GetMapping("/availabilities")
+    @Operation(summary = "Доступное время", description = "Получить все доступное для записи время")
     public ResponseEntity<?> availableTimes(@RequestParam LocalDate date) {
         String agentId = getAuthUserId();
         Set<LocalTime> availableTimes = managementService.findAvailableTimes(agentId, date);
@@ -109,6 +117,7 @@ public class ManagementController {
     }
 
     @PostMapping("/availabilities")
+    @Operation(summary = "Добавить доступное для записи время")
     ResponseEntity<?> newAvailableTime(@Valid @RequestBody TimeSlotDTO timeSlotDTO) {
         final long MAX_DAYS_TO_ADD = 30;
         if (timeSlotDTO.getDateEnd().toEpochDay() - timeSlotDTO.getDateStart().toEpochDay() > MAX_DAYS_TO_ADD) {
@@ -127,6 +136,7 @@ public class ManagementController {
     }
 
     @DeleteMapping("/availabilities")
+    @Operation(summary = "Удалить доступное для записи время", description = "Удалить время за определенную дату")
     public ResponseEntity<?> deleteAppointment(@RequestParam LocalDate date) {
         String agentId = getAuthUserId();
         managementService.deleteAvailableTime(agentId, date);
@@ -134,6 +144,7 @@ public class ManagementController {
     }
 
     @GetMapping("/services")
+    @Operation(summary = "Получить доступные для записи услуги текущего пользователя")
     public EntityModel<AgentService> getService() {
         String agentId = getAuthUserId();
         AgentService service = managementService.findService(agentId);
@@ -142,6 +153,7 @@ public class ManagementController {
     }
 
     @PostMapping("/services")
+    @Operation(summary = "Добавить доступную для записи услугу")
     public EntityModel<AgentService> newService(@Valid @RequestBody AgentServiceDTO service) {
         String agentId = getAuthUserId();
         AgentService savedService = managementService.addOrUpdateService(agentId, service);
@@ -150,6 +162,7 @@ public class ManagementController {
     }
 
     @GetMapping("/clients")
+    @Operation(summary = "Получить список всех клиентов записавшихся на услуги текущего пользователя")
     public CollectionModel<EntityModel<Client>> getClients() {
         String agentId = getAuthUserId();
         List<Client> clients = managementService.findClients(agentId);

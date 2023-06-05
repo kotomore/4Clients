@@ -1,5 +1,6 @@
 package ru.kotomore.authservice.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.security.auth.message.AuthException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,10 +10,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.kotomore.authservice.dto.AgentDTO;
 import ru.kotomore.authservice.dto.security.JwtRequest;
 import ru.kotomore.authservice.dto.security.JwtResponse;
@@ -33,6 +31,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("/registration")
+    @Operation(summary = "Регистрация пользователя", description = "Укажите логин и пароль для создания аккаунта")
     ResponseEntity<EntityModel<Agent>> registration(@Valid @RequestBody AgentDTO agentDTO) {
         Agent savedAgent = modelMapper.map(agentDTO, Agent.class);
         log.info("Register new agent with phone - " + agentDTO.getPhone());
@@ -43,6 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Аутентификация", description = "Укажите логин и пароль для получения токена доступа")
     public ResponseEntity<JwtResponse> performLogin(@Valid @RequestBody JwtRequest authRequest) throws AuthException {
         log.info("Try authenticate with login - " + authRequest.getLogin());
         UsernamePasswordAuthenticationToken authInputToken =
@@ -54,17 +54,11 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(summary = "Обновление токена", description = "Укажите Refresh Token для получения обновленного" +
+            " токена доступа")
     public ResponseEntity<JwtResponse> getNewRefreshToken(@Valid @RequestBody RefreshJwtRequest request) throws AuthException {
         log.info("refresh token");
         final JwtResponse token = authService.refresh(request.getRefreshToken());
-        if (token != null && token.getAccessToken() == null) throw new AuthException("Invalid token");
-        return ResponseEntity.ok(token);
-    }
-
-    @PostMapping("/token")
-    public ResponseEntity<JwtResponse> getNewAccessToken(@Valid @RequestBody RefreshJwtRequest request) throws AuthException {
-        log.info("Get access token");
-        final JwtResponse token = authService.getAccessToken(request.getRefreshToken());
         if (token != null && token.getAccessToken() == null) throw new AuthException("Invalid token");
         return ResponseEntity.ok(token);
     }

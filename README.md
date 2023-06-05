@@ -12,7 +12,7 @@
 ## Swagger
 http://45.159.249.5:8091/swagger-ui/index.html
 <br>
-<b>Select API definition (Management & Client)</b>
+<b>Select API definition (Authorization, Management & Client)</b>
 
 ## Sample
 ### Clients side
