@@ -1,5 +1,21 @@
 # Online Appointment service
 
+[TapTimes](https://taptimes.ru/) is an easy-to-use online booking system for professionals like hairdressers, massage therapists, and various other service providers.
+It offers simplicity, reliability, and automation. With Tap Times, you can add a booking form to your
+website or share a link with clients. The system operates through a [Telegram bot](https://t.me/clientsmanagement_bot), ensuring user-friendliness.<br>
+It securely stores data, automates business processes, and allows customization of schedules and services.
+Integration with your website is straightforward.<br>
+Overall, Laptimes streamlines appointment management
+for professionals and enhances the booking experience for clients.
+
+## Upcoming updates
+- [x] Ability to add breaks
+- [ ] Profile links on personal page
+- [ ] Ability to create a Custom Vanity URL
+- [ ] Ability to offer discounts or promotions within the app
+- [ ] Customizable SMS templates for personalized communication with clients
+
+
 ## Based
 #### Java + Multi-Module Maven + Spring Boot + Spring Security + JWT + RabbitMQ + MongoDB + H2 + Telegram API
 <br>
