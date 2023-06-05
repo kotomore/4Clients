@@ -94,8 +94,8 @@ public class CallbackQueryHandler {
 
 
                         Пример:
-                        `2023-12-30
-                        2023-12-30
+                        `%s
+                        %s
                         09:00
                         18:00`""".formatted(currentDate, currentDate);
                 SendMessage agentSchedule = new SendMessage(chatId, message);
