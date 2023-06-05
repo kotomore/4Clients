@@ -10,12 +10,15 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.kotomore.telegramservice.enums.DefinitionEnum;
 import ru.kotomore.telegramservice.enums.EntityEnum;
+import ru.kotomore.telegramservice.messaging.RabbitMessageSender;
 import ru.kotomore.telegramservice.models.TelegramUser;
 import ru.kotomore.telegramservice.repositories.TelegramUserRepository;
-import ru.kotomore.telegramservice.messaging.RabbitMessageSender;
 import ru.kotomore.telegramservice.services.UserAwaitingService;
 import ru.kotomore.telegramservice.telegram.keyboards.InlineKeyboardMaker;
 import telegram.TelegramMessage;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Component
 @RequiredArgsConstructor
@@ -80,22 +83,48 @@ public class CallbackQueryHandler {
 
             //Schedule
             case "SCHEDULE_TIME" -> {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                String currentDate = LocalDate.now().format(formatter);
                 String message = """
                         Введите дату и время одним сообщением в формате:
-                        *Дата начала:* 2023-12-30
-                        *Дата окончания:* 2023-12-30
+                        *Дата начала:* %s
+                        *Дата окончания:* %s
                         *Ежедневное время начала:* 09:00
                         *Ежедневное время окончания:* 18:00
 
 
                         Пример:
-                        `2023-12-30
-                        2023-12-30
+                        `%s
+                        %s
                         09:00
-                        18:00`""";
+                        18:00`""".formatted(currentDate, currentDate);
                 SendMessage agentSchedule = new SendMessage(chatId, message);
                 agentSchedule.enableMarkdown(true);
                 userAwaitingService.addToWaitingList(chatId, EntityEnum.SCHEDULE_, DefinitionEnum.TIME);
+                agentSchedule.setReplyToMessageId(messageId);
+                return agentSchedule;
+            }
+
+            case "SCHEDULE_BREAK" -> {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                String currentDate = LocalDate.now().format(formatter);
+
+                String message = """
+                        Введите дату и время перерывов одним сообщением в формате:
+                        *Дата начала:* 2023-12-30
+                        *Дата окончания:* 2023-12-30
+                        *Ежедневное время начала перерыва:* 09:00
+                        *Ежедневное время окончания перерыва:* 18:00
+
+
+                        Пример:
+                        `%s
+                        %s
+                        13:00
+                        14:00`""".formatted(currentDate, currentDate);
+                SendMessage agentSchedule = new SendMessage(chatId, message);
+                agentSchedule.enableMarkdown(true);
+                userAwaitingService.addToWaitingList(chatId, EntityEnum.SCHEDULE_, DefinitionEnum.BREAK);
                 agentSchedule.setReplyToMessageId(messageId);
                 return agentSchedule;
             }

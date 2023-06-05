@@ -91,6 +91,10 @@ public class InlineKeyboardMaker {
                 EntityEnum.SCHEDULE_.name() + DefinitionEnum.TIME.name()
         ));
         rowList.add(getButton(
+                "Добавить перерыв",
+                EntityEnum.SCHEDULE_.name() + DefinitionEnum.BREAK.name()
+        ));
+        rowList.add(getButton(
                 "Очистить всё",
                 EntityEnum.SCHEDULE_.name() + DefinitionEnum.DELETE_ALL.name()
         ));

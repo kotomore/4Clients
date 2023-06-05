@@ -12,6 +12,7 @@ import ru.kotomore.managementservice.services.ManagementService;
 import telegram.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @EnableRabbit
 @Slf4j
@@ -64,6 +65,11 @@ public class RabbitMessageListener {
         } catch (AppointmentNotFoundException exception) {
             rabbitSender.sendErrorMessage(appointmentMSG.getAgentId(), exception.getMessage());
         }
+    }
+
+    @RabbitListener(queues = "telegram_add_break", returnExceptions = "false")
+    public void receiveAddBreak(ScheduleMSG scheduleMSG) {
+        rabbitSender.sendUpdatedBreak(scheduleMSG);
     }
 
     private boolean isValidServiceMessage(AgentServiceMSG agentServiceMSG) {
