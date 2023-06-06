@@ -63,6 +63,6 @@ Ports: <br>
     :8092 - Client Service<br>
     :8093 - Telegram Service<br>
 
-Swagger URL: http://localhost:<service-port>/swagger-ui/index.html#/
+Swagger URL: `http://localhost:<service-port>/swagger-ui/index.html#/`
 <br>
 Telegram-bot settings (`telegram.bot-name` & `telegram.bot-token`): `telegram-service/src/main/resources/bootstrap.properties`
