@@ -56,3 +56,13 @@ cd TapTimes
 mvn package -f pom.xml
 docker-compose up
 ```
+
+Ports: <br>
+    :8090 - Authorization Service<br>
+    :8091 - Management Service<br>
+    :8092 - Client Service<br>
+    :8093 - Telegram Service<br>
+
+Swagger URL: http://localhost:<service-port>/swagger-ui/index.html#/
+<br>
+Telegram-bot settings (`telegram.bot-name` & `telegram.bot-token`): `telegram-service/src/main/resources/bootstrap.properties`
