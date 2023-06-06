@@ -11,5 +11,7 @@ public enum DefinitionEnum {
     DELETE,
     DELETE_ALL,
     PREV_PAGE,
-    NEXT_PAGE
+    NEXT_PAGE,
+    URL,
+    WEBSITE_CODE
 }

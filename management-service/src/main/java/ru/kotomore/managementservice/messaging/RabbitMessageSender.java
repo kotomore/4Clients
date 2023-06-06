@@ -8,11 +8,9 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.stereotype.Component;
 import ru.kotomore.managementservice.dto.AgentRequestDTO;
 import ru.kotomore.managementservice.dto.TimeSlotDTO;
-import ru.kotomore.managementservice.exceptions.AgentNotFoundException;
-import ru.kotomore.managementservice.exceptions.AlreadyHaveAppointmentException;
-import ru.kotomore.managementservice.exceptions.AppointmentNotFoundException;
-import ru.kotomore.managementservice.exceptions.ServiceNotFoundException;
+import ru.kotomore.managementservice.exceptions.*;
 import ru.kotomore.managementservice.models.AgentService;
+import ru.kotomore.managementservice.models.AgentSettings;
 import ru.kotomore.managementservice.models.Appointment;
 import ru.kotomore.managementservice.services.ManagementService;
 import telegram.*;
@@ -115,6 +113,13 @@ public class RabbitMessageSender {
         template.convertAndSend(telegramExchange.getName(), "telegram_key.register", agent);
     }
 
+    public void sendSettingsMessage(TelegramMessage message) {
+        SettingsMSG settings = modelMapper.map(managementService.getAgentSettings(message.getAgentId()),
+                SettingsMSG.class);
+        settings.setAgentId(message.getAgentId());
+        template.convertAndSend(telegramExchange.getName(), "telegram_key.settings", settings);
+    }
+
     private AvailabilityMSG getTelegramAvailabilityMSG(String agentId) {
         AvailabilityMSG availabilityMSG = new AvailabilityMSG();
         List<Appointment> appointments = new ArrayList<>();
@@ -155,6 +160,18 @@ public class RabbitMessageSender {
         service = managementService.addOrUpdateService(service.getAgentId(), service);
         serviceMessage = modelMapper.map(service, AgentServiceMSG.class);
         template.convertAndSend(telegramExchange.getName(), "telegram_key.service", serviceMessage);
+    }
+
+    public void sendUpdatedSettings(SettingsMSG settingsMSG) {
+        AgentSettings settings = modelMapper.map(settingsMSG, AgentSettings.class);
+        try {
+            settings = managementService.addOrUpdateSettings(settingsMSG.getAgentId(), settings);
+            settingsMSG = modelMapper.map(settings, SettingsMSG.class);
+            template.convertAndSend(telegramExchange.getName(), "telegram_key.settings", settingsMSG);
+        } catch (UrlAlreadyExistException exception) {
+            sendErrorMessage(settings.getAgentId(), "Указанная ссылка уже занята");
+        }
+
     }
 
     public void sendUpdatedAgent(AgentMSG agent) {

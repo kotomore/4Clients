@@ -9,12 +9,10 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class AgentMSG implements Serializable {
+@NoArgsConstructor
+public class SettingsMSG implements Serializable {
     private String id;
-    private String name;
-    private String phone;
-    private String password;
-    private String vanityName;
+    private String agentId;
+    private String vanityUrl;
 }

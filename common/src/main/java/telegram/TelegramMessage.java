@@ -22,7 +22,8 @@ public class TelegramMessage implements Serializable {
         SCHEDULES,
         SCHEDULE_DELETE,
         APPOINTMENTS,
-        APPOINTMENTS_DELETE
+        APPOINTMENTS_DELETE,
+        SETTINGS
     }
 }
 

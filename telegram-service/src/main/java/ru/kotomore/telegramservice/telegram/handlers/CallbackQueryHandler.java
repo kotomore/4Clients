@@ -29,6 +29,9 @@ public class CallbackQueryHandler {
     private static final String ENTER_SERVICE_DURATION = "Введите длительность услуги в минутах";
     private static final String ENTER_USER_NAME = "Введите Ф.И.О";
     private static final String ENTER_USER_PASSWORD = "Введите пароль";
+    private static final String ENTER_USER_LINK = "Введите название для вашей персональной ссылки." +
+            " https://taptimes.ru/персональное_имя";
+
 
     private final UserAwaitingService userAwaitingService;
     private final TelegramUserRepository repository;
@@ -87,8 +90,8 @@ public class CallbackQueryHandler {
                 String currentDate = LocalDate.now().format(formatter);
                 String message = """
                         Введите дату и время одним сообщением в формате:
-                        *Дата начала:* %s
-                        *Дата окончания:* %s
+                        *Дата начала:* 2023-12-30
+                        *Дата окончания:* 2023-12-31
                         *Ежедневное время начала:* 09:00
                         *Ежедневное время окончания:* 18:00
 
@@ -184,6 +187,13 @@ public class CallbackQueryHandler {
             case "APPOINTMENT_PREV_PAGE" -> {
                 return createEditMessage(chatId, messageId, inlineKeyboardMaker.getAppointmentInlineButton(true),
                         userAwaitingService.getPreviousMessageFromCache(chatId, EntityEnum.APPOINTMENT_));
+            }
+
+            case "SETTINGS_URL" -> {
+                SendMessage agentUrlMessage = new SendMessage(chatId, ENTER_USER_LINK);
+                userAwaitingService.addToWaitingList(chatId, EntityEnum.SETTINGS_, DefinitionEnum.URL);
+                agentUrlMessage.setReplyToMessageId(messageId);
+                return agentUrlMessage;
             }
         }
         if (data.contains("APPOINTMENT_DELETE")) {

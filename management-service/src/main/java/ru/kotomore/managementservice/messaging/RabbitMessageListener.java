@@ -12,7 +12,6 @@ import ru.kotomore.managementservice.services.ManagementService;
 import telegram.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @EnableRabbit
 @Slf4j
@@ -36,6 +35,7 @@ public class RabbitMessageListener {
             case APPOINTMENTS -> rabbitSender.sendAppointments(message);
             case APPOINTMENTS_DELETE -> rabbitSender.sendAppointmentsDelete(message);
             case REGISTER_BOT -> rabbitSender.sendRegisterMessage(message);
+            case SETTINGS -> rabbitSender.sendSettingsMessage(message);
         }
     }
 
@@ -56,6 +56,11 @@ public class RabbitMessageListener {
         if (isValidScheduleMessage(scheduleMSG)) {
             rabbitSender.sendUpdatedSchedule(scheduleMSG);
         }
+    }
+
+    @RabbitListener(queues = "telegram_update_settings", returnExceptions = "false")
+    public void receiveSettingsUpdate(SettingsMSG settingsMSG) {
+        rabbitSender.sendUpdatedSettings(settingsMSG);
     }
 
     @RabbitListener(queues = "telegram_delete_appointment", returnExceptions = "false")

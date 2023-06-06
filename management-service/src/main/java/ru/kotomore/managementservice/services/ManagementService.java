@@ -13,10 +13,7 @@ import ru.kotomore.managementservice.dto.AgentServiceDTO;
 import ru.kotomore.managementservice.dto.TimeSlotDTO;
 import ru.kotomore.managementservice.exceptions.*;
 import ru.kotomore.managementservice.models.*;
-import ru.kotomore.managementservice.repositories.AgentRepository;
-import ru.kotomore.managementservice.repositories.AppointmentRepository;
-import ru.kotomore.managementservice.repositories.AvailabilityRepository;
-import ru.kotomore.managementservice.repositories.ServiceRepository;
+import ru.kotomore.managementservice.repositories.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,7 +30,7 @@ public class ManagementService {
     private final ModelMapper modelMapper;
     private final AgentRepository agentRepository;
     private final PasswordEncoder passwordEncoder;
-    private final int SCHEDULE_MAX_DAYS_COUNT = 30;
+    private final SettingRepository settingRepository;
 
     public List<Appointment> findAllAppointments(String agentId) throws AppointmentNotFoundException {
 
@@ -186,6 +183,7 @@ public class ManagementService {
 
     public List<Availability> findAvailableTimeForTelegram(String agentId) {
         LocalDateTime startDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        int SCHEDULE_MAX_DAYS_COUNT = 30;
         return availabilityRepository
                 .findByAgentIdAndStartTimeBetween(agentId, startDateTime, startDateTime.plusDays(SCHEDULE_MAX_DAYS_COUNT),
                         Sort.by("startTime"));
@@ -250,8 +248,26 @@ public class ManagementService {
 
         newAgentService.setAgentId(agentId);
 
-        serviceRepository.findByAgentId(agentId)
-                .ifPresent(agentService -> newAgentService.setId(agentService.getId()));
         return serviceRepository.save(newAgentService);
+    }
+
+
+    public AgentSettings getAgentSettings(String agentId) {
+        return settingRepository.findByAgentId(agentId).orElse(new AgentSettings());
+    }
+
+    public AgentSettings addOrUpdateSettings(String agentId, AgentSettings settings) {
+        String vanityUrl = settings.getVanityUrl().toLowerCase();
+        if (settingRepository.existsByVanityUrl(vanityUrl)) {
+            throw new UrlAlreadyExistException();
+        }
+
+        AgentSettings newAgentSettings = settingRepository.findByAgentId(settings.getAgentId())
+                .orElse(new AgentSettings());
+        if (settings.getVanityUrl() != null) newAgentSettings.setVanityUrl(vanityUrl);
+
+        newAgentSettings.setAgentId(agentId);
+
+        return settingRepository.save(newAgentSettings);
     }
 }

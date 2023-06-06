@@ -4,5 +4,6 @@ public enum EntityEnum {
     SERVICE_,
     AGENT_,
     SCHEDULE_,
-    APPOINTMENT_
+    APPOINTMENT_,
+    SETTINGS_
 }

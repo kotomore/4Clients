@@ -57,6 +57,12 @@ public class RabbitConfiguration {
     }
 
     @Bean
+    public Queue telegramQueueToSettings() {
+        return QueueBuilder.durable("telegram_queue_to_settings").build();
+    }
+
+
+    @Bean
     public Queue telegramQueueToAppointment() {
         return QueueBuilder.durable("telegram_queue_to_appointment").build();
     }
@@ -74,6 +80,11 @@ public class RabbitConfiguration {
     @Bean
     public Binding telegramBindingService() {
         return BindingBuilder.bind(telegramQueueToService()).to(telegramExchange()).with("telegram_key.service");
+    }
+
+    @Bean
+    public Binding telegramBindingSettings() {
+        return BindingBuilder.bind(telegramQueueToSettings()).to(telegramExchange()).with("telegram_key.settings");
     }
 
     @Bean

@@ -10,19 +10,14 @@ import ru.kotomore.clientservice.exceptions.AgentNotFoundException;
 import ru.kotomore.clientservice.exceptions.AgentServiceNotFoundException;
 import ru.kotomore.clientservice.exceptions.TimeNotAvailableException;
 import ru.kotomore.clientservice.messaging.RabbitMessageSender;
-import ru.kotomore.clientservice.models.Agent;
-import ru.kotomore.clientservice.models.AgentService;
-import ru.kotomore.clientservice.models.Appointment;
-import ru.kotomore.clientservice.models.Client;
-import ru.kotomore.clientservice.repositories.AgentRepository;
-import ru.kotomore.clientservice.repositories.AppointmentRepository;
-import ru.kotomore.clientservice.repositories.AvailabilityRepository;
-import ru.kotomore.clientservice.repositories.ServiceRepository;
+import ru.kotomore.clientservice.models.*;
+import ru.kotomore.clientservice.repositories.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -34,6 +29,7 @@ public class ClientService {
     private final ServiceRepository serviceRepository;
     private final AgentRepository agentRepository;
     private final AvailabilityRepository availabilityRepository;
+    private final SettingRepository settingRepository;
     private final ModelMapper modelMapper;
     private final RabbitMessageSender rabbitMessageSender;
     private static final ZoneOffset TIMEZONE_OFFSET = ZoneOffset.of("+03:00");
@@ -131,5 +127,10 @@ public class ClientService {
         agentServiceDTO.setAgentPhone(agent.getPhone());
 
         return agentServiceDTO;
+    }
+
+    public String getAgentIdByVanityUrl(String vanityUrl) {
+        Optional<AgentSettings> agentSettings = settingRepository.findByVanityUrl(vanityUrl);
+        return agentSettings.map(AgentSettings::getAgentId).orElse(null);
     }
 }

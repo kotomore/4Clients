@@ -25,6 +25,11 @@ public class RabbitConfiguration {
     }
 
     @Bean
+    public Queue telegramUpdateSettings() {
+        return QueueBuilder.durable("telegram_update_settings").build();
+    }
+
+    @Bean
     public Queue telegramUpdateAgent() {
         return QueueBuilder.durable("telegram_update_agent").build();
     }

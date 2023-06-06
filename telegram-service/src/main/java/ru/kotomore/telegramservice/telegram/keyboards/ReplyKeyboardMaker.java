@@ -22,7 +22,7 @@ public class ReplyKeyboardMaker {
         row2.add(new KeyboardButton("Редактирование услуг"));
 
         KeyboardRow row3 = new KeyboardRow();
-        row3.add(new KeyboardButton("Код для сайта"));
+        row3.add(new KeyboardButton("Настройки"));
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
