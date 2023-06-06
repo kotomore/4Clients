@@ -7,6 +7,7 @@ It securely stores data, automates business processes, and allows customization 
 Integration with your website is straightforward.<br>
 Overall, Laptimes streamlines appointment management
 for professionals and enhances the booking experience for clients.
+<hr>
 
 ## Upcoming updates
 - [x] Ability to add breaks
@@ -15,6 +16,7 @@ for professionals and enhances the booking experience for clients.
 - [ ] Ability to offer discounts or promotions within the app
 - [ ] Customizable SMS templates for personalized communication with clients
 
+<hr>
 
 ## Based
 #### Java + Multi-Module Maven + Spring Boot + Spring Security + JWT + RabbitMQ + MongoDB + H2 + Telegram API

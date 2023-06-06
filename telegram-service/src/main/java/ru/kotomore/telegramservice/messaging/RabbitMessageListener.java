@@ -79,6 +79,17 @@ public class RabbitMessageListener {
     }
 
     @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = "telegram_queue_to_settings", durable = "true"),
+            exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
+            key = "telegram_key.settings"
+    ))
+    public void receiveSettingsMSG(@Payload SettingsMSG settingsMSG) {
+        log.info("Message to telegram settings for agent - " + settingsMSG.getAgentId());
+        telegramMessageService.sendWebsiteCodeMessage(settingsMSG);
+
+    }
+
+    @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "telegram_queue_to_error", durable = "true"),
             exchange = @Exchange(value = "telegram_exchange", type = ExchangeTypes.TOPIC),
             key = "telegram_key.error"

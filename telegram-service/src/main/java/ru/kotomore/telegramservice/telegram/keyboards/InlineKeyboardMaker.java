@@ -48,6 +48,17 @@ public class InlineKeyboardMaker {
         return inlineKeyboardMarkup;
     }
 
+    public InlineKeyboardMarkup getSettingsInlineButton() {
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(getButton(
+                "Изменить персональную ссылку",
+                EntityEnum.SETTINGS_.name() + DefinitionEnum.URL.name()
+        ));
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
+    }
+
     public InlineKeyboardMarkup getAppointmentInlineButton(boolean isPageable) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         if (isPageable) {

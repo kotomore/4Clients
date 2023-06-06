@@ -6,7 +6,7 @@ public enum Command {
     PERSONAL_DATA("Личные данные"),
     SCHEDULE("Расписание"),
     APPOINTMENTS("Записи"),
-    WEBSITE_CODE("Код для сайта");
+    SETTINGS("Настройки");
 
     private final String commandText;
 

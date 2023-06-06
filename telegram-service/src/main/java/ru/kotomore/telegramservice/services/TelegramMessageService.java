@@ -1,7 +1,7 @@
 package ru.kotomore.telegramservice.services;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -13,20 +13,42 @@ import ru.kotomore.telegramservice.telegram.keyboards.InlineKeyboardMaker;
 import ru.kotomore.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
 import telegram.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class TelegramMessageService {
-    private TelegramUserRepository repository;
-    private ReplyKeyboardMaker replyKeyboardMaker;
-    private InlineKeyboardMaker inlineKeyboardMaker;
-    private WriteReadBot writeReadBot;
-    private UserAwaitingService userAwaitingService;
+    private final TelegramUserRepository repository;
+    private final ReplyKeyboardMaker replyKeyboardMaker;
+    private final InlineKeyboardMaker inlineKeyboardMaker;
+    private final WriteReadBot writeReadBot;
+    private final UserAwaitingService userAwaitingService;
+    private final String siteUrl;
+    private final String websiteCodePath;
+    private final String websiteCodeDockerPath;
+
+    public TelegramMessageService(TelegramUserRepository repository, ReplyKeyboardMaker replyKeyboardMaker,
+                                  InlineKeyboardMaker inlineKeyboardMaker,
+                                  WriteReadBot writeReadBot,
+                                  UserAwaitingService userAwaitingService, @Value("${site.url}") String siteUrl,
+                                  @Value("${site.path}") String websiteCodePath,
+                                  @Value("${site.docker_path}") String websiteCodeDockerPath) {
+        this.repository = repository;
+        this.replyKeyboardMaker = replyKeyboardMaker;
+        this.inlineKeyboardMaker = inlineKeyboardMaker;
+        this.writeReadBot = writeReadBot;
+        this.userAwaitingService = userAwaitingService;
+        this.siteUrl = siteUrl;
+        this.websiteCodePath = websiteCodePath;
+        this.websiteCodeDockerPath = websiteCodeDockerPath;
+    }
 
     public void registerUser(AgentMSG agentMSG) {
 
@@ -35,7 +57,8 @@ public class TelegramMessageService {
             user.get().setAgentId(agentMSG.getId());
             repository.save(user.get());
 
-            SendMessage sendMessage = new SendMessage(user.get().getChatId(), "Регистрация завершена\n*Выберите пункт меню*");
+            SendMessage sendMessage = new SendMessage(user.get().getChatId(), "Регистрация завершена\n" +
+                    "*Выберите пункт меню*");
             sendMessage.enableMarkdown(true);
             sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboard());
 
@@ -88,6 +111,37 @@ public class TelegramMessageService {
             } catch (TelegramApiException tAe) {
                 log.debug(tAe.getMessage());
             }
+        }
+    }
+
+    public void sendWebsiteCodeMessage(SettingsMSG settingsMSG) {
+        String chatId = getChatId(settingsMSG.getAgentId());
+        String userLink = settingsMSG.getVanityUrl() == null ? settingsMSG.getAgentId() : settingsMSG.getVanityUrl();
+
+        try {
+            //if run in docker container path = "/root/frontend.html"
+            Path path = Paths.get(websiteCodePath);
+            if (!Files.exists(path)) {
+                path = Paths.get(websiteCodeDockerPath);
+            }
+
+            String integrationCode = String.join("\n", Files.readString(path));
+            integrationCode = "`" + integrationCode.replace("${agentId}", userLink) + "`";
+            integrationCode = integrationCode.replace("${siteUrl}", siteUrl);
+
+            String msg = """
+                    *Для добавления формы записи на сайт вставьте следующий код в нужный раздел вашего сайта.*
+                    Нажмите на код чтобы скопировать:
+
+
+                    """ + integrationCode + "\n\n\n\nВаша персональная ссылка: " + siteUrl + "/" + userLink;
+
+            SendMessage sendMessage = new SendMessage(chatId, msg);
+            sendMessage.enableMarkdown(true);
+            sendMessage.setReplyMarkup(inlineKeyboardMaker.getSettingsInlineButton());
+            writeReadBot.execute(sendMessage);
+        } catch (TelegramApiException | IOException tAe) {
+            log.debug(tAe.getMessage());
         }
     }
 

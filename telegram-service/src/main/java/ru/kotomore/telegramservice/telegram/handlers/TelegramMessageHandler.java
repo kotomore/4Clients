@@ -1,6 +1,6 @@
 package ru.kotomore.telegramservice.telegram.handlers;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -14,41 +14,19 @@ import ru.kotomore.telegramservice.models.UserAwaitingResponse;
 import ru.kotomore.telegramservice.repositories.TelegramUserRepository;
 import ru.kotomore.telegramservice.services.UserAwaitingService;
 import ru.kotomore.telegramservice.telegram.keyboards.ReplyKeyboardMaker;
-import telegram.AgentMSG;
-import telegram.AgentServiceMSG;
-import telegram.ScheduleMSG;
-import telegram.TelegramMessage;
+import telegram.*;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
 @Component
+@AllArgsConstructor
 public class TelegramMessageHandler {
     private final RabbitMessageSender rabbitMessageSender;
     private final TelegramUserRepository repository;
     private final UserAwaitingService userAwaitingService;
-    private final String siteUrl;
-    private final String websiteCodePath;
-    private final String websiteCodeDockerPath;
-
-    public TelegramMessageHandler(RabbitMessageSender rabbitMessageSender, TelegramUserRepository repository,
-                                  UserAwaitingService userAwaitingService,
-                                  @Value("${site.url}") String siteUrl,
-                                  @Value("${site.path}") String websiteCodePath,
-                                  @Value("${site.docker_path}") String websiteCodeDockerPath) {
-        this.rabbitMessageSender = rabbitMessageSender;
-        this.repository = repository;
-        this.userAwaitingService = userAwaitingService;
-        this.siteUrl = siteUrl;
-        this.websiteCodePath = websiteCodePath;
-        this.websiteCodeDockerPath = websiteCodeDockerPath;
-    }
 
     public BotApiMethod<?> answerMessage(Message message) {
         String chatId = message.getChatId().toString();
@@ -80,9 +58,9 @@ public class TelegramMessageHandler {
                     userAwaitingService.removeFromWaitingList(chatId);
                     rabbitMessageSender.sendTelegramMessage(agentId, TelegramMessage.Action.APPOINTMENTS);
                 }
-                case WEBSITE_CODE -> {
+                case SETTINGS -> {
                     userAwaitingService.removeFromWaitingList(chatId);
-                    return getWebsiteCodeMessage(chatId, agentId);
+                    rabbitMessageSender.sendTelegramMessage(agentId, TelegramMessage.Action.SETTINGS);
                 }
             }
         } else if (user.isEmpty()) {
@@ -103,6 +81,7 @@ public class TelegramMessageHandler {
             case SERVICE_ -> handleServiceDefinition(definition, message, chatId);
             case AGENT_ -> handleAgentDefinition(definition, message, chatId);
             case SCHEDULE_ -> handleScheduleDefinition(definition, message, chatId);
+            case SETTINGS_ -> handleSettingsDefinition(definition, message, chatId);
             default -> null;
         };
     }
@@ -135,31 +114,25 @@ public class TelegramMessageHandler {
         return null;
     }
 
-    private SendMessage getWebsiteCodeMessage(String chatId, String agentId) {
-        try {
-            //if run in docker container path = "/root/frontend.html"
-            Path path = Paths.get(websiteCodePath);
-            if (!Files.exists(path)) {
-                path = Paths.get(websiteCodeDockerPath);
+    private BotApiMethod<?> handleSettingsDefinition(DefinitionEnum definition, Message message, String chatId) {
+        if (definition == DefinitionEnum.URL) {
+            SettingsMSG settingsMSG = new SettingsMSG();
+
+            if (message.getText().length() > 20) {
+                return new SendMessage(chatId, "Максимальное количество символов - 20");
             }
 
-            String text = String.join("\n", Files.readString(path));
-            text = "`" + text.replace("${agentId}", agentId) + "`";
-            text = text.replace("${siteUrl}", siteUrl);
+            if (message.getText().length() < 4) {
+                return new SendMessage(chatId, "Минимальное количество символов - 4");
+            }
 
-            String msg = """
-                    *Для добавления формы записи на сайт вставьте следующий код в нужный раздел вашего сайта.*
-                    Нажмите на код чтобы скопировать:
-
-
-                    """ + text + "\n\n\n\nВаша персональная ссылка: " + siteUrl + "/" + agentId;
-
-            SendMessage sendMessage = new SendMessage(chatId, msg);
-            sendMessage.enableMarkdown(true);
-            return sendMessage;
-        } catch (IOException e) {
-            return null;
+            settingsMSG.setVanityUrl(message.getText());
+            return updateUserSettings(chatId, settingsMSG);
         }
+        if (definition == DefinitionEnum.BREAK) {
+            return updateAgentBreak(message, chatId);
+        }
+        return null;
     }
 
     private SendMessage sendNeedAuthMessage(String chatId) {
@@ -218,6 +191,16 @@ public class TelegramMessageHandler {
         if (user.isPresent()) {
             service.setAgentId(user.get().getAgentId());
             rabbitMessageSender.updateService(service);
+            userAwaitingService.removeFromWaitingList(chatId);
+        }
+        return null;
+    }
+
+    private BotApiMethod<?> updateUserSettings(String chatId, SettingsMSG settingsMSG) {
+        Optional<TelegramUser> user = repository.findByChatId(chatId);
+        if (user.isPresent()) {
+            settingsMSG.setAgentId(user.get().getAgentId());
+            rabbitMessageSender.updateSettings(settingsMSG);
             userAwaitingService.removeFromWaitingList(chatId);
         }
         return null;

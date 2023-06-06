@@ -23,6 +23,10 @@ public class RabbitMessageSender {
         template.convertAndSend("telegram_update_service", service);
     }
 
+    public void updateSettings(SettingsMSG settingsMSG) {
+        template.convertAndSend("telegram_update_settings", settingsMSG);
+    }
+
     public void updateAgent(AgentMSG agentMSG) {
         template.convertAndSend("telegram_update_agent", agentMSG);
     }
