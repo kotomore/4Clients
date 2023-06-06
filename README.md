@@ -7,12 +7,13 @@ It securely stores data, automates business processes, and allows customization 
 Integration with your website is straightforward.<br>
 Overall, Laptimes streamlines appointment management
 for professionals and enhances the booking experience for clients.
+
 <hr>
 
 ## Upcoming updates
 - [x] Ability to add breaks
+- [x] Ability to create a Custom Vanity URL
 - [ ] Profile links on personal page
-- [ ] Ability to create a Custom Vanity URL
 - [ ] Ability to offer discounts or promotions within the app
 - [ ] Customizable SMS templates for personalized communication with clients
 
@@ -34,7 +35,7 @@ http://45.159.249.5:8091/swagger-ui/index.html
 
 ## Sample
 ### Clients side
-https://taptimes.ru/6441a64b008d0c1864da7227
+https://taptimes.ru/kotomore
 <br>
 
 <img src="github-images/site_image.png" alt="site-image" width="60%" height="60%">
