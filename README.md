@@ -2,7 +2,7 @@
 
 [TapTimes](https://taptimes.ru/) is an easy-to-use online booking system for professionals like hairdressers, massage therapists, and various other service providers.
 It offers simplicity, reliability, and automation. With Tap Times, you can add a booking form to your
-website or share a link with clients. The system operates through a [Telegram bot](https://t.me/clientsmanagement_bot), ensuring user-friendliness.<br>
+website or share a link with clients. The system operates through a [Telegram bot](https://t.me/taptimes_bot), ensuring user-friendliness.<br>
 It securely stores data, automates business processes, and allows customization of schedules and services.
 Integration with your website is straightforward.<br>
 Overall, Laptimes streamlines appointment management
@@ -43,7 +43,7 @@ https://taptimes.ru/kotomore
 <br><br>
 
 ### Telegram bot
-https://t.me/clientsmanagement_bot
+https://t.me/taptimes_bot
 <br>
 
 <img  src="github-images/tg_image.png" alt="tg-image" width="80%" height="80%">
