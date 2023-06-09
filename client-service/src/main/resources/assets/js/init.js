@@ -5,7 +5,7 @@ var xhr = new XMLHttpRequest();
 
 xhr.open('GET', url, false);
 xhr.send();
-if (xhr.status != 200) {
+if (xhr.status !== 200) {
     alert(`Error ${xhr.status}: ${xhr.statusText}`);
 } else {
     var data = JSON.parse(xhr.response);
@@ -18,7 +18,7 @@ if (xhr.status != 200) {
     document.getElementById("agent-phone").innerText = "+" + data.agentPhone;
     document.getElementById("agent-phone").href = "tel:+" + data.agentPhone;
 
-    document.querySelector(".lds-ellipsis").remove();
+    document.getElementById("roller").classList.remove("lds-ellipsis")
 }
 
 
@@ -43,13 +43,11 @@ form.onsubmit = function(event){
         "  }\n" +
         "}");
     try {
+        document.getElementById("roller").classList.add("lds-ellipsis");
+
         xhr.open('POST','http://localhost:8092/api/v1/clients/appointment');
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send(JSON.stringify(json));
-
-        xhr.onerror = function() {
-            $('.wrap').toggleClass('booking-error');
-        };
 
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -57,11 +55,22 @@ form.onsubmit = function(event){
             } else {
                 $('.wrap').toggleClass('booking-error');
             }
+            document.getElementById("roller").classList.remove("lds-ellipsis")
         };
+
+        xhr.onerror = function() {
+            $('.wrap')
+                .removeClass('booking-complete')
+                .toggleClass('booking-error');
+        };
+
         event.preventDefault();
         event.stopPropagation();
     } catch (e) {
-        $('.wrap').toggleClass('booking-error');
+        $('.wrap')
+            .removeClass('booking-complete')
+            .toggleClass('booking-error');
+        document.getElementById("roller").classList.remove("lds-ellipsis")
     }
     return false;
 }
