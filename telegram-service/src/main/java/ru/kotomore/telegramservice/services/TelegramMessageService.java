@@ -117,6 +117,7 @@ public class TelegramMessageService {
     public void sendWebsiteCodeMessage(SettingsMSG settingsMSG) {
         String chatId = getChatId(settingsMSG.getAgentId());
         String userLink = settingsMSG.getVanityUrl() == null ? settingsMSG.getAgentId() : settingsMSG.getVanityUrl();
+        String agentId = settingsMSG.getAgentId();
 
         try {
             //if run in docker container path = "/root/frontend.html"
@@ -126,7 +127,7 @@ public class TelegramMessageService {
             }
 
             String integrationCode = String.join("\n", Files.readString(path));
-            integrationCode = "`" + integrationCode.replace("${agentId}", userLink) + "`";
+            integrationCode = "`" + integrationCode.replace("${agentId}", agentId) + "`";
             integrationCode = integrationCode.replace("${siteUrl}", siteUrl);
 
             String msg = """
