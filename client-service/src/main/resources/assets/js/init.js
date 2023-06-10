@@ -1,3 +1,4 @@
+const divElement = document.querySelector('.lds-ellipsis');
 
 var url = "http://localhost:8092/api/v1/clients/services?agentId=" + therapistId;
 
@@ -18,7 +19,7 @@ if (xhr.status !== 200) {
     document.getElementById("agent-phone").innerText = "+" + data.agentPhone;
     document.getElementById("agent-phone").href = "tel:+" + data.agentPhone;
 
-    document.getElementById("roller").classList.remove("lds-ellipsis")
+    divElement.classList.remove('show');
 }
 
 
@@ -43,7 +44,7 @@ form.onsubmit = function(event){
         "  }\n" +
         "}");
     try {
-        document.getElementById("roller").classList.add("lds-ellipsis");
+        divElement.classList.add('show');
 
         xhr.open('POST','http://localhost:8092/api/v1/clients/appointment');
         xhr.setRequestHeader("Content-Type", "application/json");
@@ -55,7 +56,7 @@ form.onsubmit = function(event){
             } else {
                 $('.wrap').toggleClass('booking-error');
             }
-            document.getElementById("roller").classList.remove("lds-ellipsis")
+            divElement.classList.remove('show');
         };
 
         xhr.onerror = function() {
@@ -70,7 +71,7 @@ form.onsubmit = function(event){
         $('.wrap')
             .removeClass('booking-complete')
             .toggleClass('booking-error');
-        document.getElementById("roller").classList.remove("lds-ellipsis")
+        divElement.classList.remove('show');
     }
     return false;
 }

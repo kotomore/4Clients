@@ -1,11 +1,28 @@
 
 .lds-ellipsis {
+    display: none;
+}
+
+.lds-ellipsis.show {
     display: inline-block;
     position: absolute;
     width: 100%;
     height: 100%;
     background: white;
     z-index: 4;
+
+    animation-name: fadeIn;
+    animation-duration: 0.9s;
+    animation-timing-function: ease;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 .lds-ellipsis div {

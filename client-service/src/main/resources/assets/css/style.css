@@ -23,6 +23,7 @@ body {
   transform: translate3d(-50%, -50%, 0);
   color: #000;
   width: 100%;
+  max-width: 1000px;
   height: 100%;
 }
 .wrap.member-selected .member:not(.selected) {
@@ -422,7 +423,7 @@ body {
   position: absolute;
   left: 15rem;
   width: calc(100% - 20rem);
-  height: calc(100% - 360px);
+  height: calc(100% - 280px);
   top: 160rem;
   opacity: 0;
   transform: translatey(50%);
